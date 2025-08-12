@@ -1,0 +1,14 @@
+# Eclipse 설정파
+.settings
+.classpath
+.project
+
+# 컴파일 결과
+bin/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
