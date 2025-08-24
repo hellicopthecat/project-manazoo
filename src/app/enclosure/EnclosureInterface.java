@@ -16,7 +16,7 @@ public interface EnclosureInterface {
       * 사육장 고유 식별자를 반환합니다.
       * @return 사육장 ID
       */
-    String getEnclosureId();
+    String getId();
 
     /**
      * 사육장 이름을 반환합니다.
