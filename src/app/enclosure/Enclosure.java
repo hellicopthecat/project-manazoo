@@ -14,7 +14,7 @@ public class Enclosure implements EnclosureInterface {
     }
 
     @Override
-    public String getEnclosureId() {
+    public String getId() {
         return id;
     }
 
@@ -58,5 +58,15 @@ public class Enclosure implements EnclosureInterface {
         this.temperature = temperature;
     }
 
+    private Enclosure() {
+    }
 
+    public Enclosure(String id, String name, Float areaSize, Float temperature, LocationType locationType, EnvironmentType environmentType) {
+        this.id = id;
+        this.name = name;
+        this.areaSize = areaSize;
+        this.temperature = temperature;
+        this.locationType = locationType;
+        this.environmentType = environmentType;
+    }
 }
