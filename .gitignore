@@ -3,6 +3,9 @@
 .classpath
 .project
 
+# Intellij
+.idea/
+
 # 컴파일 결과
 bin/
 
@@ -12,3 +15,6 @@ bin/
 # Windows
 Thumbs.db
 desktop.ini
+
+# MacOS
+*.iml
