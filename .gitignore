@@ -8,6 +8,7 @@
 
 # 컴파일 결과
 bin/
+out/
 
 # macOS
 .DS_Store
