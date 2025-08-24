@@ -4,6 +4,8 @@
  */
 package app.enclosure;
 
+import app.common.id.IdGeneratorUtil;
+
 import java.util.Scanner;
 
 public class EnclosureManager {
@@ -102,6 +104,8 @@ public class EnclosureManager {
 
     // 사육장 관련 메서드들
     private static void registerEnclosure() {
+        String id = IdGeneratorUtil.generateId();
+        System.out.println(IdGeneratorUtil.getEnclosureIdCount());
         System.out.println("\n사육장 등록 기능입니다.");
         System.out.print("사육장 이름을 입력하세요: ");
         String name = getStringInput();
@@ -149,10 +153,10 @@ public class EnclosureManager {
             System.out.println("잘못된 입력입니다. 다시 선택해주세요.");
         }
 
-        Enclosure newEnclosure = new Enclosure("C-1", name, areaSize, temperature, locationType, environmentType);
+        Enclosure newEnclosure = new Enclosure(id, name, areaSize, temperature, locationType, environmentType);
         EnclosureRepository repository = EnclosureRepository.getInstance();
         repository.save(newEnclosure.getId(), newEnclosure);
-        System.out.println(repository);
+        System.out.println(IdGeneratorUtil.getStatus());
     }
 
     private static void viewEnclosures() {
