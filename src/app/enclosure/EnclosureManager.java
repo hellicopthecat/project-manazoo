@@ -176,9 +176,9 @@ public class EnclosureManager {
 	 */
 	private void editLocationType(Enclosure enclosure) {
 		System.out.print("새로운 ");
-		selectLocationType(); // 사용자 입력을 받지만 실제로는 적용되지 않음
-		// Note: LocationType은 final이므로 직접 수정할 수 없어서 재등록이 필요함을 알림
-		System.out.println("위치 타입 수정은 현재 지원되지 않습니다. 사육장을 삭제 후 재등록해주세요.");
+		LocationType newLocationType = selectLocationType();
+		enclosure.setLocationType(newLocationType);
+		System.out.println("위치 타입이 " + newLocationType + "으로 수정되었습니다.");
 	}
 
 	/**
@@ -187,9 +187,9 @@ public class EnclosureManager {
 	 */
 	private void editEnvironmentType(Enclosure enclosure) {
 		System.out.print("새로운 ");
-		selectEnvironmentType(); // 사용자 입력을 받지만 실제로는 적용되지 않음
-		// Note: EnvironmentType은 final이므로 직접 수정할 수 없어서 재등록이 필요함을 알림
-		System.out.println("환경 타입 수정은 현재 지원되지 않습니다. 사육장을 삭제 후 재등록해주세요.");
+		EnvironmentType newEnvironmentType = selectEnvironmentType();
+		enclosure.setEnvironmentType(newEnvironmentType);
+		System.out.println("환경 타입이 " + newEnvironmentType + "으로 수정되었습니다.");
 	}
 
 	private void editEnclosure() {

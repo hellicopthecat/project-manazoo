@@ -31,11 +31,17 @@ public interface EnclosureInterface {
 
     void setName(String name);
 
-    /**
+     /**
       * 사육장 위치 유형(실내/실외)을 반환합니다.
       * @return 위치 유형
       */
     LocationType getLocationType();
+
+    /**
+     * 사육장 위치 유형을 설정합니다.
+     * @param locationType 설정할 위치 유형
+     */
+    void setLocationType(LocationType locationType);
 
      /**
       * 사육장 환경 유형(육지/수생/혼합)을 반환합니다.
@@ -43,7 +49,11 @@ public interface EnclosureInterface {
       */
     EnvironmentType getEnvironmentType();
 
-     /**
+    /**
+     * 사육장 환경 유형을 설정합니다.
+     * @param environmentType 설정할 환경 유형
+     */
+    void setEnvironmentType(EnvironmentType environmentType);     /**
       * 사육장 면적을 반환합니다.
       * @return 면적(단위: 제곱미터 등)
       */

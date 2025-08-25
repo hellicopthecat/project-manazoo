@@ -34,8 +34,18 @@ public class Enclosure implements EnclosureInterface {
 	}
 
 	@Override
+	public void setLocationType(LocationType locationType) {
+		this.locationType = locationType;
+	}
+
+	@Override
 	public EnvironmentType getEnvironmentType() {
 		return environmentType;
+	}
+
+	@Override
+	public void setEnvironmentType(EnvironmentType environmentType) {
+		this.environmentType = environmentType;
 	}
 
 	@Override
