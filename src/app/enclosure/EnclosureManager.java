@@ -10,10 +10,10 @@ import app.common.id.IdGeneratorUtil;
 
 public class EnclosureManager {
 
-	private final static Scanner scanner = new Scanner(System.in);
+	private final Scanner scanner = new Scanner(System.in);
 
 	// 안전한 정수 입력 메서드
-	private static int getIntInput() {
+	private int getIntInput() {
 		while (true) {
 			try {
 				return Integer.parseInt(scanner.nextLine());
@@ -24,7 +24,7 @@ public class EnclosureManager {
 	}
 
 	// 안전한 정수 입력 메서드
-	private static float getFloatInputOneDecimal() {
+	private float getFloatInputOneDecimal() {
 		while (true) {
 			String line = scanner.nextLine().trim();
 
@@ -49,7 +49,7 @@ public class EnclosureManager {
 	}
 
 	// 안전한 문자열 입력 메서드
-	private static String getStringInput() {
+	private String getStringInput() {
 		return scanner.nextLine().trim();
 	}
 
@@ -59,11 +59,11 @@ public class EnclosureManager {
 	 *
 	 * @param args 커맨드라인 인자
 	 */
-	public static void main(String[] args) {
+	public void main(String[] args) {
 		handleEnclosureManagement();
 	}
 
-	private static void handleEnclosureManagement() {
+	private void handleEnclosureManagement() {
 		while (true) {
 			System.out.println("\n=== 사육장 관리 ===");
 			System.out.println("1. 사육장등록  2. 사육장조회  3. 사육장수정  4. 사육장삭제  0. 뒤로가기");
@@ -85,8 +85,10 @@ public class EnclosureManager {
 		}
 	}
 
+	private void registerManagement() {}
+
 	// 사육장 관련 메서드들
-	private static void registerEnclosure() {
+	private void registerEnclosure() {
 		String id = IdGeneratorUtil.generateId();
 		System.out.println("\n사육장 등록 기능입니다.");
 		System.out.print("사육장 이름을 입력하세요: ");
@@ -145,13 +147,13 @@ public class EnclosureManager {
 				""" + newEnclosure.toString());
 	}
 
-	private static void viewEnclosures() {
+	private void viewEnclosures() {
 		EnclosureRepository instance = EnclosureRepository.getInstance();
 		System.out.printf("\n=== 사육장 목록 (총 %d)===", instance.size());
 		System.out.println(instance.toString());
 	}
 
-	private static void editEnclosure() {
+	private void editEnclosure() {
 		EnclosureRepository instance = EnclosureRepository.getInstance();
 		System.out.println("\n사육장 수정 기능입니다.");
 		viewEnclosures();
@@ -166,7 +168,7 @@ public class EnclosureManager {
 
 	}
 
-	private static void removeEnclosure() {
+	private void removeEnclosure() {
 		System.out.println("\n사육장 삭제 기능입니다.");
 		viewEnclosures();
 		System.out.print("삭제할 사육장 번호를 입력하세요: ");
