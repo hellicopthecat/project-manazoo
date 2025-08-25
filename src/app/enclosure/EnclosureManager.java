@@ -1,5 +1,5 @@
 
-/*
+/**
   동물원 우리를 생성, 조회 및 동물 관리 등 전반적으로 관리하는 클래스입니다.
  */
 package app.enclosure;
@@ -53,20 +53,10 @@ public class EnclosureManager {
 		return scanner.nextLine().trim();
 	}
 
-	/**
-	 * EnclosureManager를 테스트하거나 실행하는 메인 메서드입니다. 모든 코드가 작성완료되면 주석 처리 또는 삭제 바랍니다. 실제
-	 * 프로젝트에서 사용할 메서드가 아닙니다.
-	 *
-	 * @param args 커맨드라인 인자
-	 */
-	public void main(String[] args) {
-		handleEnclosureManagement();
-	}
-
-	private void handleEnclosureManagement() {
+	public void handleEnclosureManagement() {
 		while (true) {
 			System.out.println("\n=== 사육장 관리 ===");
-			System.out.println("1. 사육장등록  2. 사육장조회  3. 사육장수정  4. 사육장삭제  0. 뒤로가기");
+			System.out.println("1. 등록관리  2. 사육장조회  3. 사육장수정  4. 사육장삭제  0. 뒤로가기");
 			System.out.print("선택해주세요: ");
 
 			int choice = getIntInput();
@@ -86,21 +76,23 @@ public class EnclosureManager {
 	}
 
 	private void registerManagement() {
-		System.out.println("\n=== 등록 관리 ===");
-		System.out.println("1. 사육장등록  2. 동물입사관리 3. 사육사배치관리");
-		System.out.print("선택해주세요: ");
+		while (true) {
+			System.out.println("\n=== 등록 관리 ===");
+			System.out.println("1. 사육장등록  2. 동물입사관리  3. 사육사배치관리  0. 뒤로가기");
+			System.out.print("선택해주세요: ");
 
-		int choice = getIntInput();
+			int choice = getIntInput();
 
-		switch (choice) {
-			case 1 -> registerEnclosure();
-			case 2 -> System.out.println("동물입사관리");
-			case 3 -> System.out.println("사육사배치관리");
-			case 0 -> {
-				System.out.println("이전 메뉴로 돌아갑니다.");
-				return;
+			switch (choice) {
+				case 1 -> registerEnclosure();
+				case 2 -> System.out.println("동물입사관리");
+				case 3 -> System.out.println("사육사배치관리");
+				case 0 -> {
+					System.out.println("이전 메뉴로 돌아갑니다.");
+					return;
+				}
+				default -> System.out.println("잘못된 입력입니다. 다시 선택해주세요.");
 			}
-			default -> System.out.println("잘못된 입력입니다. 다시 선택해주세요.");
 		}
 	}
 
