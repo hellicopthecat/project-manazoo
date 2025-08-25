@@ -56,7 +56,7 @@ public class EnclosureManager {
 
 	public void handleEnclosureManagement() {
 		while (true) {
-			System.out.println("\n=== 사육장 관리 ===");
+			System.out.println("=== 사육장 관리 ===");
 			System.out.println("1. 등록관리  2. 사육장조회  3. 사육장수정  4. 사육장삭제  0. 뒤로가기");
 			System.out.print("선택해주세요: ");
 
@@ -78,7 +78,7 @@ public class EnclosureManager {
 
 	private void registerManagement() {
 		while (true) {
-			System.out.println("\n=== 등록 관리 ===");
+			System.out.println(" === 등록 관리 ===");
 			System.out.println("1. 사육장등록  2. 동물입사관리  3. 사육사배치관리  0. 뒤로가기");
 			System.out.print("선택해주세요: ");
 
@@ -100,7 +100,7 @@ public class EnclosureManager {
 	// 사육장 관련 메서드들
 	private void registerEnclosure() {
 		String id = IdGeneratorUtil.generateId();
-		System.out.println("\n사육장 등록 기능입니다.");
+		System.out.println(" 사육장 등록 기능입니다.");
 		System.out.print("사육장 이름을 입력하세요: ");
 		String name = getStringInput();
 		System.out.print("사육장 크기(㎡)를 입력하세요: ");
@@ -111,7 +111,7 @@ public class EnclosureManager {
 
 		while (true) {
 			System.out.print("""
-					\n사육장의 위치 타입을 입력하세요.
+					사육장의 위치 타입을 입력하세요.
 					1. 실내  2. 야외
 					정수를 입력하세요: \
 					""");
@@ -131,7 +131,7 @@ public class EnclosureManager {
 		EnvironmentType environmentType;
 		while (true) {
 			System.out.print("""
-					\n사육장의 환경 타입을 입력하세요.
+					사육장의 환경 타입을 입력하세요.
 					1. LAND  2. AQUATIC  3. MIXED
 					정수를 입력하세요: \
 					""");
@@ -153,19 +153,19 @@ public class EnclosureManager {
 		EnclosureRepository repository = EnclosureRepository.getInstance();
 		repository.save(newEnclosure.getId(), newEnclosure);
 		System.out.print("""
-				\n사육장이 등록되었습니다. 등록된 사육장의 정보는 아래와 같습니다.
+				사육장이 등록되었습니다. 등록된 사육장의 정보는 아래와 같습니다.
 				""" + newEnclosure.toString());
 	}
 
 	private void viewEnclosures() {
 		EnclosureRepository instance = EnclosureRepository.getInstance();
-		System.out.printf("\n=== 사육장 목록 (총 %d)===", instance.size());
+		System.out.printf("=== 사육장 목록 (총 %d)===", instance.size());
 		System.out.println(instance.toString());
 	}
 
 	private void editEnclosure() {
 		EnclosureRepository instance = EnclosureRepository.getInstance();
-		System.out.println("\n사육장 수정 기능입니다.");
+		System.out.println("사육장 수정 기능입니다.");
 		viewEnclosures();
 		System.out.print("수정할 사육장 번호를 입력하세요: ");
 		String enclosureId = getStringInput();
@@ -173,11 +173,11 @@ public class EnclosureManager {
 		Optional<Enclosure> foundEnclosure = instance.findById(enclosureId);
 		if (foundEnclosure.isPresent()) {
 			Enclosure enclosure = foundEnclosure.get();
-			System.out.println("\n현재 사육장 정보:");
+			System.out.println("현재 사육장 정보:");
 			System.out.println(enclosure.toString());
 			
 			while (true) {
-				System.out.println("\n=== 사육장 수정 메뉴 ===");
+				System.out.println("=== 사육장 수정 메뉴 ===");
 				System.out.println("1. 이름 수정  2. 크기 수정  3. 온도 수정  4. 위치타입 수정  5. 환경타입 수정  0. 수정완료");
 				System.out.print("수정할 항목을 선택하세요: ");
 				
@@ -206,7 +206,7 @@ public class EnclosureManager {
 						LocationType newLocationType;
 						while (true) {
 							System.out.print("""
-									\n새로운 위치 타입을 입력하세요.
+									새로운 위치 타입을 입력하세요.
 									1. 실내  2. 야외
 									정수를 입력하세요: \
 									""");
@@ -227,7 +227,7 @@ public class EnclosureManager {
 						EnvironmentType newEnvironmentType;
 						while (true) {
 							System.out.print("""
-									\n새로운 환경 타입을 입력하세요.
+									새로운 환경 타입을 입력하세요.
 									1. LAND  2. AQUATIC  3. MIXED
 									정수를 입력하세요: \
 									""");
@@ -246,7 +246,7 @@ public class EnclosureManager {
 						System.out.println("환경 타입이 " + newEnvironmentType + "으로 수정되었습니다.");
 					}
 					case 0 -> {
-						System.out.println("\n수정이 완료되었습니다!");
+						System.out.println("수정이 완료되었습니다!");
 						System.out.println("수정된 사육장 정보:");
 						System.out.println(enclosure.toString());
 						return;
@@ -260,7 +260,7 @@ public class EnclosureManager {
 	}
 
 	private void removeEnclosure() {
-		System.out.println("\n사육장 삭제 기능입니다.");
+		System.out.println("사육장 삭제 기능입니다.");
 		viewEnclosures();
 		System.out.print("삭제할 사육장 번호를 입력하세요: ");
 		String EnclosureId = getStringInput();
