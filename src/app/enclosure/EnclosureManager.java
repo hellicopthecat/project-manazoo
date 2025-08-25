@@ -78,7 +78,7 @@ public class EnclosureManager {
 
 	private void registerManagement() {
 		while (true) {
-			System.out.println(" === 등록 관리 ===");
+			System.out.println("=== 등록 관리 ===");
 			System.out.println("1. 사육장등록  2. 동물입사관리  3. 사육사배치관리  0. 뒤로가기");
 			System.out.print("선택해주세요: ");
 
@@ -100,7 +100,7 @@ public class EnclosureManager {
 	// 사육장 관련 메서드들
 	private void registerEnclosure() {
 		String id = IdGeneratorUtil.generateId();
-		System.out.println(" 사육장 등록 기능입니다.");
+		System.out.println("=== 사육장 등록 기능 ===");
 		System.out.print("사육장 이름을 입력하세요: ");
 		String name = getStringInput();
 		System.out.print("사육장 크기(㎡)를 입력하세요: ");
@@ -152,7 +152,7 @@ public class EnclosureManager {
 		Enclosure newEnclosure = new Enclosure(id, name, areaSize, temperature, locationType, environmentType);
 		EnclosureRepository repository = EnclosureRepository.getInstance();
 		repository.save(newEnclosure.getId(), newEnclosure);
-		System.out.print("""
+		System.out.println("""
 				사육장이 등록되었습니다. 등록된 사육장의 정보는 아래와 같습니다.
 				""" + newEnclosure.toString());
 	}
@@ -165,7 +165,7 @@ public class EnclosureManager {
 
 	private void editEnclosure() {
 		EnclosureRepository instance = EnclosureRepository.getInstance();
-		System.out.println("사육장 수정 기능입니다.");
+		System.out.println("=== 사육장 수정 기능 ===");
 		viewEnclosures();
 		System.out.print("수정할 사육장 번호를 입력하세요: ");
 		String enclosureId = getStringInput();
@@ -175,14 +175,14 @@ public class EnclosureManager {
 			Enclosure enclosure = foundEnclosure.get();
 			System.out.println("현재 사육장 정보:");
 			System.out.println(enclosure.toString());
-			
+
 			while (true) {
 				System.out.println("=== 사육장 수정 메뉴 ===");
 				System.out.println("1. 이름 수정  2. 크기 수정  3. 온도 수정  4. 위치타입 수정  5. 환경타입 수정  0. 수정완료");
 				System.out.print("수정할 항목을 선택하세요: ");
-				
+
 				int choice = getIntInput();
-				
+
 				switch (choice) {
 					case 1 -> {
 						System.out.print("새로운 사육장 이름을 입력하세요: ");
@@ -206,18 +206,18 @@ public class EnclosureManager {
 						LocationType newLocationType;
 						while (true) {
 							System.out.print("""
-									새로운 위치 타입을 입력하세요.
-									1. 실내  2. 야외
-									정수를 입력하세요: \
-									""");
+								새로운 위치 타입을 입력하세요.
+								1. 실내  2. 야외
+								정수를 입력하세요: \
+								""");
 							int locationChoice = getIntInput();
-							
+
 							newLocationType = switch (locationChoice) {
 								case 1 -> LocationType.INDOOR;
 								case 2 -> LocationType.OUTDOOR;
 								default -> null;
 							};
-							
+
 							if (newLocationType != null) break;
 							System.out.println("잘못된 입력입니다. 다시 선택해주세요.");
 						}
@@ -227,19 +227,19 @@ public class EnclosureManager {
 						EnvironmentType newEnvironmentType;
 						while (true) {
 							System.out.print("""
-									새로운 환경 타입을 입력하세요.
-									1. LAND  2. AQUATIC  3. MIXED
-									정수를 입력하세요: \
-									""");
+								새로운 환경 타입을 입력하세요.
+								1. LAND  2. AQUATIC  3. MIXED
+								정수를 입력하세요: \
+								""");
 							int envChoice = getIntInput();
-							
+
 							newEnvironmentType = switch (envChoice) {
 								case 1 -> EnvironmentType.LAND;
 								case 2 -> EnvironmentType.AQUATIC;
 								case 3 -> EnvironmentType.MIXED;
 								default -> null;
 							};
-							
+
 							if (newEnvironmentType != null) break;
 							System.out.println("잘못된 입력입니다. 다시 선택해주세요.");
 						}
@@ -260,11 +260,49 @@ public class EnclosureManager {
 	}
 
 	private void removeEnclosure() {
-		System.out.println("사육장 삭제 기능입니다.");
+		EnclosureRepository instance = EnclosureRepository.getInstance();
+		System.out.println("=== 사육장 삭제 기능 ===");
 		viewEnclosures();
+		
+		if (instance.isEmpty()) {
+			System.out.println("삭제할 수 있는 사육장이 없습니다.");
+			return;
+		}
+		
 		System.out.print("삭제할 사육장 번호를 입력하세요: ");
-		String EnclosureId = getStringInput();
-		System.out.println("사육장 " + EnclosureId + "이(가) 삭제되었습니다.");
+		String enclosureId = getStringInput();
+		
+		Optional<Enclosure> foundEnclosure = instance.findById(enclosureId);
+		if (foundEnclosure.isPresent()) {
+			Enclosure enclosure = foundEnclosure.get();
+			
+			// 삭제 전 확인
+			System.out.println("삭제할 사육장 정보:");
+			System.out.println(enclosure.toString());
+			
+			while (true) {
+				System.out.print("정말로 이 사육장을 삭제하시겠습니까? (y/n): ");
+				String confirmation = getStringInput().toLowerCase();
+				
+				if (confirmation.equals("y") || confirmation.equals("yes")) {
+					Object deletedEnclosure = instance.deleteById(enclosureId);
+					if (deletedEnclosure != null) {
+						System.out.println("사육장 '" + enclosure.getName() + "' [" + enclosureId + "]이(가) 성공적으로 삭제되었습니다.");
+					} else {
+						System.out.println("삭제 중 오류가 발생했습니다.");
+					}
+					return;
+				} else if (confirmation.equals("n") || confirmation.equals("no")) {
+					System.out.println("삭제가 취소되었습니다.");
+					return;
+				} else {
+					System.out.println("'y' 또는 'n'으로 입력해주세요.");
+				}
+			}
+		} else {
+			System.out.println("입력하신 ID '" + enclosureId + "'의 사육장이 존재하지 않습니다.");
+			System.out.println("위의 목록에서 올바른 사육장 ID를 확인해주세요.");
+		}
 	}
 
 }

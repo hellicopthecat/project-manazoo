@@ -100,7 +100,6 @@ public class EnclosureRepository {
 		}
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("\n=== 사육장 목록 ===\n");
 
 		for (Map.Entry<String, Object> entry : enclosures.entrySet()) {
 			Enclosure enclosure = (Enclosure) entry.getValue();
