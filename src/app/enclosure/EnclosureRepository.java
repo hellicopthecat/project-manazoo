@@ -3,6 +3,7 @@ package app.enclosure;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 우리(사육장) 데이터를 메모리에서 관리하는 저장소 클래스입니다. 싱글톤 패턴을 사용하여 애플리케이션 전체에서 하나의 인스턴스만 존재합니다.
@@ -44,11 +45,15 @@ public class EnclosureRepository {
 	/**
 	 * ID로 우리를 조회합니다.
 	 * 
-	 * @param id 우리 고유 식별자
-	 * @return 조회된 우리 객체, 없으면 null
+	 * @param id 사육장 고유 식별자
+	 * @return 조회된 우리 객체를 Optional로 감싸서 반환, 없으면 Optional.empty()
 	 */
-	public boolean findById(String id) {
-		return enclosures.containsKey(id);
+	public Optional<Enclosure> findById(String id) {
+		Object foundObject = enclosures.get(id);
+		if (foundObject instanceof Enclosure enclosure) {
+			return Optional.of(enclosure);
+		}
+		return Optional.empty();
 	}
 
 	/**

@@ -4,6 +4,7 @@
  */
 package app.enclosure;
 
+import java.util.Optional;
 import java.util.Scanner;
 
 import app.common.id.IdGeneratorUtil;
@@ -169,12 +170,93 @@ public class EnclosureManager {
 		System.out.print("수정할 사육장 번호를 입력하세요: ");
 		String enclosureId = getStringInput();
 
-		if (instance.findById(enclosureId)) {
-
+		Optional<Enclosure> foundEnclosure = instance.findById(enclosureId);
+		if (foundEnclosure.isPresent()) {
+			Enclosure enclosure = foundEnclosure.get();
+			System.out.println("\n현재 사육장 정보:");
+			System.out.println(enclosure.toString());
+			
+			while (true) {
+				System.out.println("\n=== 사육장 수정 메뉴 ===");
+				System.out.println("1. 이름 수정  2. 크기 수정  3. 온도 수정  4. 위치타입 수정  5. 환경타입 수정  0. 수정완료");
+				System.out.print("수정할 항목을 선택하세요: ");
+				
+				int choice = getIntInput();
+				
+				switch (choice) {
+					case 1 -> {
+						System.out.print("새로운 사육장 이름을 입력하세요: ");
+						String newName = getStringInput();
+						enclosure.setName(newName);
+						System.out.println("사육장 이름이 '" + newName + "'으로 수정되었습니다.");
+					}
+					case 2 -> {
+						System.out.print("새로운 사육장 크기(㎡)를 입력하세요: ");
+						float newAreaSize = getFloatInputOneDecimal();
+						enclosure.setAreaSize(newAreaSize);
+						System.out.println("사육장 크기가 " + newAreaSize + "㎡로 수정되었습니다.");
+					}
+					case 3 -> {
+						System.out.print("새로운 사육장 온도(°C)를 입력하세요: ");
+						float newTemperature = getFloatInputOneDecimal();
+						enclosure.setTemperature(newTemperature);
+						System.out.println("사육장 온도가 " + newTemperature + "°C로 수정되었습니다.");
+					}
+					case 4 -> {
+						LocationType newLocationType;
+						while (true) {
+							System.out.print("""
+									\n새로운 위치 타입을 입력하세요.
+									1. 실내  2. 야외
+									정수를 입력하세요: \
+									""");
+							int locationChoice = getIntInput();
+							
+							newLocationType = switch (locationChoice) {
+								case 1 -> LocationType.INDOOR;
+								case 2 -> LocationType.OUTDOOR;
+								default -> null;
+							};
+							
+							if (newLocationType != null) break;
+							System.out.println("잘못된 입력입니다. 다시 선택해주세요.");
+						}
+						System.out.println("위치 타입이 " + newLocationType + "으로 수정되었습니다.");
+					}
+					case 5 -> {
+						EnvironmentType newEnvironmentType;
+						while (true) {
+							System.out.print("""
+									\n새로운 환경 타입을 입력하세요.
+									1. LAND  2. AQUATIC  3. MIXED
+									정수를 입력하세요: \
+									""");
+							int envChoice = getIntInput();
+							
+							newEnvironmentType = switch (envChoice) {
+								case 1 -> EnvironmentType.LAND;
+								case 2 -> EnvironmentType.AQUATIC;
+								case 3 -> EnvironmentType.MIXED;
+								default -> null;
+							};
+							
+							if (newEnvironmentType != null) break;
+							System.out.println("잘못된 입력입니다. 다시 선택해주세요.");
+						}
+						System.out.println("환경 타입이 " + newEnvironmentType + "으로 수정되었습니다.");
+					}
+					case 0 -> {
+						System.out.println("\n수정이 완료되었습니다!");
+						System.out.println("수정된 사육장 정보:");
+						System.out.println(enclosure.toString());
+						return;
+					}
+					default -> System.out.println("잘못된 입력입니다. 다시 선택해주세요.");
+				}
+			}
 		} else {
 			System.out.println("입력하신 아이디의 사육장이 없습니다.");
 		}
-
 	}
 
 	private void removeEnclosure() {
