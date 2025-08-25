@@ -8,51 +8,11 @@ import java.util.Optional;
 import java.util.Scanner;
 
 import app.common.id.IdGeneratorUtil;
+import app.common.input.InputUtil;
 
 public class EnclosureManager {
 
-	private final Scanner scanner = new Scanner(System.in);
-
-	// 안전한 정수 입력 메서드
-	private int getIntInput() {
-		while (true) {
-			try {
-				return Integer.parseInt(scanner.nextLine());
-			} catch (NumberFormatException e) {
-				System.out.print("올바른 숫자를 입력해주세요: ");
-			}
-		}
-	}
-
-	// 안전한 정수 입력 메서드
-	private float getFloatInputOneDecimal() {
-		while (true) {
-			String line = scanner.nextLine().trim();
-
-			// 패턴 설명:
-			// ^[+-]? : 선택적 부호
-			// (?:\\d+ : 정수부 1자리 이상
-			// (?:\\.\\d)? : 소수점 이하가 있다면 정확히 1자리
-			// )$
-			//
-			// 허용 예: "1", "-3", "0.5", "+12.3"
-			// 비허용 예: "1.", ".5", "1.23", "abc"
-			if (line.matches("^[+-]?(?:\\d+(?:\\.\\d)?)$")) {
-				try {
-					return Float.parseFloat(line);
-				} catch (NumberFormatException ignored) {
-					// float 범위를 벗어나면 아래 안내 출력
-				}
-			}
-
-			System.out.print("올바른 형식의 실수(소수점 1자리까지)로 입력해주세요: ");
-		}
-	}
-
-	// 안전한 문자열 입력 메서드
-	private String getStringInput() {
-		return scanner.nextLine().trim();
-	}
+	private final InputUtil inputUtil = new InputUtil(new Scanner(System.in));
 
 	public void handleEnclosureManagement() {
 		while (true) {
@@ -60,7 +20,7 @@ public class EnclosureManager {
 			System.out.println("1. 등록관리  2. 사육장조회  3. 사육장수정  4. 사육장삭제  0. 뒤로가기");
 			System.out.print("선택해주세요: ");
 
-			int choice = getIntInput();
+			int choice = inputUtil.getIntInput();
 
 			switch (choice) {
 			case 1 -> registerManagement();
@@ -82,7 +42,7 @@ public class EnclosureManager {
 			System.out.println("1. 사육장등록  2. 동물입사관리  3. 사육사배치관리  0. 뒤로가기");
 			System.out.print("선택해주세요: ");
 
-			int choice = getIntInput();
+			int choice = inputUtil.getIntInput();
 
 			switch (choice) {
 				case 1 -> registerEnclosure();
@@ -102,11 +62,11 @@ public class EnclosureManager {
 		String id = IdGeneratorUtil.generateId();
 		System.out.println("=== 사육장 등록 기능 ===");
 		System.out.print("사육장 이름을 입력하세요: ");
-		String name = getStringInput();
+		String name = inputUtil.getStringInput();
 		System.out.print("사육장 크기(㎡)를 입력하세요: ");
-		float areaSize = getFloatInputOneDecimal();
+		float areaSize = inputUtil.getFloatInputOneDecimal();
 		System.out.print("사육장 온도(°C)를 입력하세요: ");
-		float temperature = getFloatInputOneDecimal();
+		float temperature = inputUtil.getFloatInputOneDecimal();
 		LocationType locationType;
 
 		while (true) {
@@ -115,7 +75,7 @@ public class EnclosureManager {
 					1. 실내  2. 야외
 					정수를 입력하세요: \
 					""");
-			int choice = getIntInput();
+			int choice = inputUtil.getIntInput();
 
 			locationType = switch (choice) {
 			case 1 -> LocationType.INDOOR;
@@ -135,7 +95,7 @@ public class EnclosureManager {
 					1. LAND  2. AQUATIC  3. MIXED
 					정수를 입력하세요: \
 					""");
-			int choice = getIntInput();
+			int choice = inputUtil.getIntInput();
 
 			environmentType = switch (choice) {
 			case 1 -> EnvironmentType.LAND;
@@ -168,7 +128,7 @@ public class EnclosureManager {
 		System.out.println("=== 사육장 수정 기능 ===");
 		viewEnclosures();
 		System.out.print("수정할 사육장 번호를 입력하세요: ");
-		String enclosureId = getStringInput();
+		String enclosureId = inputUtil.getStringInput();
 
 		Optional<Enclosure> foundEnclosure = instance.findById(enclosureId);
 		if (foundEnclosure.isPresent()) {
@@ -181,24 +141,24 @@ public class EnclosureManager {
 				System.out.println("1. 이름 수정  2. 크기 수정  3. 온도 수정  4. 위치타입 수정  5. 환경타입 수정  0. 수정완료");
 				System.out.print("수정할 항목을 선택하세요: ");
 
-				int choice = getIntInput();
+				int choice = inputUtil.getIntInput();
 
 				switch (choice) {
 					case 1 -> {
 						System.out.print("새로운 사육장 이름을 입력하세요: ");
-						String newName = getStringInput();
+						String newName = inputUtil.getStringInput();
 						enclosure.setName(newName);
 						System.out.println("사육장 이름이 '" + newName + "'으로 수정되었습니다.");
 					}
 					case 2 -> {
 						System.out.print("새로운 사육장 크기(㎡)를 입력하세요: ");
-						float newAreaSize = getFloatInputOneDecimal();
+						float newAreaSize = inputUtil.getFloatInputOneDecimal();
 						enclosure.setAreaSize(newAreaSize);
 						System.out.println("사육장 크기가 " + newAreaSize + "㎡로 수정되었습니다.");
 					}
 					case 3 -> {
 						System.out.print("새로운 사육장 온도(°C)를 입력하세요: ");
-						float newTemperature = getFloatInputOneDecimal();
+						float newTemperature = inputUtil.getFloatInputOneDecimal();
 						enclosure.setTemperature(newTemperature);
 						System.out.println("사육장 온도가 " + newTemperature + "°C로 수정되었습니다.");
 					}
@@ -210,7 +170,7 @@ public class EnclosureManager {
 								1. 실내  2. 야외
 								정수를 입력하세요: \
 								""");
-							int locationChoice = getIntInput();
+							int locationChoice = inputUtil.getIntInput();
 
 							newLocationType = switch (locationChoice) {
 								case 1 -> LocationType.INDOOR;
@@ -231,7 +191,7 @@ public class EnclosureManager {
 								1. LAND  2. AQUATIC  3. MIXED
 								정수를 입력하세요: \
 								""");
-							int envChoice = getIntInput();
+							int envChoice = inputUtil.getIntInput();
 
 							newEnvironmentType = switch (envChoice) {
 								case 1 -> EnvironmentType.LAND;
@@ -270,7 +230,7 @@ public class EnclosureManager {
 		}
 		
 		System.out.print("삭제할 사육장 번호를 입력하세요: ");
-		String enclosureId = getStringInput();
+		String enclosureId = inputUtil.getStringInput();
 		
 		Optional<Enclosure> foundEnclosure = instance.findById(enclosureId);
 		if (foundEnclosure.isPresent()) {
@@ -282,7 +242,7 @@ public class EnclosureManager {
 			
 			while (true) {
 				System.out.print("정말로 이 사육장을 삭제하시겠습니까? (y/n): ");
-				String confirmation = getStringInput().toLowerCase();
+				String confirmation = inputUtil.getStringInput().toLowerCase();
 				
 				if (confirmation.equals("y") || confirmation.equals("yes")) {
 					Object deletedEnclosure = instance.deleteById(enclosureId);
