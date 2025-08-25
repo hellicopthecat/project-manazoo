@@ -133,7 +133,7 @@ public class EnclosureManager {
 	}
 
 	private void viewEnclosures() {
-		System.out.printf("=== 사육장 목록 (총 %d)===", repository.size());
+		System.out.printf("=== 사육장 목록 (총 %d)===\n", repository.size());
 		System.out.println(repository.toString());
 	}
 
