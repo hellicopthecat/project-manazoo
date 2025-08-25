@@ -6,6 +6,8 @@ package app.enclosure;
 
 import java.util.Scanner;
 
+import app.common.id.IdGeneratorUtil;
+
 public class EnclosureManager {
 
 	private final static Scanner scanner = new Scanner(System.in);
@@ -85,6 +87,7 @@ public class EnclosureManager {
 
 	// 사육장 관련 메서드들
 	private static void registerEnclosure() {
+		String id = IdGeneratorUtil.generateId();
 		System.out.println("\n사육장 등록 기능입니다.");
 		System.out.print("사육장 이름을 입력하세요: ");
 		String name = getStringInput();
@@ -96,9 +99,9 @@ public class EnclosureManager {
 
 		while (true) {
 			System.out.print("""
-					사육장의 위치 타입을 입력하세요.
+					\n사육장의 위치 타입을 입력하세요.
 					1. 실내  2. 야외
-					정수를 입력하세요:
+					정수를 입력하세요: \
 					""");
 			int choice = getIntInput();
 
@@ -116,9 +119,9 @@ public class EnclosureManager {
 		EnvironmentType environmentType;
 		while (true) {
 			System.out.print("""
-					사육장의 환경 타입을 입력하세요.
+					\n사육장의 환경 타입을 입력하세요.
 					1. LAND  2. AQUATIC  3. MIXED
-					정수를 입력하세요:
+					정수를 입력하세요: \
 					""");
 			int choice = getIntInput();
 
@@ -134,27 +137,33 @@ public class EnclosureManager {
 			System.out.println("잘못된 입력입니다. 다시 선택해주세요.");
 		}
 
-		Enclosure newEnclosure = new Enclosure("C-1", name, areaSize, temperature, locationType, environmentType);
+		Enclosure newEnclosure = new Enclosure(id, name, areaSize, temperature, locationType, environmentType);
 		EnclosureRepository repository = EnclosureRepository.getInstance();
 		repository.save(newEnclosure.getId(), newEnclosure);
-		System.out.println(repository);
+		System.out.print("""
+				\n사육장이 등록되었습니다. 등록된 사육장의 정보는 아래와 같습니다.
+				""" + newEnclosure.toString());
 	}
 
 	private static void viewEnclosures() {
-		System.out.println("\n=== 사육장 목록 ===");
-		System.out.println("A-1: 맹수관 (100㎡, 수용량: 2마리) - 호랑이 1마리");
-		System.out.println("B-2: 초식동물관 (200㎡, 수용량: 3마리) - 코끼리 1마리");
-		System.out.println("C-3: 사바나관 (300㎡, 수용량: 5마리) - 기린 1마리");
-		System.out.println("D-4: 극지관 (150㎡, 수용량: 10마리) - 펭귄 1마리");
-		System.out.println("E-5: 원숭이관 (80㎡, 수용량: 8마리) - 원숭이 1마리");
+		EnclosureRepository instance = EnclosureRepository.getInstance();
+		System.out.printf("\n=== 사육장 목록 (총 %d)===", instance.size());
+		System.out.println(instance.toString());
 	}
 
 	private static void editEnclosure() {
+		EnclosureRepository instance = EnclosureRepository.getInstance();
 		System.out.println("\n사육장 수정 기능입니다.");
 		viewEnclosures();
 		System.out.print("수정할 사육장 번호를 입력하세요: ");
-		String EnclosureId = getStringInput();
-		System.out.println("사육장 " + EnclosureId + " 정보가 수정되었습니다.");
+		String enclosureId = getStringInput();
+
+		if (instance.findById(enclosureId)) {
+
+		} else {
+			System.out.println("입력하신 아이디의 사육장이 없습니다.");
+		}
+
 	}
 
 	private static void removeEnclosure() {

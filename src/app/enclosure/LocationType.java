@@ -5,5 +5,5 @@
 package app.enclosure;
 
 public enum LocationType {
-    INDOOR, OUTDOOR
+	INDOOR, OUTDOOR
 }
