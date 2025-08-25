@@ -1,6 +1,6 @@
 
-/**
- * 동물원 우리를 생성, 조회 및 동물 관리 등 전반적으로 관리하는 클래스입니다.
+/*
+  동물원 우리를 생성, 조회 및 동물 관리 등 전반적으로 관리하는 클래스입니다.
  */
 package app.enclosure;
 
@@ -72,7 +72,7 @@ public class EnclosureManager {
 			int choice = getIntInput();
 
 			switch (choice) {
-			case 1 -> registerEnclosure();
+			case 1 -> registerManagement();
 			case 2 -> viewEnclosures();
 			case 3 -> editEnclosure();
 			case 4 -> removeEnclosure();
@@ -85,7 +85,24 @@ public class EnclosureManager {
 		}
 	}
 
-	private void registerManagement() {}
+	private void registerManagement() {
+		System.out.println("\n=== 등록 관리 ===");
+		System.out.println("1. 사육장등록  2. 동물입사관리 3. 사육사배치관리");
+		System.out.print("선택해주세요: ");
+
+		int choice = getIntInput();
+
+		switch (choice) {
+			case 1 -> registerEnclosure();
+			case 2 -> System.out.println("동물입사관리");
+			case 3 -> System.out.println("사육사배치관리");
+			case 0 -> {
+				System.out.println("이전 메뉴로 돌아갑니다.");
+				return;
+			}
+			default -> System.out.println("잘못된 입력입니다. 다시 선택해주세요.");
+		}
+	}
 
 	// 사육장 관련 메서드들
 	private void registerEnclosure() {
