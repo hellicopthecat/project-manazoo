@@ -1,4 +1,4 @@
-package app.common.id;
+package app.common;
 
 import java.util.HashSet;
 import java.util.Set;
