@@ -1,9 +1,7 @@
 package app.zooKeeper.zooKeeperInterface;
 
-import app.zooKeeper.ZooKeeper;
-
 public interface ZooKeeperManagerService {
-	void registerZooKeeper(ZooKeeper keeper);
+	void registerZooKeeper();
 
 	void setIsWorking(String keeperId);
 

@@ -7,18 +7,18 @@ import app.zooKeeper.zooKeeperEnum.ZooKeeperRank;
 
 abstract public class ZooKeeper {
 	// fields
-	String id;
-	String name;
-	int age;
-	Gender gender;
-	ZooKeeperRank rank;
-	boolean isWorking;
-	int experieneceYear;
-	boolean canHandleDangerAnimal;
-	boolean canAssignTask;
-	List<String> licenses;
-	// List<Animal> caredAnimals ;
-	// List<Enclosures> enclosures;
+	private String id;
+	public String name;
+	public int age;
+	public Gender gender;
+	public ZooKeeperRank rank;
+	public boolean isWorking;
+	public int experieneceYear;
+	public boolean canHandleDangerAnimal;
+	public boolean canAssignTask;
+	public List<String> licenses;
+	// public List<Animal> caredAnimals ;
+	// public List<Enclosures> enclosures;
 
 	// constructor
 
