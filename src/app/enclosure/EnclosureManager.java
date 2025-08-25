@@ -7,8 +7,8 @@ package app.enclosure;
 import java.util.Optional;
 import java.util.Scanner;
 
-import app.common.id.IdGeneratorUtil;
-import app.common.input.InputUtil;
+import app.common.IdGeneratorUtil;
+import app.common.InputUtil;
 
 public class EnclosureManager {
 
