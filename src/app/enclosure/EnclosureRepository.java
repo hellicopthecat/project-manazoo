@@ -10,7 +10,7 @@ import java.util.Optional;
  */
 public class EnclosureRepository {
 
-	private static EnclosureRepository instance;
+	private static final EnclosureRepository instance = new EnclosureRepository();
 	private final Map<String, Object> enclosures;
 
 	/**
@@ -26,9 +26,6 @@ public class EnclosureRepository {
 	 * @return EnclosureRepository 인스턴스
 	 */
 	public static EnclosureRepository getInstance() {
-		if (instance == null) {
-			instance = new EnclosureRepository();
-		}
 		return instance;
 	}
 
