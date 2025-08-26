@@ -1,10 +1,10 @@
 package app.zooKeeper;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,6 +13,7 @@ import app.zooKeeper.zooKeeperEnum.Gender;
 import app.zooKeeper.zooKeeperEnum.ZooKeeperConverter;
 import app.zooKeeper.zooKeeperEnum.ZooKeeperRank;
 
+// 임시 enum
 enum Species {
 	MAMMAL, BIRD, REPTILE, FISH
 }
@@ -29,74 +30,29 @@ public class ZooKeeperRepository {
 		return instance;
 	}
 
-	public static void registerZooKeeper() {
-		Scanner in = new Scanner(System.in);
-		String name;
-		int age;
-		int genderIndex;
-		int rankIndex;
-		int departmentIndex;
-		int isWorkingIndex;
-		int canHandleDangerAnimalIndex;
-		int canAssignTaskIndex;
-		String desc;
+	public void createZooKeeper(String id, String name, int age, int genderIndex, int rankIndex, int departmentIndex,
+			int isWorkingIndex, int experienceYear, int canHandleDangerAnimalIndex, int canAssignTaskIndex,
+			String desc) {
 
-		while (true) {
-			System.out.println("=================== 사 육 사 생 성 ===================");
-			// 이름
-			System.out.println("이름을 입력하세요.");
-			name = in.nextLine();
-			// 나이
-			System.out.println("나이를 입력하세요.");
-			age = Integer.parseInt(in.nextLine());
-			// 성별
-			System.out.println("성별을 입력하세요.");
-			System.out.println("---------------");
-			System.out.println("1 : 남성 , 2 : 여성");
-			genderIndex = Integer.parseInt(in.nextLine());
-			// 직책
-			System.out.println("직책을 입력하세요.");
-			System.out.println("---------------");
-			System.out.println("1 : 신입사육사 , 2 : 사육사 , 3 : 시니어 사육사 , 4 : 팀장 사육사 , 5 : 관리자 , 6 : 동물원장");
-			rankIndex = Integer.parseInt(in.nextLine());
-			// 부서
-			System.out.println("부서를 입력하세요.");
-			System.out.println("---------------");
-			System.out.println(
-					"1 : 포유류부서 , 2 : 조류부서 , 3 : 파충류부서 , 4 : 어류부서 , 5 : 양서류부서 , 6 : 번식/연구 , 7 : 수의/재활 , 8 : 교육");
-			departmentIndex = Integer.parseInt(in.nextLine());
-			// 재직여부
-			System.out.println("재직여부를 입력하세요.");
-			System.out.println("---------------");
-			System.out.println("1 : 재직 , 2 : 퇴사");
-			isWorkingIndex = Integer.parseInt(in.nextLine());
-			// 맹수조련여부
-			System.out.println("맹수조련여부를 입력하세요.");
-			System.out.println("---------------");
-			System.out.println("1 : 가능 , 2 : 불가능");
-			canHandleDangerAnimalIndex = Integer.parseInt(in.nextLine());
-			// 업무할당여부
-			System.out.println("업무할당여부를 입력하세요.");
-			System.out.println("---------------");
-			System.out.println("1 : 가능 , 2 : 불가능");
-			canAssignTaskIndex = Integer.parseInt(in.nextLine());
-			// 자격
-			System.out.println("자격증을 작성하세요. ',' 로 구분할 수 있습니다.");
-			System.out.println("---------------");
-			desc = in.next();
-
-			// type converter
-			Gender gender = ZooKeeperConverter.genderConverter(genderIndex);
-			ZooKeeperRank rank = ZooKeeperConverter.rankConverter(rankIndex);
-			Department department = ZooKeeperConverter.departmentConverter(departmentIndex);
-			boolean isWorking = ZooKeeperConverter.workingConverter(isWorkingIndex);
-			boolean canHandleDangerAnimal = ZooKeeperConverter.possibleImpossibleConverter(canHandleDangerAnimalIndex);
-			boolean canAssignTask = ZooKeeperConverter.possibleImpossibleConverter(canAssignTaskIndex);
-			List<String> license = List.of(desc.trim().split(","));
-
-//			ZooKeeper newZooKeeper = new ZooKeeper();
+		// type converter
+		Gender gender = ZooKeeperConverter.genderConverter(genderIndex);
+		ZooKeeperRank rank = ZooKeeperConverter.rankConverter(rankIndex);
+		Department department = ZooKeeperConverter.departmentConverter(departmentIndex);
+		boolean isWorking = ZooKeeperConverter.workingConverter(isWorkingIndex);
+		boolean canHandleDangerAnimal = ZooKeeperConverter.possibleImpossibleConverter(canHandleDangerAnimalIndex);
+		boolean canAssignTask = ZooKeeperConverter.possibleImpossibleConverter(canAssignTaskIndex);
+		// 빈배열보내주기
+		List<String> licenses = new ArrayList<String>();
+		if (!desc.isEmpty()) {
+			String[] licenseArr = desc.split(",");
+			for (String license : licenseArr) {
+				licenses.add(license);
+			}
 		}
 
+		ZooKeeper newZooKeeper = new ZooKeeper(id, name, age, gender, rank, department, isWorking, experienceYear,
+				canHandleDangerAnimal, canAssignTask, licenses);
+		repository.put(id, newZooKeeper);
 	}
 
 	public Map<String, ZooKeeper> getZooKeeperList() {
@@ -130,18 +86,18 @@ public class ZooKeeperRepository {
 
 	private boolean existManager(String id) {
 		ZooKeeper manager = getZooKeeperById(id);
-		boolean existManager = manager.isWorking()
-				&& (manager.getRank() == ZooKeeperRank.DIRECTOR || manager.getRank() == ZooKeeperRank.MANAGER);
+		boolean existManager = manager.isWorking() && (manager.getRank() == ZooKeeperRank.DIRECTOR
+				|| manager.getRank() == ZooKeeperRank.MANAGER || manager.getRank() == ZooKeeperRank.HEAD_KEEPER);
 		return existManager;
 	}
 
-	public void setIsWorking(String keeperId, String targetId) {
+	public void setIsWorking(String keeperId, String targetId, int index) {
 		// TODO Auto-generated method stub
 		try {
 			boolean isManager = existManager(keeperId);
 			if (isManager) {
 				ZooKeeper targetZooKeeper = getZooKeeperById(targetId);
-				boolean isWorking = ZooKeeperConverter.workingConverter(1);
+				boolean isWorking = ZooKeeperConverter.workingConverter(index);
 				targetZooKeeper.setIsWorking(isWorking);
 			} else {
 				System.out.println("매니저가 아닙니다.");
@@ -154,13 +110,13 @@ public class ZooKeeperRepository {
 		}
 	}
 
-	public void setCanAssignTask(String keeperId, String targetId) {
+	public void setCanAssignTask(String keeperId, String targetId, int index) {
 		// TODO Auto-generated method stub
 		try {
 			boolean isManager = existManager(keeperId);
 			if (isManager) {
 				ZooKeeper targetZooKeeper = getZooKeeperById(targetId);
-				boolean canHandleDangerAnimal = ZooKeeperConverter.possibleImpossibleConverter(1);
+				boolean canHandleDangerAnimal = ZooKeeperConverter.possibleImpossibleConverter(index);
 				targetZooKeeper.setCanAssignTask(canHandleDangerAnimal);
 			} else {
 				System.out.println("매니저가 아닙니다.");
@@ -173,13 +129,13 @@ public class ZooKeeperRepository {
 
 	}
 
-	public void setPermissionDangerAnimal(String keeperId, String targetId) {
+	public void setPermissionDangerAnimal(String keeperId, String targetId, int index) {
 		// TODO Auto-generated method stub
 		try {
 			boolean isManager = existManager(keeperId);
 			if (isManager) {
 				ZooKeeper targetZooKeeper = getZooKeeperById(targetId);
-				boolean canHandleDangerAnimal = ZooKeeperConverter.possibleImpossibleConverter(1);
+				boolean canHandleDangerAnimal = ZooKeeperConverter.possibleImpossibleConverter(index);
 				targetZooKeeper.setCanHandleDangerAnimal(canHandleDangerAnimal);
 			} else {
 				System.out.println("매니저가 아닙니다.");
@@ -188,6 +144,7 @@ public class ZooKeeperRepository {
 		} catch (NullPointerException e) {
 			System.out.println("존재하지 않은 회원입니다.");
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 	}
@@ -207,10 +164,12 @@ public class ZooKeeperRepository {
 		} catch (NullPointerException e) {
 			System.out.println("존재하지 않은 회원입니다.");
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return removedZooKeeper;
 	}
 
+	// 추후 animal과 연동계획
 	public boolean removeCaredAnimal(String animalId, String keeperId) {
 		// TODO Auto-generated method stub
 		try {
