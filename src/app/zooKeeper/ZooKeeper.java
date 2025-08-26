@@ -134,15 +134,26 @@ public class ZooKeeper implements ZooKeeperBasicBehavior {
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
+		String g = ZooKeeperConverter.genderStringConverter(gender);
+		String r = ZooKeeperConverter.rankStringConverter(rank);
+		String d = ZooKeeperConverter.departmentStringConverter(department);
+		String w = ZooKeeperConverter.workingStringConverter(isWorking);
+		String da = ZooKeeperConverter.possibleImpossibleStringConverter(canHandleDangerAnimal);
+		String at = ZooKeeperConverter.possibleImpossibleStringConverter(canAssignTask);
+		String licensesStr = licenses.isEmpty() ? "없음" : String.join(", ", licenses);
+
 		return String.format(
 				"""
 						----------------------------------------------------------------------------------------------------------------------------------------------
 						id : %s | 이름 : %s | 나이 : %d | 성별 : %s | 직급 : %s | 부서 : %s | 재직여부 : %s | 연차 : %d | 고위험군생물관리 : %s | 업무부여 : %s | 자격증 : %s
 						----------------------------------------------------------------------------------------------------------------------------------------------
 						""",
-				"id", name, age, "남", "직급", "부서", "재직여부", experieneceYear, "가능", "가능", "자격증");
+				id, name, age, g, r, d, w, experieneceYear, da, at, licensesStr);
 	}
 
+	/**
+	 * pr후 animal과 enclosure 받고 작업진행 예
+	 */
 	@Override
 	public void feedAnimal(String animalId) {
 		// TODO Auto-generated method stub
