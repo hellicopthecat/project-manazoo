@@ -92,8 +92,24 @@ public class AnimalManager {
 		id = IdGeneratorUtil.generateId();
 
 		//  < 동물 이름 입력 >
-		System.out.println("동물 이름 : ");
-		name = in.nextLine();
+		while (true) {
+			System.out.println("동물 이름 : ");
+			String inName = in.nextLine();
+			if (animals.isEmpty()) {
+				name = inName;
+				break;
+			} else {
+				boolean findName = animals.values().stream()
+						.anyMatch(n -> inName.equals(n.getName()));
+
+				if (!findName) {
+					name = inName;
+					break;
+				} else {
+					System.out.println("동일한 이름이 있습니다. 다시 입력해 주세요.");
+				}
+			}
+		}
 
 		//  < 동물 종 입력 >
 		while (true) {
