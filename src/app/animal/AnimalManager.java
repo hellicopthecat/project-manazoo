@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import app.animal.AnimalEnum.Species;
+import app.common.id.IdGeneratorUtil;
+
 public class AnimalManager {
 
 	Scanner in = new Scanner(System.in);
@@ -49,13 +52,14 @@ public class AnimalManager {
 		System.out.println("선택>> ");
 	}
 
+	//	<< 1. 동물 등록 >>
 	public void registerAnimal() {
 		System.out.println("새 동물을 등록합니다.");
 		while (true) {
-			//			<<  정보 입력 받기  >>
+			//	<<  정보 입력 받기  >>
 			inputInformation();
 
-			//			<<  정보 확인하고 확답 받기 & 동물 등록 후 완료 메시지  >> 
+			//	<<  정보 확인하고 확답 받기 & 동물 등록 후 완료 메시지  >> 
 			System.out.println("\n입력하신 정보를 확인하세요.");
 			System.out.printf("%s / %s / %s / %d / %s / %s / %s / %s \n", id,
 					name, species, age, gender, healthStatus, enclosureId,
@@ -82,32 +86,94 @@ public class AnimalManager {
 		}
 	}
 
+	//	< 동물 신규 등록시, 정보 입력 받는 메소드 >
 	public void inputInformation() {
-		System.out.println("동물 ID : ");
-		id = in.nextLine(); // (id 자동 생성 적용)
+		//  < ID 자동 생성 >
+		id = IdGeneratorUtil.generateId();
 
+		//  < 동물 이름 입력 >
 		System.out.println("동물 이름 : ");
 		name = in.nextLine();
 
-		System.out.println("동물 종 : ");
-		species = in.nextLine();
+		//  < 동물 종 입력 >
+		while (true) {
+			System.out.println("동물 종 : ");
+			String inSpe = in.nextLine().trim();
+			if (Species.isValid(inSpe)) {
+				species = inSpe;
+				break;
+			} else {
+				System.out.println("동물 종을 정확히 입력하세요.");
+				System.out.println("등록 가능한 종 목록:");
+				for (Species s : Species.values()) {
+					System.out.print(s.name() + " ");
+				}
+				System.out.println();
+			}
+		}
 
-		System.out.println("동물 나이 : ");
-		age = Integer.parseInt(in.nextLine());
+		//  < 나이 입력 >
+		while (true) {
+			System.out.println("동물 나이 : ");
+			String inAge = in.nextLine();
+			if (!StringIsLong(inAge)) {
+				System.out.println("숫자로 정확히 입력해 주세요.");
+			} else {
+				int longAge = Integer.parseInt(inAge);
+				if (0 <= longAge && longAge < 200) {
+					age = longAge;
+					break;
+				} else {
+					System.out.println("다시 입력해 주세요.");
+				}
+			}
+		}
 
-		System.out.println("동물 성별 : ");
-		gender = in.nextLine();
+		//	< 성별 입력 >
+		while (true) {
+			System.out.println("동물 성별(수컷/암컷) : ");
+			String inGen = in.nextLine();
+			if (inGen.equals("수컷") || inGen.equals("암컷")) {
+				gender = inGen;
+				break;
+			} else {
+				System.out.println("다시 입력해 주세요.");
+			}
+		}
 
-		System.out.println("동물 건강상태 : ");
-		healthStatus = in.nextLine();
+		//	< 건강상태 입력 >
+		while (true) {
+			System.out.println("동물 건강상태(양호/보통/나쁨) : ");
+			String inHeal = in.nextLine();
+			if (inHeal.equals("양호") || inHeal.equals("보통")
+					|| inHeal.equals("나쁨")) {
+				healthStatus = inHeal;
+				break;
+			} else {
+				System.out.println("다시 입력해 주세요.");
+			}
+		}
 
+		//	< 케이지 ID 입력 >
 		System.out.println("케이지 ID : ");
 		enclosureId = in.nextLine();
 
+		//	< 사육사 ID 입력 >
 		System.out.println("사육사 ID : ");
 		zkId = in.nextLine();
 	}
 
+	//	< 입력된 String 값이 Long값으로 변환 가능한지 체크하는 메소드 >
+	public static boolean StringIsLong(String str) {
+		try {
+			Long.parseLong(str);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
+	//	<< 2. 동물 조회 >>
 	public void viewAnimals() {
 		while (true) {
 			System.out.println("\n1.동물 목록 조회");
@@ -141,11 +207,27 @@ public class AnimalManager {
 		}
 	}
 
-	public Animal searchId() {
-
-		return null;
+	//	<< 2-3. 동물 ID로 검색 >>
+	public void searchId() {
+		while (true) {
+			if (animals.isEmpty()) {
+				System.out.println("(동물 목록 없음)");
+				return;
+			} else {
+				System.out.println("검색할 동물 ID : ");
+				String findId = in.nextLine();
+				if (animals.containsKey(findId)) {
+					Animal animal = animals.get(findId);
+					System.out.println(animal);
+					return;
+				} else {
+					System.out.println("ID를 다시 입력해 주세요. ");
+				}
+			}
+		}
 	}
 
+	//	<< 2-4. 동물 이름으로 검색 >>
 	public void searchName() {
 		while (true) {
 			if (animals.isEmpty()) {
@@ -169,6 +251,7 @@ public class AnimalManager {
 		}
 	}
 
+	//	<< 2-5. 동물 종으로 검색 >>
 	public void searchSpecies() {
 		while (true) {
 			if (animals.isEmpty()) {
@@ -192,18 +275,29 @@ public class AnimalManager {
 		}
 	}
 
+	//	<< 3. 동물 수정 >>
 	public void updateAnimal() {
 		if (animals.isEmpty()) {
 			System.out.println("(동물 목록 없음)");
 			return;
 		} else {
-			//	<<  수정할 ID로 검색  >>
-			System.out.println("수정할 동물 ID 입력 : ");
-			String findId = in.nextLine();
-			Animal animal = animals.get(findId);
-			System.out.println(animal);
+			//	< 수정할 ID로 검색 >
+			Animal animal = null;
+			String findId = null;
+			while (true) {
+				System.out.println("수정할 동물 ID 입력 : ");
+				findId = in.nextLine();
+				if (animals.containsKey(findId)) {
+					animal = animals.get(findId);
+					System.out.println(animal);
+					break;
+				} else {
+					System.out.println("ID를 다시 입력해 주세요. ");
+				}
 
-			//	<< 원하는 정보 선택 >>
+			}
+
+			//	< 원하는 정보 선택 >
 			while (true) {
 				System.out.println("수정할 정보 선택 : ");
 				System.out.println("1.종");
@@ -214,36 +308,74 @@ public class AnimalManager {
 
 				String select = in.nextLine();
 
-				//	<<  정보 수정  >>
+				//	< 정보 수정 >
 				switch (select) {
 				case "1" -> {
-					System.out.println("수정할 종 : ");
-					String sp = in.nextLine();
-					animal.setSpecies(sp);
-					System.out.println("동물 수정 완료");
-					System.out.println(animal);
+					while (true) {
+						System.out.println("수정할 종 : ");
+						String sp = in.nextLine().trim();
+						if (Species.isValid(sp)) {
+							animal.setSpecies(sp);
+							System.out.println("동물 수정 완료");
+							System.out.println(animal);
+							break;
+						} else {
+							System.out.println("동물 종을 정확히 입력하세요.");
+							System.out.println("등록 가능한 종 목록:");
+							for (Species s : Species.values()) {
+								System.out.print(s.name() + " ");
+							}
+							System.out.println();
+						}
+					}
 				}
 				case "2" -> {
-					System.out.println("수정할 나이 : ");
-					String age = in.nextLine();
-					int ag = Integer.parseInt(age);
-					animal.setAge(ag);
-					System.out.println("동물 수정 완료");
-					System.out.println(animal);
+					while (true) {
+						System.out.println("수정할 나이 : ");
+						String age = in.nextLine();
+						if (!StringIsLong(age)) {
+							System.out.println("숫자로 정확히 입력해 주세요.");
+						} else {
+							int longAge = Integer.parseInt(age);
+							if (0 <= longAge && longAge < 200) {
+								animal.setAge(longAge);
+								System.out.println("동물 수정 완료");
+								System.out.println(animal);
+								break;
+							} else {
+								System.out.println("다시 입력해 주세요.");
+							}
+						}
+					}
 				}
 				case "3" -> {
-					System.out.println("수정할 성별 : ");
-					String gen = in.nextLine();
-					animal.setGender(gen);
-					System.out.println("동물 수정 완료");
-					System.out.println(animal);
+					while (true) {
+						System.out.println("수정할 성별(수컷/암컷) : ");
+						String gen = in.nextLine();
+						if (gen.equals("수컷") || gen.equals("암컷")) {
+							animal.setGender(gen);
+							System.out.println("동물 수정 완료");
+							System.out.println(animal);
+							break;
+						} else {
+							System.out.println("다시 입력해 주세요.");
+						}
+					}
 				}
 				case "4" -> {
-					System.out.println("수정할 건강상태 : ");
-					String heal = in.nextLine();
-					animal.setHealthStatus(heal);
-					System.out.println("동물 수정 완료");
-					System.out.println(animal);
+					while (true) {
+						System.out.println("수정할 건강상태(양호/보통/나쁨) : ");
+						String heal = in.nextLine();
+						if (heal.equals("양호") || heal.equals("보통")
+								|| heal.equals("나쁨")) {
+							animal.setHealthStatus(heal);
+							System.out.println("동물 수정 완료");
+							System.out.println(animal);
+							break;
+						} else {
+							System.out.println("다시 입력해 주세요.");
+						}
+					}
 				}
 				case "5" -> {
 					System.out.println("나가기");
@@ -255,16 +387,29 @@ public class AnimalManager {
 		}
 	}
 
+	//	<< 4. 동물 삭제 >>
 	public void deleteAnimal() {
 		if (animals.isEmpty()) {
 			System.out.println("(동물 목록 없음)");
 			return;
 		} else {
-			//	<<  수정할 ID로 검색  >>
-			System.out.println("삭제할 동물 ID 입력 : ");
-			String findId = in.nextLine();
+			//	< 수정할 ID로 검색 >
+			Animal animal = null;
+			String findId = null;
+			while (true) {
+				System.out.println("수정할 동물 ID 입력 : ");
+				findId = in.nextLine();
+				if (animals.containsKey(findId)) {
+					animal = animals.get(findId);
+					System.out.println(animal);
+					break;
+				} else {
+					System.out.println("ID를 다시 입력해 주세요. ");
+				}
 
-			//	<<  동물 정보 삭제  >>
+			}
+
+			//	< 동물 정보 삭제 >
 			animals.remove(findId);
 			System.out.println("동물 삭제 완료");
 		}
