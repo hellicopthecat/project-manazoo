@@ -1,8 +1,10 @@
 package app.animal;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class AnimalManager {
 
@@ -32,10 +34,8 @@ public class AnimalManager {
 				return;
 			}
 			default -> System.out.println("잘못된 선택입니다.");
-
 			}
 		}
-
 	}
 
 	public void showMenu() {
@@ -44,7 +44,7 @@ public class AnimalManager {
 		System.out.println("2. 동물 조회");
 		System.out.println("3. 동물 수정");
 		System.out.println("4. 동물 삭제");
-		System.out.println("5. 뒤로가기");
+		System.out.println("5. 뒤로 가기");
 		System.out.println("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ");
 		System.out.println("선택>> ");
 	}
@@ -52,13 +52,14 @@ public class AnimalManager {
 	public void registerAnimal() {
 		System.out.println("새 동물을 등록합니다.");
 		while (true) {
-//			<<  정보 입력 받기  >>
+			//			<<  정보 입력 받기  >>
 			inputInformation();
 
-//			<<  정보 확인하고 확답 받기 & 동물 등록 후 완료 메시지  >> 
+			//			<<  정보 확인하고 확답 받기 & 동물 등록 후 완료 메시지  >> 
 			System.out.println("\n입력하신 정보를 확인하세요.");
-			System.out.printf("%s / %s / %s / %d / %s / %s / %s / %s \n", id, name, species, age, gender, healthStatus,
-					enclosureId, zkId);
+			System.out.printf("%s / %s / %s / %d / %s / %s / %s / %s \n", id,
+					name, species, age, gender, healthStatus, enclosureId,
+					zkId);
 
 			while (true) {
 				System.out.println("1.등록 2.다시입력");
@@ -66,9 +67,10 @@ public class AnimalManager {
 
 				if (answer.equals("1")) {
 					// < 동물 등록 >
-					Animal animal = new Animal(id, name, species, age, gender, healthStatus, enclosureId, zkId);
+					Animal animal = new Animal(id, name, species, age, gender,
+							healthStatus, enclosureId, zkId);
 					animals.put(id, animal);
-					System.out.println("동물 등록 완료");
+					System.out.println("동물 등록 완료 \n");
 					return;
 				} else if (answer.equals("2")) {
 					// < 다시입력 > (내부 while만 깨고 외부 while은 계속 진행)
@@ -82,7 +84,7 @@ public class AnimalManager {
 
 	public void inputInformation() {
 		System.out.println("동물 ID : ");
-		id = in.nextLine(); // (id 자동 생성)
+		id = in.nextLine(); // (id 자동 생성 적용)
 
 		System.out.println("동물 이름 : ");
 		name = in.nextLine();
@@ -107,65 +109,36 @@ public class AnimalManager {
 	}
 
 	public void viewAnimals() {
+		while (true) {
+			System.out.println("\n1.동물 목록 조회");
+			System.out.println("2.동물 ID로 검색");
+			System.out.println("3.동물 이름으로 검색");
+			System.out.println("4.동물 종으로 검색");
+			System.out.println("5.뒤로 가기");
+			System.out.println("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ");
+			System.out.println("선택>> ");
 
-//		<<  2-1. 전체 동물 목록 조회  >>
-		System.out.println("동물 목록");
-		for (Map.Entry<String, Animal> ent : animals.entrySet()) {
-			System.out.println(ent.getValue());
+			String menu = in.nextLine();
+			switch (menu) {
+			case "1" -> {
+				System.out.println("동물 목록");
+				for (Map.Entry<String, Animal> ent : animals.entrySet()) {
+					System.out.println(ent.getValue());
+				}
+				if (animals.isEmpty()) {
+					System.out.println("(동물 목록 없음)");
+				}
+			}
+			case "2" -> searchId();
+			case "3" -> searchName();
+			case "4" -> searchSpecies();
+			case "5" -> {
+				System.out.println("뒤로 가기");
+				return;
+			}
+			default -> System.out.println("잘못된 선택입니다.");
+			}
 		}
-
-		// 2-2. Id로 검색
-		searchId();
-
-		// 2-3. 동물 이름으로 검색
-		searchName();
-
-		// 2-4. 동물 종으로 검색
-		searchSpecies();
-
-		// 2-5. 메뉴로 돌아가기
-		// 메인 while문으로 돌아가기. break; ??
-
-	}
-
-	public void updateAnimal() {
-
-		// << 수정할 동물 검색 >>
-		System.out.println("수정할 동물 검색");
-
-		// 3-1. Id로 검색
-		searchId();
-
-		// 3-2. 동물 이름으로 검색
-		searchName();
-
-		// << 동물 정보 수정 >>
-
-		// << 수정 완료 정보와 메시지 >>
-		System.out.println("동물 수정 완료");
-
-		// 3-3. 메뉴로 돌아가기
-
-	}
-
-	public void deleteAnimal() {
-
-		// << 삭제할 동물 검색 >>
-		System.out.println("삭제할 동물 검색");
-
-		// 4-1. Id로 검색
-		searchId();
-
-		// 4-2. 동물 이름으로 검색
-		searchName();
-
-		// << 동물 정보 삭제 >>
-
-		// << 삭제 완료 메시지 >>
-		System.out.println("동물 삭제 완료");
-
-		// 4-3. 메뉴로 돌아가기
-
 	}
 
 	public Animal searchId() {
@@ -173,51 +146,128 @@ public class AnimalManager {
 		return null;
 	}
 
-	public Animal searchName() {
+	public void searchName() {
+		while (true) {
+			if (animals.isEmpty()) {
+				System.out.println("(동물 목록 없음)");
+				return;
+			} else {
+				System.out.println("검색할 동물 이름 : ");
+				String findName = in.nextLine();
 
-		// (gpt)
-//		Scanner scanner = new Scanner(System.in);
-//		System.out.print("검색할 동물 이름을 입력하세요: ");
-//		String searchName = scanner.nextLine();
-//
-//		boolean found = false;
-//
-//		for (Animal animal : animalMap.values()) {
-//		    if (animal.getName().equalsIgnoreCase(searchName)) {
-//		        System.out.println(animal);
-//		        found = true;
-//		    }
-//		}
-//
-//		if (!found) {
-//		    System.out.println("해당 이름의 동물을 찾을 수 없습니다.");
-//		}
+				List<Animal> findAnimal = animals.values().stream()
+						.filter(k -> findName.equals(k.getName()))
+						.collect(Collectors.toList());
 
-		return null;
+				if (findAnimal.isEmpty()) {
+					System.out.println("해당 이름의 동물을 찾을 수 없습니다.");
+				} else {
+					findAnimal.forEach(System.out::println);
+					return;
+				}
+			}
+		}
 	}
 
-	public Animal searchSpecies() {
+	public void searchSpecies() {
+		while (true) {
+			if (animals.isEmpty()) {
+				System.out.println("(동물 목록 없음)");
+				return;
+			} else {
+				System.out.println("검색할 동물 종 : ");
+				String findSpecies = in.nextLine();
 
-		// (gpt)
-//		System.out.print("검색할 키워드를 입력하세요 (이름 또는 종): ");
-//		String keyword = scanner.nextLine().toLowerCase();
-//
-//		boolean found = false;
-//
-//		for (Animal animal : animalMap.values()) {
-//		    if (animal.getName().toLowerCase().contains(keyword) || animal.getSpecies().toLowerCase().contains(keyword)) {
-//		        System.out.println(animal);
-//		        found = true;
-//		    }
-//		}
-//
-//		if (!found) {
-//		    System.out.println("검색 결과가 없습니다.");
-//		}
+				List<Animal> findAnimals = animals.values().stream()
+						.filter(k -> findSpecies.equals(k.getSpecies()))
+						.collect(Collectors.toList());
 
-		return null;
+				if (findAnimals.isEmpty()) {
+					System.out.println("해당 종의 동물을 찾을 수 없습니다.");
+				} else {
+					findAnimals.forEach(System.out::println);
+					return;
+				}
+			}
+		}
 	}
 
-	// 입력에 대한 예외를 처리하는 메소드들
+	public void updateAnimal() {
+		if (animals.isEmpty()) {
+			System.out.println("(동물 목록 없음)");
+			return;
+		} else {
+			//	<<  수정할 ID로 검색  >>
+			System.out.println("수정할 동물 ID 입력 : ");
+			String findId = in.nextLine();
+			Animal animal = animals.get(findId);
+			System.out.println(animal);
+
+			//	<< 원하는 정보 선택 >>
+			while (true) {
+				System.out.println("수정할 정보 선택 : ");
+				System.out.println("1.종");
+				System.out.println("2.나이");
+				System.out.println("3.성별");
+				System.out.println("4.건강상태");
+				System.out.println("5.나가기");
+
+				String select = in.nextLine();
+
+				//	<<  정보 수정  >>
+				switch (select) {
+				case "1" -> {
+					System.out.println("수정할 종 : ");
+					String sp = in.nextLine();
+					animal.setSpecies(sp);
+					System.out.println("동물 수정 완료");
+					System.out.println(animal);
+				}
+				case "2" -> {
+					System.out.println("수정할 나이 : ");
+					String age = in.nextLine();
+					int ag = Integer.parseInt(age);
+					animal.setAge(ag);
+					System.out.println("동물 수정 완료");
+					System.out.println(animal);
+				}
+				case "3" -> {
+					System.out.println("수정할 성별 : ");
+					String gen = in.nextLine();
+					animal.setGender(gen);
+					System.out.println("동물 수정 완료");
+					System.out.println(animal);
+				}
+				case "4" -> {
+					System.out.println("수정할 건강상태 : ");
+					String heal = in.nextLine();
+					animal.setHealthStatus(heal);
+					System.out.println("동물 수정 완료");
+					System.out.println(animal);
+				}
+				case "5" -> {
+					System.out.println("나가기");
+					return;
+				}
+				default -> System.out.println("잘못된 선택입니다.");
+				}
+			}
+		}
+	}
+
+	public void deleteAnimal() {
+		if (animals.isEmpty()) {
+			System.out.println("(동물 목록 없음)");
+			return;
+		} else {
+			//	<<  수정할 ID로 검색  >>
+			System.out.println("삭제할 동물 ID 입력 : ");
+			String findId = in.nextLine();
+
+			//	<<  동물 정보 삭제  >>
+			animals.remove(findId);
+			System.out.println("동물 삭제 완료");
+		}
+	}
 
 }
