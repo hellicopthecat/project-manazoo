@@ -7,7 +7,7 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 import app.animal.AnimalEnum.Species;
-import app.common.id.IdGeneratorUtil;
+import app.common.IdGeneratorUtil;
 
 public class AnimalManager {
 
@@ -52,19 +52,17 @@ public class AnimalManager {
 		System.out.println("선택>> ");
 	}
 
-	//	<< 1. 동물 등록 >>
+	// << 1. 동물 등록 >>
 	public void registerAnimal() {
 		System.out.println("새 동물을 등록합니다.");
 		while (true) {
-			//	<<  정보 입력 받기  >>
+			// << 정보 입력 받기 >>
 			inputInformation();
 
-			//	<<  정보 확인하고 확답 받기 & 동물 등록 후 완료 메시지  >> 
+			// << 정보 확인하고 확답 받기 & 동물 등록 후 완료 메시지 >>
 			System.out.println("\n입력하신 정보를 확인하세요.");
 
-			System.out.printf(
-					"%s / %s / %s / %d / %s / %s / %s / %s \n", id,
-					name, species, age, gender, healthStatus,
+			System.out.printf("%s / %s / %s / %d / %s / %s / %s / %s \n", id, name, species, age, gender, healthStatus,
 					enclosureId, zkId);
 
 			while (true) {
@@ -74,8 +72,7 @@ public class AnimalManager {
 				if (answer.equals("1")) {
 					// < 동물 등록 >
 
-					Animal animal = new Animal(id, name, species, age, gender,
-							healthStatus, enclosureId, zkId);
+					Animal animal = new Animal(id, name, species, age, gender, healthStatus, enclosureId, zkId);
 					animals.put(id, animal);
 					System.out.println("동물 등록 완료 \n");
 					return;
@@ -89,12 +86,12 @@ public class AnimalManager {
 		}
 	}
 
-	//	< 동물 신규 등록시, 정보 입력 받는 메소드 >
+	// < 동물 신규 등록시, 정보 입력 받는 메소드 >
 	public void inputInformation() {
-		//  < ID 자동 생성 >
+		// < ID 자동 생성 >
 		id = IdGeneratorUtil.generateId();
 
-		//  < 동물 이름 입력 >
+		// < 동물 이름 입력 >
 		while (true) {
 			System.out.println("동물 이름 : ");
 			String inName = in.nextLine();
@@ -102,8 +99,7 @@ public class AnimalManager {
 				name = inName;
 				break;
 			} else {
-				boolean findName = animals.values().stream()
-						.anyMatch(n -> inName.equals(n.getName()));
+				boolean findName = animals.values().stream().anyMatch(n -> inName.equals(n.getName()));
 
 				if (!findName) {
 					name = inName;
@@ -114,7 +110,7 @@ public class AnimalManager {
 			}
 		}
 
-		//  < 동물 종 입력 >
+		// < 동물 종 입력 >
 		while (true) {
 			System.out.println("동물 종 : ");
 			String inSpe = in.nextLine().trim();
@@ -131,7 +127,7 @@ public class AnimalManager {
 			}
 		}
 
-		//  < 나이 입력 >
+		// < 나이 입력 >
 		while (true) {
 			System.out.println("동물 나이 : ");
 			String inAge = in.nextLine();
@@ -148,7 +144,7 @@ public class AnimalManager {
 			}
 		}
 
-		//	< 성별 입력 >
+		// < 성별 입력 >
 		while (true) {
 			System.out.println("동물 성별(수컷/암컷) : ");
 			String inGen = in.nextLine();
@@ -160,12 +156,11 @@ public class AnimalManager {
 			}
 		}
 
-		//	< 건강상태 입력 >
+		// < 건강상태 입력 >
 		while (true) {
 			System.out.println("동물 건강상태(양호/보통/나쁨) : ");
 			String inHeal = in.nextLine();
-			if (inHeal.equals("양호") || inHeal.equals("보통")
-					|| inHeal.equals("나쁨")) {
+			if (inHeal.equals("양호") || inHeal.equals("보통") || inHeal.equals("나쁨")) {
 				healthStatus = inHeal;
 				break;
 			} else {
@@ -173,16 +168,16 @@ public class AnimalManager {
 			}
 		}
 
-		//	< 케이지 ID 입력 >
+		// < 케이지 ID 입력 >
 		System.out.println("케이지 ID : ");
 		enclosureId = in.nextLine();
 
-		//	< 사육사 ID 입력 >
+		// < 사육사 ID 입력 >
 		System.out.println("사육사 ID : ");
 		zkId = in.nextLine();
 	}
 
-	//	< 입력된 String 값이 int 값으로 변환 가능한지 체크하는 메소드 >
+	// < 입력된 String 값이 int 값으로 변환 가능한지 체크하는 메소드 >
 
 	public static boolean StringIsInt(String str) {
 		try {
@@ -193,7 +188,7 @@ public class AnimalManager {
 		}
 	}
 
-	//	<< 2. 동물 조회 >>
+	// << 2. 동물 조회 >>
 	public void viewAnimals() {
 		while (true) {
 			System.out.println("\n1.동물 목록 조회");
@@ -228,7 +223,7 @@ public class AnimalManager {
 		}
 	}
 
-	//	<< 2-3. 동물 ID로 검색 >>
+	// << 2-3. 동물 ID로 검색 >>
 	public void searchId() {
 		while (true) {
 			if (animals.isEmpty()) {
@@ -248,7 +243,7 @@ public class AnimalManager {
 		}
 	}
 
-	//	<< 2-4. 동물 이름으로 검색 >>
+	// << 2-4. 동물 이름으로 검색 >>
 	public void searchName() {
 		while (true) {
 			if (animals.isEmpty()) {
@@ -258,8 +253,7 @@ public class AnimalManager {
 				System.out.println("검색할 동물 이름 : ");
 				String findName = in.nextLine();
 
-				List<Animal> findAnimal = animals.values().stream()
-						.filter(k -> findName.equals(k.getName()))
+				List<Animal> findAnimal = animals.values().stream().filter(k -> findName.equals(k.getName()))
 						.collect(Collectors.toList());
 
 				if (findAnimal.isEmpty()) {
@@ -272,7 +266,7 @@ public class AnimalManager {
 		}
 	}
 
-	//	<< 2-5. 동물 종으로 검색 >>
+	// << 2-5. 동물 종으로 검색 >>
 	public void searchSpecies() {
 		while (true) {
 			if (animals.isEmpty()) {
@@ -284,8 +278,7 @@ public class AnimalManager {
 
 				List<Animal> findAnimals = animals.values().stream()
 
-						.filter(k -> findSpecies.equals(k.getSpecies()))
-						.collect(Collectors.toList());
+						.filter(k -> findSpecies.equals(k.getSpecies())).collect(Collectors.toList());
 
 				if (findAnimals.isEmpty()) {
 					System.out.println("해당 종의 동물을 찾을 수 없습니다.");
@@ -297,13 +290,13 @@ public class AnimalManager {
 		}
 	}
 
-	//	<< 3. 동물 수정 >>
+	// << 3. 동물 수정 >>
 	public void updateAnimal() {
 		if (animals.isEmpty()) {
 			System.out.println("(동물 목록 없음)");
 			return;
 		} else {
-			//	< 수정할 ID로 검색 >
+			// < 수정할 ID로 검색 >
 			Animal animal = null;
 			String findId = null;
 			while (true) {
@@ -319,7 +312,7 @@ public class AnimalManager {
 
 			}
 
-			//	< 원하는 정보 선택 >
+			// < 원하는 정보 선택 >
 			while (true) {
 				System.out.println("수정할 정보 선택 : ");
 				System.out.println("1.종");
@@ -330,7 +323,7 @@ public class AnimalManager {
 
 				String select = in.nextLine();
 
-				//	< 정보 수정 >
+				// < 정보 수정 >
 				switch (select) {
 				case "1" -> {
 					while (true) {
@@ -388,8 +381,7 @@ public class AnimalManager {
 					while (true) {
 						System.out.println("수정할 건강상태(양호/보통/나쁨) : ");
 						String heal = in.nextLine();
-						if (heal.equals("양호") || heal.equals("보통")
-								|| heal.equals("나쁨")) {
+						if (heal.equals("양호") || heal.equals("보통") || heal.equals("나쁨")) {
 							animal.setHealthStatus(heal);
 							System.out.println("동물 수정 완료");
 							System.out.println(animal);
@@ -409,13 +401,13 @@ public class AnimalManager {
 		}
 	}
 
-	//	<< 4. 동물 삭제 >>
+	// << 4. 동물 삭제 >>
 	public void deleteAnimal() {
 		if (animals.isEmpty()) {
 			System.out.println("(동물 목록 없음)");
 			return;
 		} else {
-			//	< 수정할 ID로 검색 >
+			// < 수정할 ID로 검색 >
 			Animal animal = null;
 			String findId = null;
 			while (true) {
@@ -431,7 +423,7 @@ public class AnimalManager {
 
 			}
 
-			//	< 동물 정보 삭제 >
+			// < 동물 정보 삭제 >
 			animals.remove(findId);
 			System.out.println("동물 삭제 완료");
 		}

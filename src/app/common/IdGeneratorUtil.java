@@ -35,10 +35,9 @@ public final class IdGeneratorUtil {
 		/** 사육사 타입 (접두사: K) */
 		ZOOKEEPER("K"),
 		/** 재정 타입 (접두사 : F) */
-		FINANCE("F");
+		FINANCE("F"),
 		/** 방문객 타입 (접두사: V) */
 		VISITOR("V");
-
 
 		private final String prefix;
 
@@ -67,7 +66,6 @@ public final class IdGeneratorUtil {
 	private static final Set<String> usedFinanceIds = new HashSet<>();
 	/** 방문객 ID 저장소 - 생성된 모든 방문객 ID를 추적 */
 	private static final Set<String> usedVisitorIds = new HashSet<>();
-
 
 	/** 사육장 ID 카운터 - 다음에 생성될 사육장 ID 번호 */
 	private static int enclosureCounter = 1;
@@ -138,8 +136,6 @@ public final class IdGeneratorUtil {
 	 */
 	private static IdType determineIdType() {
 		StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-		StackTraceElement[] stackTrace = Thread.currentThread()
-				.getStackTrace();
 
 		for (StackTraceElement element : stackTrace) {
 			String className = element.getClassName();
@@ -157,9 +153,8 @@ public final class IdGeneratorUtil {
 			}
 		}
 
-		throw new IllegalStateException(
-				"ID 생성 요청이 지원되지 않는 클래스에서 호출되었습니다. "
-						+ "EnclosureManager, AnimalManager, ZooKeeperManager,FinanceManager, VisitorManager에서만 호출 가능합니다.");
+		throw new IllegalStateException("ID 생성 요청이 지원되지 않는 클래스에서 호출되었습니다. "
+				+ "EnclosureManager, AnimalManager, ZooKeeperManager,FinanceManager, VisitorManager에서만 호출 가능합니다.");
 	}
 
 	// ==================== 공개 ID 생성 메서드 ====================
@@ -305,8 +300,7 @@ public final class IdGeneratorUtil {
 		StringBuilder sb = new StringBuilder();
 		sb.append("IdGeneratorUtil 현재 상태:\n");
 
-		sb.append("├─ 사육장 ID (").append(usedEnclosureIds.size())
-				.append("개): ");
+		sb.append("├─ 사육장 ID (").append(usedEnclosureIds.size()).append("개): ");
 
 		if (usedEnclosureIds.isEmpty()) {
 			sb.append("없음");
@@ -315,8 +309,7 @@ public final class IdGeneratorUtil {
 		}
 		sb.append("\n");
 
-		sb.append("├─ 동물 ID (").append(usedAnimalIds.size())
-				.append("개): ");
+		sb.append("├─ 동물 ID (").append(usedAnimalIds.size()).append("개): ");
 
 		if (usedAnimalIds.isEmpty()) {
 			sb.append("없음");
@@ -325,8 +318,7 @@ public final class IdGeneratorUtil {
 		}
 		sb.append("\n");
 
-		sb.append("├─ 사육사 ID (").append(usedZooKeeperIds.size())
-				.append("개): ");
+		sb.append("├─ 사육사 ID (").append(usedZooKeeperIds.size()).append("개): ");
 		if (usedZooKeeperIds.isEmpty()) {
 			sb.append("없음");
 		} else {
