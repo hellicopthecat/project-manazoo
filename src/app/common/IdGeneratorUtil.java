@@ -36,6 +36,9 @@ public final class IdGeneratorUtil {
 		ZOOKEEPER("K"),
 		/** 재정 타입 (접두사 : F) */
 		FINANCE("F");
+		/** 방문객 타입 (접두사: V) */
+		VISITOR("V");
+
 
 		private final String prefix;
 
@@ -62,6 +65,9 @@ public final class IdGeneratorUtil {
 	private static final Set<String> usedZooKeeperIds = new HashSet<>();
 	/** 재정 ID 저장소 - 생성된 모든 재정 ID를 추적 */
 	private static final Set<String> usedFinanceIds = new HashSet<>();
+	/** 방문객 ID 저장소 - 생성된 모든 방문객 ID를 추적 */
+	private static final Set<String> usedVisitorIds = new HashSet<>();
+
 
 	/** 사육장 ID 카운터 - 다음에 생성될 사육장 ID 번호 */
 	private static int enclosureCounter = 1;
@@ -71,6 +77,8 @@ public final class IdGeneratorUtil {
 	private static int zooKeeperCounter = 1;
 	/** 재정 ID 카운터 - 다음에 생성될 재정 ID 번호 */
 	private static int financeCounter = 1;
+	/** 방문객 ID 카운터 - 다음에 생성될 방문객 ID 번호 */
+	private static int visitorCounter = 1;
 
 	private IdGeneratorUtil() {
 	}
@@ -88,6 +96,7 @@ public final class IdGeneratorUtil {
 		case ANIMAL -> usedAnimalIds;
 		case ZOOKEEPER -> usedZooKeeperIds;
 		case FINANCE -> usedFinanceIds;
+		case VISITOR -> usedVisitorIds;
 		};
 	}
 
@@ -102,6 +111,7 @@ public final class IdGeneratorUtil {
 		case ANIMAL -> animalCounter;
 		case ZOOKEEPER -> zooKeeperCounter;
 		case FINANCE -> financeCounter;
+		case VISITOR -> visitorCounter;
 		};
 	}
 
@@ -116,6 +126,7 @@ public final class IdGeneratorUtil {
 		case ANIMAL -> animalCounter = newValue;
 		case ZOOKEEPER -> zooKeeperCounter = newValue;
 		case FINANCE -> financeCounter = newValue;
+		case VISITOR -> visitorCounter = newValue;
 		}
 	}
 
@@ -127,6 +138,8 @@ public final class IdGeneratorUtil {
 	 */
 	private static IdType determineIdType() {
 		StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+		StackTraceElement[] stackTrace = Thread.currentThread()
+				.getStackTrace();
 
 		for (StackTraceElement element : stackTrace) {
 			String className = element.getClassName();
@@ -139,11 +152,14 @@ public final class IdGeneratorUtil {
 				return IdType.ZOOKEEPER;
 			} else if (className.contains("FinanceManager")) {
 				return IdType.FINANCE;
+			} else if (className.contains("VisitorManager")) {
+				return IdType.VISITOR;
 			}
 		}
 
 		throw new IllegalStateException(
-				"ID 생성 요청이 지원되지 않는 클래스에서 호출되었습니다. " + "EnclosureManager, AnimalManager, ZooKeeperManager에서만 호출 가능합니다.");
+				"ID 생성 요청이 지원되지 않는 클래스에서 호출되었습니다. "
+						+ "EnclosureManager, AnimalManager, ZooKeeperManager,FinanceManager, VisitorManager에서만 호출 가능합니다.");
 	}
 
 	// ==================== 공개 ID 생성 메서드 ====================
@@ -289,7 +305,9 @@ public final class IdGeneratorUtil {
 		StringBuilder sb = new StringBuilder();
 		sb.append("IdGeneratorUtil 현재 상태:\n");
 
-		sb.append("├─ 사육장 ID (").append(usedEnclosureIds.size()).append("개): ");
+		sb.append("├─ 사육장 ID (").append(usedEnclosureIds.size())
+				.append("개): ");
+
 		if (usedEnclosureIds.isEmpty()) {
 			sb.append("없음");
 		} else {
@@ -297,7 +315,9 @@ public final class IdGeneratorUtil {
 		}
 		sb.append("\n");
 
-		sb.append("├─ 동물 ID (").append(usedAnimalIds.size()).append("개): ");
+		sb.append("├─ 동물 ID (").append(usedAnimalIds.size())
+				.append("개): ");
+
 		if (usedAnimalIds.isEmpty()) {
 			sb.append("없음");
 		} else {
@@ -305,7 +325,8 @@ public final class IdGeneratorUtil {
 		}
 		sb.append("\n");
 
-		sb.append("├─ 사육사 ID (").append(usedZooKeeperIds.size()).append("개): ");
+		sb.append("├─ 사육사 ID (").append(usedZooKeeperIds.size())
+				.append("개): ");
 		if (usedZooKeeperIds.isEmpty()) {
 			sb.append("없음");
 		} else {
@@ -318,8 +339,6 @@ public final class IdGeneratorUtil {
 		} else {
 			sb.append(usedFinanceIds.toString());
 		}
-
 		return sb.toString();
 	}
-
 }
