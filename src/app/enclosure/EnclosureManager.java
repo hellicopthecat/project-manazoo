@@ -53,21 +53,21 @@ public class EnclosureManager {
     /**
      * 사육장 정보를 표 형식으로 출력합니다.
      * CMD 호환성을 위해 영문 헤더와 ASCII 문자로 변경했습니다.
-     * 
-     * @param title 제목
+     *
+     * @param title     제목
      * @param enclosure 출력할 사육장 객체
      */
     private void printEnclosureInfo(String title, Enclosure enclosure) {
         String[] headers = {"Enclosure ID", "Name", "Size(m2)", "Temp(C)", "Location", "Environment"};
         String[] values = {
-            enclosure.getId(),
-            enclosure.getName(),
-            String.format("%.1f", enclosure.getAreaSize()),
-            String.format("%.1f", enclosure.getTemperature()),
-            enclosure.getLocationType().toString(),
-            enclosure.getEnvironmentType().toString()
+                enclosure.getId(),
+                enclosure.getName(),
+                String.format("%.1f", enclosure.getAreaSize()),
+                String.format("%.1f", enclosure.getTemperature()),
+                enclosure.getLocationType().toString(),
+                enclosure.getEnvironmentType().toString()
         };
-        
+
         TableUtil.printSingleRowTable(title, headers, values);
     }
 
@@ -113,7 +113,7 @@ public class EnclosureManager {
     }
 
     private void registerManagement() {
-        
+
         while (true) {
             displayRegisterMenu();
             int choice = InputUtil.getIntInput();
@@ -158,29 +158,29 @@ public class EnclosureManager {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 사육장이 없습니다.");
             return;
         }
-        
+
         // 헤더는 printEnclosureInfo와 동일
         String[] headers = {"Enclosure ID", "Name", "Size(m2)", "Temp(C)", "Location", "Environment"};
-        
+
         // repository의 모든 사육장 데이터를 2차원 배열로 변환
         Collection<Object> allEnclosures = repository.findAll();
         String[][] data = new String[allEnclosures.size()][];
         int index = 0;
-        
+
         for (Object obj : allEnclosures) {
             if (obj instanceof Enclosure enclosure) {
                 data[index] = new String[]{
-                    enclosure.getId(),
-                    enclosure.getName(),
-                    String.format("%.1f", enclosure.getAreaSize()),
-                    String.format("%.1f", enclosure.getTemperature()),
-                    enclosure.getLocationType().toString(),
-                    enclosure.getEnvironmentType().toString()
+                        enclosure.getId(),
+                        enclosure.getName(),
+                        String.format("%.1f", enclosure.getAreaSize()),
+                        String.format("%.1f", enclosure.getTemperature()),
+                        enclosure.getLocationType().toString(),
+                        enclosure.getEnvironmentType().toString()
                 };
                 index++;
             }
         }
-        
+
         // TableUtil.printTable 사용하여 다중 행 표 출력
         String title = String.format("사육장 목록 (총 %d개)", repository.size());
         TableUtil.printTable(title, headers, data);
@@ -244,7 +244,7 @@ public class EnclosureManager {
     private void editEnclosure() {
         viewEnclosures();
 
-        if(repository.isEmpty()){
+        if (repository.isEmpty()) {
             return;
         }
         String enclosureId = MenuUtil.Question.askTextInput("수정할 사육장 번호를 입력하세요.");
