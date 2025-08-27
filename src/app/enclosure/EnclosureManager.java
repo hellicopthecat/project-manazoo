@@ -1,5 +1,6 @@
 package app.enclosure;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import app.common.IdGeneratorUtil;
@@ -138,8 +139,36 @@ public class EnclosureManager {
     }
 
     private void viewEnclosures() {
-        System.out.printf("=== 사육장 목록 (총 %d)===\n", repository.size());
-        System.out.println(repository.toString());
+        if (repository.isEmpty()) {
+            System.out.println("등록된 사육장이 없습니다.");
+            return;
+        }
+        
+        // 헤더는 printEnclosureInfo와 동일
+        String[] headers = {"Enclosure ID", "Name", "Size(m2)", "Temp(C)", "Location", "Environment"};
+        
+        // repository의 모든 사육장 데이터를 2차원 배열로 변환
+        Collection<Object> allEnclosures = repository.findAll();
+        String[][] data = new String[allEnclosures.size()][];
+        int index = 0;
+        
+        for (Object obj : allEnclosures) {
+            if (obj instanceof Enclosure enclosure) {
+                data[index] = new String[]{
+                    enclosure.getId(),
+                    enclosure.getName(),
+                    String.format("%.1f", enclosure.getAreaSize()),
+                    String.format("%.1f", enclosure.getTemperature()),
+                    enclosure.getLocationType().toString(),
+                    enclosure.getEnvironmentType().toString()
+                };
+                index++;
+            }
+        }
+        
+        // TableUtil.printTable 사용하여 다중 행 표 출력
+        String title = String.format("사육장 목록 (총 %d개)", repository.size());
+        TableUtil.printTable(title, headers, data);
     }
 
     /**
