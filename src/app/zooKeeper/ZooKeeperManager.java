@@ -11,10 +11,10 @@ public class ZooKeeperManager {
 	/**
 	 * test용 main 함수입니다.
 	 */
-	public static void main(String[] args) {
-		ZooKeeperManager z = new ZooKeeperManager();
-		z.handleZookeeperManagement();
-	}
+//	public static void main(String[] args) {
+//		ZooKeeperManager z = new ZooKeeperManager();
+//		z.handleZookeeperManagement();
+//	}
 
 	/*
 	 * ZooKeeperManagement으로 콘솔을 실행시킬 수 있습니다.
