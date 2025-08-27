@@ -12,6 +12,7 @@ import java.util.Set;
  *   <li>EnclosureManager: E-0001, E-0002, E-0003, ...</li>
  *   <li>AnimalManager: A-0001, A-0002, A-0003, ...</li>
  *   <li>ZooKeeperManager: K-0001, K-0002, K-0003, ...</li>
+ *   <li>FinanceManager: F-0001, F-0002, F-0003, ...</li>
  * </ul>
  * 
  * <p>사용법:
@@ -33,8 +34,11 @@ public final class IdGeneratorUtil {
 		ANIMAL("A"),
 		/** 사육사 타입 (접두사: K) */
 		ZOOKEEPER("K"),
+		/** 재정 타입 (접두사 : F) */
+		FINANCE("F");
 		/** 방문객 타입 (접두사: V) */
 		VISITOR("V");
+
 
 		private final String prefix;
 
@@ -59,8 +63,11 @@ public final class IdGeneratorUtil {
 	private static final Set<String> usedAnimalIds = new HashSet<>();
 	/** 사육사 ID 저장소 - 생성된 모든 사육사 ID를 추적 */
 	private static final Set<String> usedZooKeeperIds = new HashSet<>();
+	/** 재정 ID 저장소 - 생성된 모든 재정 ID를 추적 */
+	private static final Set<String> usedFinanceIds = new HashSet<>();
 	/** 방문객 ID 저장소 - 생성된 모든 방문객 ID를 추적 */
 	private static final Set<String> usedVisitorIds = new HashSet<>();
+
 
 	/** 사육장 ID 카운터 - 다음에 생성될 사육장 ID 번호 */
 	private static int enclosureCounter = 1;
@@ -68,6 +75,8 @@ public final class IdGeneratorUtil {
 	private static int animalCounter = 1;
 	/** 사육사 ID 카운터 - 다음에 생성될 사육사 ID 번호 */
 	private static int zooKeeperCounter = 1;
+	/** 재정 ID 카운터 - 다음에 생성될 재정 ID 번호 */
+	private static int financeCounter = 1;
 	/** 방문객 ID 카운터 - 다음에 생성될 방문객 ID 번호 */
 	private static int visitorCounter = 1;
 
@@ -86,6 +95,7 @@ public final class IdGeneratorUtil {
 		case ENCLOSURE -> usedEnclosureIds;
 		case ANIMAL -> usedAnimalIds;
 		case ZOOKEEPER -> usedZooKeeperIds;
+		case FINANCE -> usedFinanceIds;
 		case VISITOR -> usedVisitorIds;
 		};
 	}
@@ -100,6 +110,7 @@ public final class IdGeneratorUtil {
 		case ENCLOSURE -> enclosureCounter;
 		case ANIMAL -> animalCounter;
 		case ZOOKEEPER -> zooKeeperCounter;
+		case FINANCE -> financeCounter;
 		case VISITOR -> visitorCounter;
 		};
 	}
@@ -114,6 +125,7 @@ public final class IdGeneratorUtil {
 		case ENCLOSURE -> enclosureCounter = newValue;
 		case ANIMAL -> animalCounter = newValue;
 		case ZOOKEEPER -> zooKeeperCounter = newValue;
+		case FINANCE -> financeCounter = newValue;
 		case VISITOR -> visitorCounter = newValue;
 		}
 	}
@@ -125,6 +137,7 @@ public final class IdGeneratorUtil {
 	 * @throws IllegalStateException 지원되지 않는 클래스에서 호출된 경우
 	 */
 	private static IdType determineIdType() {
+		StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 		StackTraceElement[] stackTrace = Thread.currentThread()
 				.getStackTrace();
 
@@ -137,14 +150,16 @@ public final class IdGeneratorUtil {
 				return IdType.ANIMAL;
 			} else if (className.contains("ZooKeeperManager")) {
 				return IdType.ZOOKEEPER;
-			} else if (className.contains("VisitorManager")) { // ✅ 추가
+			} else if (className.contains("FinanceManager")) {
+				return IdType.FINANCE;
+			} else if (className.contains("VisitorManager")) {
 				return IdType.VISITOR;
 			}
 		}
 
 		throw new IllegalStateException(
 				"ID 생성 요청이 지원되지 않는 클래스에서 호출되었습니다. "
-						+ "EnclosureManager, AnimalManager, ZooKeeperManager, VisitorManager에서만 호출 가능합니다.");
+						+ "EnclosureManager, AnimalManager, ZooKeeperManager,FinanceManager, VisitorManager에서만 호출 가능합니다.");
 	}
 
 	// ==================== 공개 ID 생성 메서드 ====================
@@ -160,6 +175,7 @@ public final class IdGeneratorUtil {
 	 *   <li>EnclosureManager → E-0001, E-0002, ...</li>
 	 *   <li>AnimalManager → A-0001, A-0002, ...</li>
 	 *   <li>ZooKeeperManager → K-0001, K-0002, ...</li>
+	 *   <li>FinanceManager → F-0001, F-0002, ...</li>
 	 * </ul>
 	 *
 	 * @return 생성된 고유 ID (예: "E-0001")
@@ -205,6 +221,14 @@ public final class IdGeneratorUtil {
 	 */
 	public static int getZooKeeperIdCount() {
 		return usedZooKeeperIds.size();
+	}
+
+	/**
+	 * 현재 생성된 재정 ID의 총 개수를 반환합니다.
+	 * @return 재정 ID 개수
+	 */
+	public static int getFinanceIdCount() {
+		return usedFinanceIds.size();
 	}
 
 	// ==================== 디버그/테스트용 메서드 ====================
@@ -259,6 +283,18 @@ public final class IdGeneratorUtil {
 	}
 
 	/**
+	 * 🔍 [DEBUG] 특정 재정 ID가 이미 사용되었는지 확인합니다.
+	 * 
+	 * <p><strong>⚠️ 디버깅 및 중복 확인 목적으로만 사용하세요.</strong>
+	 * 
+	 * @param id 확인할 재정 ID (예: "F-0001")
+	 * @return 사용된 ID면 true, 아니면 false
+	 */
+	public static boolean isFinanceIdUsed(String id) {
+		return isIdUsed(id, usedFinanceIds);
+	}
+
+	/**
 	 * 🔍 [DEBUG] 현재 저장된 모든 ID들을 타입별로 나열합니다.
 	 * 
 	 * <p><strong>⚠️ 디버깅 및 개발 목적으로만 사용하세요.</strong>
@@ -271,6 +307,7 @@ public final class IdGeneratorUtil {
 
 		sb.append("├─ 사육장 ID (").append(usedEnclosureIds.size())
 				.append("개): ");
+
 		if (usedEnclosureIds.isEmpty()) {
 			sb.append("없음");
 		} else {
@@ -280,6 +317,7 @@ public final class IdGeneratorUtil {
 
 		sb.append("├─ 동물 ID (").append(usedAnimalIds.size())
 				.append("개): ");
+
 		if (usedAnimalIds.isEmpty()) {
 			sb.append("없음");
 		} else {
@@ -287,7 +325,7 @@ public final class IdGeneratorUtil {
 		}
 		sb.append("\n");
 
-		sb.append("└─ 사육사 ID (").append(usedZooKeeperIds.size())
+		sb.append("├─ 사육사 ID (").append(usedZooKeeperIds.size())
 				.append("개): ");
 		if (usedZooKeeperIds.isEmpty()) {
 			sb.append("없음");
@@ -295,7 +333,12 @@ public final class IdGeneratorUtil {
 			sb.append(usedZooKeeperIds.toString());
 		}
 
+		sb.append("└─ 재정 ID (").append(usedFinanceIds.size()).append("개): ");
+		if (usedZooKeeperIds.isEmpty()) {
+			sb.append("없음");
+		} else {
+			sb.append(usedFinanceIds.toString());
+		}
 		return sb.toString();
 	}
-
 }
