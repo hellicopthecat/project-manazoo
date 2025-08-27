@@ -2,7 +2,7 @@ package app.zooKeeper;
 
 import java.util.Scanner;
 
-import app.common.id.IdGeneratorUtil;
+import app.common.IdGeneratorUtil;
 
 public class ZooKeeperManager {
 

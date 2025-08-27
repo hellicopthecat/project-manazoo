@@ -42,8 +42,8 @@ public class IncomeExpend {
 		// TODO Auto-generated method stub
 		String convertIEType = IEConverter.IETypeStringConverter(IEType);
 		String convertEventType = IEConverter.eventTypeStringConverter(eventType);
-		return String.format("금액 : %d , 수입지출타 : %s , 수입지출모델 : %s , 설명 : %s]", money, convertIEType, convertEventType,
-				desc);
+		return String.format("[id: %s , 금액 : %d , 수입지출타 : %s , 수입지출모델 : %s , 설명 : %s]\n", id, money, convertIEType,
+				convertEventType, desc);
 	}
 
 }
