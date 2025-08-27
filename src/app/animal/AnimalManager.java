@@ -61,6 +61,7 @@ public class AnimalManager {
 
 			//	<<  정보 확인하고 확답 받기 & 동물 등록 후 완료 메시지  >> 
 			System.out.println("\n입력하신 정보를 확인하세요.");
+
 			System.out.printf(
 					"%s / %s / %s / %d / %s / %s / %s / %s \n", id,
 					name, species, age, gender, healthStatus,
@@ -72,8 +73,9 @@ public class AnimalManager {
 
 				if (answer.equals("1")) {
 					// < 동물 등록 >
-					Animal animal = new Animal(id, name, species, age,
-							gender, healthStatus, enclosureId, zkId);
+
+					Animal animal = new Animal(id, name, species, age, gender,
+							healthStatus, enclosureId, zkId);
 					animals.put(id, animal);
 					System.out.println("동물 등록 완료 \n");
 					return;
@@ -181,6 +183,7 @@ public class AnimalManager {
 	}
 
 	//	< 입력된 String 값이 int 값으로 변환 가능한지 체크하는 메소드 >
+
 	public static boolean StringIsInt(String str) {
 		try {
 			Integer.parseInt(str);
@@ -205,8 +208,8 @@ public class AnimalManager {
 			switch (menu) {
 			case "1" -> {
 				System.out.println("동물 목록");
-				for (Map.Entry<String, Animal> ent : animals
-						.entrySet()) {
+
+				for (Map.Entry<String, Animal> ent : animals.entrySet()) {
 					System.out.println(ent.getValue());
 				}
 				if (animals.isEmpty()) {
@@ -280,8 +283,8 @@ public class AnimalManager {
 				String findSpecies = in.nextLine();
 
 				List<Animal> findAnimals = animals.values().stream()
-						.filter(k -> findSpecies
-								.equals(k.getSpecies()))
+
+						.filter(k -> findSpecies.equals(k.getSpecies()))
 						.collect(Collectors.toList());
 
 				if (findAnimals.isEmpty()) {
