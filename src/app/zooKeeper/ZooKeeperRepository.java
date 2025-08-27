@@ -31,8 +31,7 @@ public class ZooKeeperRepository {
 	}
 
 	public void createZooKeeper(String id, String name, int age, int genderIndex, int rankIndex, int departmentIndex,
-			int isWorkingIndex, int experienceYear, int canHandleDangerAnimalIndex, int canAssignTaskIndex,
-			String desc) {
+			int isWorkingIndex, int experienceYear, int canHandleDangerAnimalIndex, String desc) {
 
 		// type converter
 		Gender gender = ZooKeeperConverter.genderConverter(genderIndex);
@@ -40,7 +39,7 @@ public class ZooKeeperRepository {
 		Department department = ZooKeeperConverter.departmentConverter(departmentIndex);
 		boolean isWorking = ZooKeeperConverter.workingConverter(isWorkingIndex);
 		boolean canHandleDangerAnimal = ZooKeeperConverter.possibleImpossibleConverter(canHandleDangerAnimalIndex);
-		boolean canAssignTask = ZooKeeperConverter.possibleImpossibleConverter(canAssignTaskIndex);
+		boolean canAssignTask = canHaveAssingTask(rank);
 		// 빈배열보내주기
 		List<String> licenses = new ArrayList<String>();
 		if (!desc.isEmpty()) {
@@ -68,7 +67,7 @@ public class ZooKeeperRepository {
 		Set<Entry<String, ZooKeeper>> zooKeeperEntrySet = repository.entrySet();
 
 		List<Entry<String, ZooKeeper>> collect = zooKeeperEntrySet.stream()
-				.filter(keeper -> keeper.getValue().getName() == name).collect(Collectors.toList());
+				.filter(keeper -> keeper.getValue().getName().equals(name)).collect(Collectors.toList());
 		return collect;
 	}
 
@@ -116,8 +115,8 @@ public class ZooKeeperRepository {
 			boolean isManager = existManager(keeperId);
 			if (isManager) {
 				ZooKeeper targetZooKeeper = getZooKeeperById(targetId);
-				boolean canHandleDangerAnimal = ZooKeeperConverter.possibleImpossibleConverter(index);
-				targetZooKeeper.setCanAssignTask(canHandleDangerAnimal);
+				boolean canAssignTask = ZooKeeperConverter.possibleImpossibleConverter(index);
+				targetZooKeeper.setCanAssignTask(canAssignTask);
 			} else {
 				System.out.println("매니저가 아닙니다.");
 			}
@@ -184,5 +183,14 @@ public class ZooKeeperRepository {
 		} catch (Exception e) {
 		}
 		return false;
+	}
+
+	// util methods
+	private boolean canHaveAssingTask(ZooKeeperRank rank) {
+		if (rank == ZooKeeperRank.DIRECTOR || rank == ZooKeeperRank.MANAGER || rank == ZooKeeperRank.HEAD_KEEPER) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
