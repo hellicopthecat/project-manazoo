@@ -1,5 +1,8 @@
 package app.visitor;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -80,28 +83,83 @@ public class VisitorManager {
 			id = IdGeneratorUtil.generateId();
 
 			// 예약 정보 입력 받기 
-			System.out.println("예약 정보를 입력해 주세요.");
-			System.out.println("방문 일시 (YYYY-MM-DD) : ");
-			date = in.nextLine();
-
-			System.out.println("대인 인원수 : ");
-			adultCount = Integer.parseInt(in.nextLine());
-
-			System.out.println("소인 인원수 : ");
-			childCount = Integer.parseInt(in.nextLine());
+			inputInformation();
 
 			// 예약 정보 확인 받고, 결제 여부 결정
 			if (confirmInformation()) {
-				break;
+				break; // while문 깨고 payment() 진행 
 			}
 		}
 		// 결제 진행 
 		payment();
 	}
 
+	public void inputInformation() {
+		System.out.println("예약 정보를 입력해 주세요.");
+
+		// 방문날짜 입력 받기
+		DateTimeFormatter formatter = DateTimeFormatter
+				.ofPattern("yyyy-MM-dd");
+		while (true) {
+			System.out.println("방문 일시 (YYYY-MM-DD) : ");
+			String inDate = in.nextLine();
+			try {
+				LocalDate localDate = LocalDate.parse(inDate,
+						formatter);
+				date = localDate.format(formatter);
+				break; // 성공적으로 파싱되면 루프 종료
+			} catch (DateTimeParseException e) {
+				System.out.println("잘못된 날짜 형식입니다. 다시 입력해 주세요.");
+			}
+		}
+
+		// 대인 인원수 입력 받기
+		while (true) {
+			System.out.println("대인 인원수 : ");
+			String inputAdultCount = in.nextLine();
+			if (!StringIsInt(inputAdultCount)) {
+				System.out.println("숫자로 정확히 입력해 주세요.");
+			} else {
+				int intAdultCount = Integer.parseInt(inputAdultCount);
+				if (0 <= intAdultCount) {
+					adultCount = intAdultCount;
+					break;
+				} else {
+					System.out.println("다시 입력해 주세요.");
+				}
+			}
+		}
+
+		// 소인 인원수 입력 받기
+		while (true) {
+			System.out.println("소인 인원수 : ");
+			String inputChildCount = in.nextLine();
+			if (!StringIsInt(inputChildCount)) {
+				System.out.println("숫자로 정확히 입력해 주세요.");
+			} else {
+				int intChildCount = Integer.parseInt(inputChildCount);
+				if (0 <= intChildCount) {
+					childCount = intChildCount;
+					break;
+				} else {
+					System.out.println("다시 입력해 주세요.");
+				}
+			}
+		}
+	}
+
+	public static boolean StringIsInt(String str) {
+		try {
+			Integer.parseInt(str);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
 	public boolean confirmInformation() {
 
-		// 예약 정보 입력 받기
+		// 입력 받은 예약 정보 보여주기
 		System.out.println("방문 일시 : " + date);
 		System.out.println("대인 인원수 : " + adultCount);
 		System.out.println("소인 인원수 : " + childCount);
@@ -110,7 +168,7 @@ public class VisitorManager {
 		System.out.printf("금액 : %d 원 \n", totalPrice);
 		while (true) {
 
-			// 예약 정보 확인 받고, 결제 여부 결정 
+			// 예약 정보 확정 받고, 결제 여부 결정 
 			System.out.println("1.다시 입력 2.결제");
 			String answer = in.nextLine();
 			if (answer.equals("1")) {
@@ -127,13 +185,24 @@ public class VisitorManager {
 
 	public void payment() {
 		while (true) {
+
 			// 결제 정보 입력 받기
 			System.out.println("결제 정보를 입력해 주세요.");
 			System.out.println("이름: ");
 			name = in.nextLine();
 
-			System.out.println("전화번호: ");
-			phone = in.nextLine();
+			// 전화번호 : 지정된 형식으로 받기 
+			String phonePattern = "^\\d{3}-\\d{4}-\\d{4}$";
+			while (true) {
+				System.out.println("폰 번호 : ");
+				String inPhone = in.nextLine();
+				if (inPhone.matches(phonePattern)) {
+					phone = inPhone;
+					break;
+				} else {
+					System.out.println("잘못된 날짜 형식입니다. 다시 입력해 주세요.");
+				}
+			}
 
 			// 결제 정보 확인 받고, 결제 진행 여부 결정 
 			System.out.printf("결제 금액 : %d 원 \n", totalPrice);
