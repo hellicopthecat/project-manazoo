@@ -11,10 +11,10 @@ public class ZooKeeperManager {
 	/**
 	 * test용 main 함수입니다.
 	 */
-	// public static void main(String[] args) {
-	// ZooKeeperManager z = new ZooKeeperManager();
-	// z.handleZookeeperManagement();
-	// }
+//	public static void main(String[] args) {
+//		ZooKeeperManager z = new ZooKeeperManager();
+//		z.handleZookeeperManagement();
+//	}
 
 	/*
 	 * ZooKeeperManagement으로 콘솔을 실행시킬 수 있습니다.
@@ -43,11 +43,11 @@ public class ZooKeeperManager {
 	private void registerZooKeeper(Scanner in) {
 
 		while (true) {
-			String name;
 			System.out.println("=================== 사 육 사 생 성 ===================");
-			// 이름
-			System.out.println("이름을 입력하세요.");
+			String name;
 			while (true) {
+				// 이름
+				System.out.println("이름을 입력하세요.");
 				name = in.nextLine().trim();
 				if (name.isEmpty()) {
 					System.out.println("""
@@ -74,32 +74,21 @@ public class ZooKeeperManager {
 				}
 			}
 			// 나이
-			String ageInfoMsg = "나이를 입력하세요.";
-			String ageInfoStandard = "20세 ~ 65세";
-			int age = getValidateInt(in, ageInfoMsg, ageInfoStandard, 20, 65);
+			int age = getValidateInt(in, "나이를 입력하세요.", "20세 ~ 65세", 20, 65);
 			// 성별
-			String genderInfoMsg = "성별을 입력하세요.";
-			String genderInfoStandard = "1 : 남성 , 2 : 여성";
-			int genderIndex = getValidateInt(in, genderInfoMsg, genderInfoStandard, 1, 2);
+			int genderIndex = getValidateInt(in, "성별을 입력하세요.", "1 : 남성 , 2 : 여성", 1, 2);
 			// 직책
-			String rankInfoMsg = "직책을 입력하세요.";
-			String rankInfoStandard = "1 : 신입사육사 , 2 : 사육사 , 3 : 시니어 사육사 , 4 : 팀장 사육사 , 5 : 관리자 , 6 : 동물원장";
-			int rankIndex = getValidateInt(in, rankInfoMsg, rankInfoStandard, 1, 6);
+			int rankIndex = getValidateInt(in, "직책을 입력하세요.",
+					"1 : 신입사육사 , 2 : 사육사 , 3 : 시니어 사육사 , 4 : 팀장 사육사 , 5 : 관리자 , 6 : 동물원장", 1, 6);
 			// 부서
-			String departmentInfoMsg = "부서를 입력하세요.";
-			String departmentInfoStandard = "1 : 포유류부서 , 2 : 조류부서 , 3 : 파충류부서 , 4 : 어류부서 , 5 : 양서류부서 , 6 : 번식/연구 , 7 : 수의/재활 , 8 : 교육";
-			int departmentIndex = getValidateInt(in, departmentInfoMsg, departmentInfoStandard, 1, 8);
+			int departmentIndex = getValidateInt(in, "부서를 입력하세요.",
+					"1 : 포유류부서 , 2 : 조류부서 , 3 : 파충류부서 , 4 : 어류부서 , 5 : 양서류부서 , 6 : 번식/연구 , 7 : 수의/재활 , 8 : 교육", 1, 8);
 			// 재직여부
-			String isWorkingInfoMsg = "재직여부를 입력하세요.";
-			String isWorkingInfoStandard = "1 : 재직 , 2 : 퇴사";
-			int isWorkingIndex = getValidateInt(in, isWorkingInfoMsg, isWorkingInfoStandard, 1, 2);
+			int isWorkingIndex = getValidateInt(in, "재직여부를 입력하세요.", "1 : 재직 , 2 : 퇴사", 1, 2);
+			// 재직여부
+			int experienceYear = getValidateInt(in, "연차를 입력하세요.", "1 ~ 40", 1, 40);
 			// 맹수조련여부
-			String handleDangerInfoMsg = "맹수조련여부를 입력하세요.";
-			String possibleInfoStandard = "1 : 가능 , 2 : 불가능";
-			int canHandleDangerAnimalIndex = getValidateInt(in, handleDangerInfoMsg, possibleInfoStandard, 1, 2);
-			// 업무할당여부
-			String assignTaskInfoMsg = "업무할당여부를 입력하세요.";
-			int canAssignTaskIndex = getValidateInt(in, assignTaskInfoMsg, possibleInfoStandard, 1, 2);
+			int canHandleDangerAnimalIndex = getValidateInt(in, "맹수조련여부를 입력하세요.", "1 : 가능 , 2 : 불가능", 1, 2);
 			// 자격
 			System.out.println("자격증을 작성하세요. ',' 로 구분할 수 있습니다.");
 			System.out.println("---------------");
@@ -108,7 +97,7 @@ public class ZooKeeperManager {
 			// id 생성
 			String id = IdGeneratorUtil.generateId();
 			repository.createZooKeeper(id, name, age, genderIndex, rankIndex, departmentIndex, isWorkingIndex,
-					isWorkingIndex, canHandleDangerAnimalIndex, canAssignTaskIndex, desc);
+					experienceYear, canHandleDangerAnimalIndex, desc);
 			System.out.println("""
 					==================
 					사육사가 등록되었습니다.
@@ -176,7 +165,7 @@ public class ZooKeeperManager {
 	 */
 	private void editIsWorking(Scanner in) {
 		IdTracker ids = getIds(in);
-		int index = getValidateInt(in, "1. 재직, 2. 퇴사", 1, 2);
+		int index = getValidateInt(in, null, "1. 재직, 2. 퇴사", 1, 2);
 		repository.setIsWorking(ids.getMyId(), ids.getTargetId(), index);
 		System.out.println("재직여부가 수정되었습니다.");
 	}
@@ -188,7 +177,7 @@ public class ZooKeeperManager {
 	 */
 	private void editCanAssignTask(Scanner in) {
 		IdTracker ids = getIds(in);
-		int index = getValidateInt(in, "1. 가능, 2. 불가능", 1, 2);
+		int index = getValidateInt(in, null, "1. 가능, 2. 불가능", 1, 2);
 		repository.setCanAssignTask(ids.getMyId(), ids.getTargetId(), index);
 		System.out.println("업무배정가능여부가 수정되었습니다.");
 	}
@@ -200,8 +189,8 @@ public class ZooKeeperManager {
 	 */
 	private void editPermissionDangerAnimal(Scanner in) {
 		IdTracker ids = getIds(in);
-		int index = getValidateInt(in, "1. 가능, 2. 불가능", 1, 2);
-		repository.setPermissionDangerAnimal(ids.myId, ids.getTargetId(), index);
+		int index = getValidateInt(in, null, "1. 가능, 2. 불가능", 1, 2);
+		repository.setPermissionDangerAnimal(ids.getMyId(), ids.getTargetId(), index);
 		System.out.println("위험동물관리여부가 수정되었습니다.");
 	}
 
@@ -220,31 +209,6 @@ public class ZooKeeperManager {
 	 * 수의 최저값과 최고값을 정하고 그 사이 int 값을 반환하는 메소드입니다.
 	 * 
 	 *   @param in Scanner
-	 *   @param numInfo 수의 정보를 나타내주는 String
-	 *   @param min 최저값
-	 *   @param max 최고값
-	 */
-	private int getValidateInt(Scanner in, String numInfo, int min, int max) {
-		while (true) {
-			System.out.println("---------------------------");
-			System.out.println(numInfo);
-			int value = Integer.parseInt(in.nextLine());
-			try {
-				if (value >= min && value <= max) {
-					return value;
-				} else {
-					System.out.println(numInfo);
-				}
-			} catch (NumberFormatException e) {
-				System.out.println("숫자를 입력해주세요.");
-			}
-		}
-	}
-
-	/**
-	 * 수의 최저값과 최고값을 정하고 그 사이 int 값을 반환하는 메소드입니다.
-	 * 
-	 *   @param in Scanner
 	 *   @param message 제목 String
 	 *   @param numInfo 수의 정보를 나타내주는 String
 	 *   @param min 최저값
@@ -252,11 +216,14 @@ public class ZooKeeperManager {
 	 */
 	private int getValidateInt(Scanner in, String message, String numInfo, int min, int max) {
 		while (true) {
-			System.out.println(message);
+			if (message != null && !message.isEmpty()) {
+				System.out.println(message);
+			}
 			System.out.println("---------------------------");
 			System.out.println(numInfo);
+			String input = in.nextLine();
 			try {
-				int value = Integer.parseInt(in.nextLine());
+				int value = Integer.parseInt(input);
 				if (value >= min && value <= max) {
 					return value;
 				} else {
@@ -266,7 +233,6 @@ public class ZooKeeperManager {
 				System.out.println("숫자를 입력해주세요.");
 			}
 		}
-
 	}
 
 	/*
@@ -316,7 +282,7 @@ public class ZooKeeperManager {
 		while (true) {
 			System.out.println("본인 아이디를 입력하세요.");
 			myId = in.nextLine();
-			if (myId.matches("^K-([0-9]{4,}$)")) {
+			if (myId.matches("^K-([0-9]{4,})$")) {
 				break;
 			} else {
 				System.out.println("잘못된 형식입니다.");
@@ -325,7 +291,7 @@ public class ZooKeeperManager {
 		while (true) {
 			System.out.println("상대 아이디를 입력하세요.");
 			targetId = in.nextLine();
-			if (targetId.matches("^K-([0-9]{4,}$)")) {
+			if (targetId.matches("^K-([0-9]{4,})$")) {
 				break;
 			} else {
 				System.out.println("잘못된 형식입니다.");

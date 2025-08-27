@@ -1,15 +1,25 @@
 package app.zooKeeper.zooKeeperEnum;
 
 public class ZooKeeperConverter {
+	/**
+	 * int값으로 Gender Enum을 반환하는 메서드
+	 * 
+	 *  @param index
+	 */
 	public static Gender genderConverter(int index) {
 		Gender convert = switch (index) {
 		case 1 -> Gender.MALE;
 		case 2 -> Gender.FEMALE;
-		default -> throw new IllegalArgumentException("1 : 남성 , 2 : 여성");
+		default -> throw new IllegalArgumentException("1 : 남성 , 2 : 여성"); // refactor 이후 수정예
 		};
 		return convert;
 	}
 
+	/**
+	 * Gender Enum값으로 String을 반환하는 메서드
+	 * 
+	 *  @param g
+	 */
 	public static String genderStringConverter(Gender g) {
 		String convert = switch (g) {
 		case MALE -> "남성";
@@ -18,6 +28,11 @@ public class ZooKeeperConverter {
 		return convert;
 	}
 
+	/**
+	 * int값으로 ZooKeeperRank Enum을 반환하는 메서드
+	 * 
+	 *  @param index
+	 */
 	public static ZooKeeperRank rankConverter(int index) {
 		ZooKeeperRank convert = switch (index) {
 		case 1 -> ZooKeeperRank.JUNIOR_KEEPER;
@@ -27,11 +42,18 @@ public class ZooKeeperConverter {
 		case 5 -> ZooKeeperRank.MANAGER;
 		case 6 -> ZooKeeperRank.DIRECTOR;
 		default ->
-			throw new IllegalArgumentException("1 : 신입사육사 , 2 : 사육사 , 3 : 시니어 사육사 , 4 : 팀장 사육사 , 5 : 관리자 , 6 : 동물원장");
+			throw new IllegalArgumentException("1 : 신입사육사 , 2 : 사육사 , 3 : 시니어 사육사 , 4 : 팀장 사육사 , 5 : 관리자 , 6 : 동물원장"); // refactor
+																														// 이후
+																														// 수정예
 		};
 		return convert;
 	}
 
+	/**
+	 * ZooKeeperRank Enum값으로 String을 반환하는 메서드
+	 * 
+	 *  @param keeper
+	 */
 	public static String rankStringConverter(ZooKeeperRank keeper) {
 		String convert = switch (keeper) {
 		case JUNIOR_KEEPER -> "신입사육사";
@@ -39,11 +61,16 @@ public class ZooKeeperConverter {
 		case SENIOR_KEEPER -> "시니어 사육사";
 		case HEAD_KEEPER -> "팀장 사육사";
 		case MANAGER -> "관리자";
-		case DIRECTOR -> "동물원";
+		case DIRECTOR -> "동물원장";
 		};
 		return convert;
 	}
 
+	/**
+	 * int값으로 Department Enum을 반환하는 메서드
+	 * 
+	 *  @param index
+	 */
 	public static Department departmentConverter(int index) {
 		Department convert = switch (index) {
 		case 1 -> Department.MAMMAL;
@@ -55,11 +82,16 @@ public class ZooKeeperConverter {
 		case 7 -> Department.VETERINARY_REHAB;
 		case 8 -> Department.EDUCATION;
 		default -> throw new IllegalArgumentException(
-				"1 : 포유류 , 2 : 조류 , 3 : 파충류 , 4 : 어류 , 5 : 양서류 , 6 : 번식/연구 , 7 : 수의/재활 , 8 : 교육");
+				"1 : 포유류 , 2 : 조류 , 3 : 파충류 , 4 : 어류 , 5 : 양서류 , 6 : 번식/연구 , 7 : 수의/재활 , 8 : 교육"); // refactor 이후 수정예
 		};
 		return convert;
 	}
 
+	/**
+	 * Department Enum값으로 String을 반환하는 메서드
+	 * 
+	 *  @param d
+	 */
 	public static String departmentStringConverter(Department d) {
 		String convert = switch (d) {
 		case MAMMAL -> "포유류부서";
@@ -74,15 +106,25 @@ public class ZooKeeperConverter {
 		return convert;
 	}
 
+	/**
+	 * int값으로 boolean을 반환하는 메서드
+	 * 
+	 *  @param index
+	 */
 	public static boolean workingConverter(int index) {
 		boolean convert = switch (index) {
 		case 1 -> true;
 		case 2 -> false;
-		default -> throw new IllegalArgumentException("1 : 재직중 , 2 : 퇴사");
+		default -> throw new IllegalArgumentException("1 : 재직중 , 2 : 퇴사");// refactor 이후 수정예
 		};
 		return convert;
 	}
 
+	/**
+	 * boolean값으로 String을 반환하는 메서드
+	 * 
+	 *  @param isWorking
+	 */
 	public static String workingStringConverter(boolean isWorking) {
 		if (isWorking) {
 			return "재직중";
@@ -91,15 +133,25 @@ public class ZooKeeperConverter {
 		}
 	}
 
+	/**
+	 * int값으로 boolean을 반환하는 메서드
+	 * 
+	 *  @param index
+	 */
 	public static boolean possibleImpossibleConverter(int index) {
 		boolean convert = switch (index) {
 		case 1 -> true;
 		case 2 -> false;
-		default -> throw new IllegalArgumentException("1 : 가능 , 2 : 불가능");
+		default -> throw new IllegalArgumentException("1 : 가능 , 2 : 불가능");// refactor 이후 수정예
 		};
 		return convert;
 	}
 
+	/**
+	 * boolean값으로 String을 반환하는 메서드
+	 * 
+	 *  @param ok
+	 */
 	public static String possibleImpossibleStringConverter(boolean ok) {
 		if (ok) {
 			return "가능";
