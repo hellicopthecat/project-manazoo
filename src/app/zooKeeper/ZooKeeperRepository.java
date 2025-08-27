@@ -54,8 +54,8 @@ public class ZooKeeperRepository {
 		repository.put(id, newZooKeeper);
 	}
 
-	public Map<String, ZooKeeper> getZooKeeperList() {
-		return repository;
+	public Set<Entry<String, ZooKeeper>> getZooKeeperList() {
+		return repository.entrySet();
 	}
 
 	public ZooKeeper getZooKeeperById(String id) {
