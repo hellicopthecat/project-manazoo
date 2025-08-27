@@ -1,5 +1,7 @@
 package app.common.ui;
 
+import app.common.InputUtil;
+
 /**
  * 메뉴 UI 생성 및 출력을 담당하는 유틸리티 클래스입니다.
  * 일관된 스타일의 메뉴를 쉽게 생성할 수 있도록 도와줍니다.
@@ -183,7 +185,6 @@ public final class MenuUtil {
          * @return 사용자가 선택한 번호 (1부터 시작)
          */
         public static int askSingleChoice(String question, String[] choices) {
-            UIUtil.printSeparator('━');
             System.out.println(DEFAULT_PREFIX + question);
             System.out.println();
             
@@ -192,9 +193,35 @@ public final class MenuUtil {
                                 (i + 1), choices[i]);
             }
             
-            UIUtil.printSeparator('━');
+            System.out.println();
             System.out.print(DEFAULT_PREFIX + "정수를 입력하세요 ▶ ");
-            return app.common.InputUtil.getIntInput();
+            
+            while (true) {
+                int input = InputUtil.getIntInput();
+                if (input >= 1 && input <= choices.length) {
+                    UIUtil.printSeparator('━');
+                    return input;
+                } else {
+                    System.out.println(DEFAULT_PREFIX + "X 잘못된 입력입니다. 1부터 " + choices.length + " 사이의 번호를 입력하세요.");
+                    System.out.print(DEFAULT_PREFIX + "정수를 입력하세요 ▶ ");
+                }
+            }
+        }
+        
+        /**
+         * 텍스트 입력을 받는 질문을 출력합니다.
+         * 
+         * @param question 질문 내용
+         * @return 사용자가 입력한 문자열
+         */
+        public static String askTextInput(String question) {
+            System.out.println(DEFAULT_PREFIX + question);
+            System.out.println();
+            System.out.print(DEFAULT_PREFIX + "입력하세요 ▶ ");
+            
+            String input = InputUtil.getStringInput();
+            UIUtil.printSeparator('━');
+            return input;
         }
 
         
@@ -206,12 +233,14 @@ public final class MenuUtil {
          * @return 사용자가 입력한 실수값
          */
         public static float askNumberInput(String question, String unit) {
-            UIUtil.printSeparator('━');
             String displayQuestion = unit != null ? question + "(" + unit + ")" : question;
             System.out.println(DEFAULT_PREFIX + displayQuestion);
-            UIUtil.printSeparator('━');
+            System.out.println();
             System.out.print(DEFAULT_PREFIX + "숫자를 입력하세요 ▶ ");
-            return app.common.InputUtil.getFloatInputOneDecimal();
+            
+            float input = InputUtil.getFloatInputOneDecimal();
+            UIUtil.printSeparator('━');
+            return input;
         }
         
         /**
@@ -255,19 +284,22 @@ public final class MenuUtil {
          * @return true(y/yes) 또는 false(n/no)
          */
         public static boolean askSimpleConfirm(String question) {
-            UIUtil.printSeparator('━');
+            System.out.println();
             System.out.println(DEFAULT_PREFIX + question);
-            UIUtil.printSeparator('━');
+            System.out.println();
             System.out.print(DEFAULT_PREFIX + "확인하시겠습니까? (y/n) ▶ ");
             
             while (true) {
                 String input = app.common.InputUtil.getStringInput().toLowerCase().trim();
                 if (input.equals("y") || input.equals("yes")) {
+                    UIUtil.printSeparator('━');
                     return true;
                 } else if (input.equals("n") || input.equals("no")) {
+                    UIUtil.printSeparator('━');
                     return false;
                 } else {
-                    System.out.print(DEFAULT_PREFIX + "'y' 또는 'n'으로 입력해주세요 ▶ ");
+                    System.out.println(DEFAULT_PREFIX + "X 잘못된 입력입니다. 'y' 또는 'n'으로 입력해주세요.");
+                    System.out.print(DEFAULT_PREFIX + "확인하시겠습니까? (y/n) ▶ ");
                 }
             }
         }
