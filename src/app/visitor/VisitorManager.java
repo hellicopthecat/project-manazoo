@@ -31,7 +31,7 @@ public class VisitorManager {
 			String menu = in.nextLine();
 			switch (menu) {
 			case "1" -> zooInformation();
-			case "2" -> Reservation();
+			case "2" -> reservation();
 			case "3" -> viewReservation();
 			case "4" -> changeReservationDate();
 			case "5" -> cancelReservation();
@@ -77,9 +77,9 @@ public class VisitorManager {
 		System.out.println();
 	}
 
-	public void Reservation() {
+	public void reservation() {
 		while (true) {
-			// 예약자 번호 생성 
+			// 예약번호 생성 
 			id = IdGeneratorUtil.generateId();
 
 			// 예약 정보 입력 받기 
