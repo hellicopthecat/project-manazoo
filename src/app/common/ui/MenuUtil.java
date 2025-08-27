@@ -161,4 +161,115 @@ public final class MenuUtil {
     public static void printAdminMenu(String[] options) {
         generateMenuWithSpecialOptions(TextArtUtil::printAdminMenuTitle, options, null);
     }
+
+    /**
+     * 질문형 UI를 담당하는 내부 클래스입니다.
+     * 사용자에게 선택지를 제시하고 입력을 받는 기능을 제공합니다.
+     * MenuUtil과 일관된 스타일을 유지하면서 질문 형태의 인터페이스를 구현합니다.
+     */
+    public static class Question {
+        
+        /**
+         * private 생성자로 인스턴스 생성을 방지합니다.
+         */
+        private Question() {
+        }
+        
+        /**
+         * 단일 선택 질문을 출력하고 사용자 입력을 받습니다.
+         * 
+         * @param question 질문 내용
+         * @param choices 선택지 배열
+         * @return 사용자가 선택한 번호 (1부터 시작)
+         */
+        public static int askSingleChoice(String question, String[] choices) {
+            UIUtil.printSeparator('━');
+            System.out.println(DEFAULT_PREFIX + question);
+            System.out.println();
+            
+            for (int i = 0; i < choices.length; i++) {
+                System.out.printf(DEFAULT_PREFIX + DEFAULT_NUMBER_FORMAT + "%s%n", 
+                                (i + 1), choices[i]);
+            }
+            
+            UIUtil.printSeparator('━');
+            System.out.print(DEFAULT_PREFIX + "정수를 입력하세요 ▶ ");
+            return app.common.InputUtil.getIntInput();
+        }
+
+        
+        /**
+         * 숫자 입력을 받는 질문을 출력합니다.
+         * 
+         * @param question 질문 내용
+         * @param unit 단위 (예: "㎡", "°C", "원" 등, null 가능)
+         * @return 사용자가 입력한 실수값
+         */
+        public static float askNumberInput(String question, String unit) {
+            UIUtil.printSeparator('━');
+            String displayQuestion = unit != null ? question + "(" + unit + ")" : question;
+            System.out.println(DEFAULT_PREFIX + displayQuestion);
+            UIUtil.printSeparator('━');
+            System.out.print(DEFAULT_PREFIX + "숫자를 입력하세요 ▶ ");
+            return app.common.InputUtil.getFloatInputOneDecimal();
+        }
+        
+        /**
+         * 숫자 입력을 받는 질문을 출력합니다. (단위 없음)
+         * 
+         * @param question 질문 내용
+         * @return 사용자가 입력한 실수값
+         */
+        public static float askNumberInput(String question) {
+            return askNumberInput(question, null);
+        }
+        
+        /**
+         * 예/아니오 질문을 출력합니다.
+         * 
+         * @param question 질문 내용
+         * @return true(예) 또는 false(아니오)
+         */
+        public static boolean askYesNo(String question) {
+            String[] choices = {"예", "아니오"};
+            int result = askSingleChoice(question, choices);
+            return result == 1;
+        }
+        
+        /**
+         * 확인/취소 질문을 출력합니다.
+         * 
+         * @param question 질문 내용
+         * @return true(확인) 또는 false(취소)
+         */
+        public static boolean askConfirmCancel(String question) {
+            String[] choices = {"확인", "취소"};
+            int result = askSingleChoice(question, choices);
+            return result == 1;
+        }
+        
+        /**
+         * y/n 형태의 간단한 확인 질문을 출력합니다.
+         * 
+         * @param question 질문 내용
+         * @return true(y/yes) 또는 false(n/no)
+         */
+        public static boolean askSimpleConfirm(String question) {
+            UIUtil.printSeparator('━');
+            System.out.println(DEFAULT_PREFIX + question);
+            UIUtil.printSeparator('━');
+            System.out.print(DEFAULT_PREFIX + "확인하시겠습니까? (y/n) ▶ ");
+            
+            while (true) {
+                String input = app.common.InputUtil.getStringInput().toLowerCase().trim();
+                if (input.equals("y") || input.equals("yes")) {
+                    return true;
+                } else if (input.equals("n") || input.equals("no")) {
+                    return false;
+                } else {
+                    System.out.print(DEFAULT_PREFIX + "'y' 또는 'n'으로 입력해주세요 ▶ ");
+                }
+            }
+        }
+    }
 }
