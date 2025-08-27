@@ -17,7 +17,6 @@ public final class TextArtUtil {
      * 애플리케이션 시작 시 표시되는 대형 로고입니다.
      */
     private static void printZooLogo() {
-        System.out.println();
         System.out.println("███╗   ███╗ █████╗ ███╗   ██╗ █████╗  ██████╗ ███████╗      ███████╗ ██████╗  ██████╗ ");
         System.out.println("████╗ ████║██╔══██╗████╗  ██║██╔══██╗██╔════╝ ██╔════╝      ╚══███╔╝██╔═══██╗██╔═══██╗");
         System.out.println("██╔████╔██║███████║██╔██╗ ██║███████║██║  ███╗█████╗          ███╔╝ ██║   ██║██║   ██║");
@@ -27,15 +26,6 @@ public final class TextArtUtil {
         System.out.println();
         System.out.println("  Welcome to ManageZoo");
         System.out.println("  Professional Zoo Management System");
-        System.out.println();
-    }
-    
-    /**
-     * 동물원 작은 로고를 출력합니다.
-     * 서브 메뉴에서 사용할 작은 크기의 로고입니다.
-     */
-    public static void printSmallZooLogo() {
-        // TODO: 구현 예정
     }
     
     /**
@@ -50,31 +40,124 @@ public final class TextArtUtil {
         System.out.println("██║  ██║██████╔╝██║ ╚═╝ ██║██║██║ ╚████║");
         System.out.println("╚═╝  ╚═╝╚═════╝ ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝");
     }
-    
+
     /**
-     * 사육장 아이콘을 출력합니다.
-     * 사육장 관리 메뉴에서 사용할 아이콘입니다.
+     * 관람객 메뉴 타이틀을 텍스트 아트로 출력합니다.
+     * ManageZoo 로고와 일관성 있는 클래식 블록 스타일로 구현됩니다.
      */
-    public static void printEnclosureIcon() {
-        // TODO: 구현 예정
+    public static void printVisitorMenuTitle() {
+        System.out.println("██╗   ██╗██╗███████╗██╗████████╗ ██████╗ ██████╗ ");
+        System.out.println("██║   ██║██║██╔════╝██║╚══██╔══╝██╔═══██╗██╔══██╗");
+        System.out.println("██║   ██║██║███████╗██║   ██║   ██║   ██║██████╔╝");
+        System.out.println("╚██╗ ██╔╝██║╚════██║██║   ██║   ██║   ██║██╔══██╗");
+        System.out.println(" ╚████╔╝ ██║███████║██║   ██║   ╚██████╔╝██║  ██║");
+        System.out.println("  ╚═══╝  ╚═╝╚══════╝╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝");
     }
-    
+
     /**
-     * 동물 아이콘을 출력합니다.
-     * 동물 관리 메뉴에서 사용할 아이콘입니다.
+     * 사육장 메뉴 타이틀을 텍스트 아트로 출력합니다.
+     * ManageZoo 로고와 일관성 있는 클래식 블록 스타일로 구현됩니다.
      */
-    public static void printAnimalIcon() {
-        // TODO: 구현 예정
+    public static void printEnclosureMenuTitle() {
+        System.out.println("███████╗███╗   ██╗ ██████╗██╗      ██████╗ ███████╗██╗   ██╗██████╗ ███████╗");
+        System.out.println("██╔════╝████╗  ██║██╔════╝██║     ██╔═══██╗██╔════╝██║   ██║██╔══██╗██╔════╝");
+        System.out.println("█████╗  ██╔██╗ ██║██║     ██║     ██║   ██║███████╗██║   ██║██████╔╝█████╗  ");
+        System.out.println("██╔══╝  ██║╚██╗██║██║     ██║     ██║   ██║╚════██║██║   ██║██╔══██╗██╔══╝  ");
+        System.out.println("███████╗██║ ╚████║╚██████╗███████╗╚██████╔╝███████║╚██████╔╝██║  ██║███████╗");
+        System.out.println("╚══════╝╚═╝  ╚═══╝ ╚═════╝╚══════╝ ╚═════╝ ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝");
     }
-    
+
     /**
-     * 사육사 아이콘을 출력합니다.
-     * 사육사 관리 메뉴에서 사용할 아이콘입니다.
+     * 동물 메뉴 타이틀을 텍스트 아트로 출력합니다.
+     * ManageZoo 로고와 일관성 있는 클래식 블록 스타일로 구현됩니다.
      */
-    public static void printKeeperIcon() {
-        // TODO: 구현 예정
+    public static void printAnimalMenuTitle() {
+        System.out.println(" █████╗ ███╗   ██╗██╗███╗   ███╗ █████╗ ██╗     ");
+        System.out.println("██╔══██╗████╗  ██║██║████╗ ████║██╔══██╗██║     ");
+        System.out.println("███████║██╔██╗ ██║██║██╔████╔██║███████║██║     ");
+        System.out.println("██╔══██║██║╚██╗██║██║██║╚██╔╝██║██╔══██║██║     ");
+        System.out.println("██║  ██║██║ ╚████║██║██║ ╚═╝ ██║██║  ██║███████╗");
+        System.out.println("╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝");
     }
-    
+
+    /**
+     * 사육사 메뉴 타이틀을 텍스트 아트로 출력합니다.
+     * ManageZoo 로고와 일관성 있는 클래식 블록 스타일로 구현됩니다.
+     */
+    public static void printZookeeperMenuTitle() {
+        System.out.println("███████╗ ██████╗  ██████╗ ██╗  ██╗███████╗███████╗██████╗ ███████╗██████╗ ");
+        System.out.println("╚══███╔╝██╔═══██╗██╔═══██╗██║ ██╔╝██╔════╝██╔════╝██╔══██╗██╔════╝██╔══██╗");
+        System.out.println("  ███╔╝ ██║   ██║██║   ██║█████╔╝ █████╗  █████╗  ██████╔╝█████╗  ██████╔╝");
+        System.out.println(" ███╔╝  ██║   ██║██║   ██║██╔═██╗ ██╔══╝  ██╔══╝  ██╔═══╝ ██╔══╝  ██╔══██╗");
+        System.out.println("███████╗╚██████╔╝╚██████╔╝██║  ██╗███████╗███████╗██║     ███████╗██║  ██║");
+        System.out.println("╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═╝");
+    }
+
+    /**
+     * 재무 메뉴 타이틀을 텍스트 아트로 출력합니다.
+     * ManageZoo 로고와 일관성 있는 클래식 블록 스타일로 구현됩니다.
+     */
+    public static void printFinanceMenuTitle() {
+        System.out.println("███████╗██╗███╗   ██╗ █████╗ ███╗   ██╗ ██████╗███████╗");
+        System.out.println("██╔════╝██║████╗  ██║██╔══██╗████╗  ██║██╔════╝██╔════╝");
+        System.out.println("█████╗  ██║██╔██╗ ██║███████║██╔██╗ ██║██║     █████╗  ");
+        System.out.println("██╔══╝  ██║██║╚██╗██║██╔══██║██║╚██╗██║██║     ██╔══╝  ");
+        System.out.println("██║     ██║██║ ╚████║██║  ██║██║ ╚████║╚██████╗███████╗");
+        System.out.println("╚═╝     ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝╚══════╝");
+    }
+
+    /**
+     * 등록 메뉴 타이틀을 텍스트 아트로 출력합니다.
+     * ManageZoo 로고와 일관성 있는 클래식 블록 스타일로 구현됩니다.
+     */
+    public static void printRegisterMenuTitle() {
+        System.out.println("██████╗ ███████╗ ██████╗ ██╗███████╗████████╗███████╗██████╗ ");
+        System.out.println("██╔══██╗██╔════╝██╔════╝ ██║██╔════╝╚══██╔══╝██╔════╝██╔══██╗");
+        System.out.println("██████╔╝█████╗  ██║  ███╗██║███████╗   ██║   █████╗  ██████╔╝");
+        System.out.println("██╔══██╗██╔══╝  ██║   ██║██║╚════██║   ██║   ██╔══╝  ██╔══██╗");
+        System.out.println("██║  ██║███████╗╚██████╔╝██║███████║   ██║   ███████╗██║  ██║");
+        System.out.println("╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝");
+    }
+
+    /**
+     * 조회 메뉴 타이틀을 텍스트 아트로 출력합니다.
+     * ManageZoo 로고와 일관성 있는 클래식 블록 스타일로 구현됩니다.
+     */
+    public static void printViewMenuTitle() {
+        System.out.println("██╗   ██╗██╗███████╗██╗    ██╗");
+        System.out.println("██║   ██║██║██╔════╝██║    ██║");
+        System.out.println("██║   ██║██║█████╗  ██║ █╗ ██║");
+        System.out.println("╚██╗ ██╔╝██║██╔══╝  ██║███╗██║");
+        System.out.println(" ╚████╔╝ ██║███████╗╚███╔███╔╝");
+        System.out.println("  ╚═══╝  ╚═╝╚══════╝ ╚══╝╚══╝ ");
+    }
+
+    /**
+     * 수정 메뉴 타이틀을 텍스트 아트로 출력합니다.
+     * ManageZoo 로고와 일관성 있는 클래식 블록 스타일로 구현됩니다.
+     */
+    public static void printEditMenuTitle() {
+        System.out.println("███████╗██████╗ ██╗████████╗");
+        System.out.println("██╔════╝██╔══██╗██║╚══██╔══╝");
+        System.out.println("█████╗  ██║  ██║██║   ██║   ");
+        System.out.println("██╔══╝  ██║  ██║██║   ██║   ");
+        System.out.println("███████╗██████╔╝██║   ██║   ");
+        System.out.println("╚══════╝╚═════╝ ╚═╝   ╚═╝   ");
+    }
+
+    /**
+     * 삭제 메뉴 타이틀을 텍스트 아트로 출력합니다.
+     * ManageZoo 로고와 일관성 있는 클래식 블록 스타일로 구현됩니다.
+     */
+    public static void printRemoveMenuTitle() {
+        System.out.println("██████╗ ███████╗███╗   ███╗ ██████╗ ██╗   ██╗███████╗");
+        System.out.println("██╔══██╗██╔════╝████╗ ████║██╔═══██╗██║   ██║██╔════╝");
+        System.out.println("██████╔╝█████╗  ██╔████╔██║██║   ██║██║   ██║█████╗  ");
+        System.out.println("██╔══██╗██╔══╝  ██║╚██╔╝██║██║   ██║╚██╗ ██╔╝██╔══╝  ");
+        System.out.println("██║  ██║███████╗██║ ╚═╝ ██║╚██████╔╝ ╚████╔╝ ███████╗");
+        System.out.println("╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝ ╚═════╝   ╚═══╝  ╚══════╝");
+    }
+
     /**
      * 환영 메시지를 텍스트 아트로 출력합니다.
      * ManageZoo 로고 스타일과 일관성 있는 Welcome!! 메시지를 출력합니다.
@@ -96,34 +179,7 @@ public final class TextArtUtil {
         printWelcomeMessage();
         MenuUtil.printAccessMenu();
     }
-    
-    /**
-     * 성공 메시지를 텍스트 아트로 출력합니다.
-     * 
-     * @param message 출력할 성공 메시지
-     */
-    public static void printSuccessMessage(String message) {
-        // TODO: 구현 예정
-    }
-    
-    /**
-     * 오류 메시지를 텍스트 아트로 출력합니다.
-     * 
-     * @param message 출력할 오류 메시지
-     */
-    public static void printErrorMessage(String message) {
-        // TODO: 구현 예정
-    }
-    
-    /**
-     * 경고 메시지를 텍스트 아트로 출력합니다.
-     * 
-     * @param message 출력할 경고 메시지
-     */
-    public static void printWarningMessage(String message) {
-        // TODO: 구현 예정
-    }
-    
+
     /**
      * 로딩 애니메이션을 출력합니다.
      * 3초 동안 로딩 게이지가 진행되고 완료되면 메인 로고를 출력합니다.
