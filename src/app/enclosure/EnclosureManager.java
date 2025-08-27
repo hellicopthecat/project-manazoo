@@ -140,7 +140,7 @@ public class EnclosureManager {
 
     private void viewEnclosures() {
         if (repository.isEmpty()) {
-            System.out.println("등록된 사육장이 없습니다.");
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 사육장이 없습니다.");
             return;
         }
         
@@ -177,7 +177,7 @@ public class EnclosureManager {
      * @param enclosure 수정할 사육장 객체
      */
     private void editName(Enclosure enclosure) {
-        String newName = MenuUtil.Question.askTextInput("사육장 이름을 입력하세요.");
+        String newName = MenuUtil.Question.askTextInput(MenuUtil.DEFAULT_PREFIX + "사육장 이름을 입력하세요.");
         enclosure.setName(newName);
         System.out.println("사육장 이름이 '" + newName + "'으로 수정되었습니다.");
     }
@@ -239,7 +239,7 @@ public class EnclosureManager {
             while (true) {
                 String[] editOptions = {"이름 수정", "크기 수정", "온도 수정", "위치타입 수정", "환경타입 수정"};
                 String[] specialOptions = {"수정완료"};
-                MenuUtil.generateMenuWithTextTitle("=== 사육장 수정 메뉴 ===", editOptions, specialOptions);
+                MenuUtil.generateMenuWithSpecialOptions(TextArtUtil::printRegisterMenuTitle, editOptions, specialOptions);
 
                 int choice = InputUtil.getIntInput();
                 switch (choice) {
@@ -262,39 +262,39 @@ public class EnclosureManager {
     }
 
     private void removeEnclosure() {
-        System.out.println("=== 사육장 삭제 기능 ===");
+        UIUtil.printSeparator('━');
+        TextArtUtil.printRemoveMenuTitle();
+        UIUtil.printSeparator('━');
         viewEnclosures();
 
         if (repository.isEmpty()) {
             System.out.println("삭제할 수 있는 사육장이 없습니다.");
-            return;
-        }
+        } else {
+            String enclosureId = MenuUtil.Question.askTextInput("삭제할 사육장 번호를 입력하세요.");
 
-        String enclosureId = MenuUtil.Question.askTextInput("삭제할 사육장 번호를 입력하세요.");
+            Optional<Enclosure> foundEnclosure = repository.findById(enclosureId);
+            if (foundEnclosure.isPresent()) {
+                Enclosure enclosure = foundEnclosure.get();
 
-        Optional<Enclosure> foundEnclosure = repository.findById(enclosureId);
-        if (foundEnclosure.isPresent()) {
-            Enclosure enclosure = foundEnclosure.get();
+                // 삭제 전 확인
+                printEnclosureInfo("삭제할 사육장 정보", enclosure);
 
-            // 삭제 전 확인
-            printEnclosureInfo("삭제할 사육장 정보", enclosure);
+                boolean confirmed = MenuUtil.Question.askSimpleConfirm("정말로 이 사육장을 삭제하시겠습니까?");
 
-            boolean confirmed = MenuUtil.Question.askSimpleConfirm("정말로 이 사육장을 삭제하시겠습니까?");
-            
-            if (confirmed) {
-                Object deletedEnclosure = repository.deleteById(enclosureId);
-                if (deletedEnclosure != null) {
-                    System.out.println("사육장 '" + enclosure.getName() + "' [" + enclosureId + "]이(가) 성공적으로 삭제되었습니다.");
+                if (confirmed) {
+                    Object deletedEnclosure = repository.deleteById(enclosureId);
+                    if (deletedEnclosure != null) {
+                        System.out.println("사육장 '" + enclosure.getName() + "' [" + enclosureId + "]이(가) 성공적으로 삭제되었습니다.");
+                    } else {
+                        System.out.println("삭제 중 오류가 발생했습니다.");
+                    }
                 } else {
-                    System.out.println("삭제 중 오류가 발생했습니다.");
+                    System.out.println("삭제가 취소되었습니다.");
                 }
             } else {
-                System.out.println("삭제가 취소되었습니다.");
+                System.out.println("입력하신 ID '" + enclosureId + "'의 사육장이 존재하지 않습니다.");
+                System.out.println("위의 목록에서 올바른 사육장 ID를 확인해주세요.");
             }
-        } else {
-            System.out.println("입력하신 ID '" + enclosureId + "'의 사육장이 존재하지 않습니다.");
-            System.out.println("위의 목록에서 올바른 사육장 ID를 확인해주세요.");
         }
     }
-
 }
