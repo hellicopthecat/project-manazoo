@@ -1,14 +1,17 @@
 package app.enclosure;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
+import app.animal.Animal;
 import app.common.IdGeneratorUtil;
 import app.common.InputUtil;
 import app.common.ui.MenuUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.TableUtil;
 import app.common.ui.UIUtil;
+import app.animal.AnimalManager;
 
 /**
  * 동물원 우리를 생성, 조회 및 동물 관리 등 전반적으로 관리하는 클래스입니다.
@@ -119,7 +122,7 @@ public class EnclosureManager {
             int choice = InputUtil.getIntInput();
             switch (choice) {
                 case 1 -> registerEnclosure();
-                case 2 -> System.out.println("동물입사관리");
+                case 2 -> manageAnimalAdmission();
                 case 3 -> System.out.println("사육사배치관리");
                 case 0 -> {
                     System.out.println(MenuUtil.DEFAULT_PREFIX + "이전 메뉴로 돌아갑니다.");
@@ -318,5 +321,276 @@ public class EnclosureManager {
                 System.out.println(MenuUtil.DEFAULT_PREFIX + "위의 목록에서 올바른 사육장 ID를 확인해주세요.");
             }
         }
+    }
+
+    /**
+     * 동물 입사 관리 기능을 처리합니다.
+     * 기존 동물을 특정 사육장에 입주시키는 기능으로, 다음과 같은 과정을 거칩니다:
+     * 1. 사전 조건 확인 (사육장과 동물 존재 여부)
+     * 2. 사용자에게 사육장과 동물 목록 표시
+     * 3. 사육장 선택 (3회 시도 제한)
+     * 4. 동물 선택 (3회 시도 제한)
+     * 5. 입사 처리 (사육장에 추가, 대기 목록에서 제거)
+     * 6. 결과 표시 (입사한 사육장의 동물 현황)
+     */
+    private void manageAnimalAdmission() {
+        UIUtil.printSeparator('━');
+        System.out.println("동물 입사 관리");
+        UIUtil.printSeparator('━');
+        
+        // 1. 사전 조건 확인 - 사육장과 동물이 모두 있어야 실행 가능
+        if (!hasRequiredDataForAdmission()) {
+            return; // Early return으로 중첩 방지
+        }
+        
+        // 2. 현재 상황을 사용자에게 표시
+        displayDataForAdmission();
+        
+        // 3. 사육장 선택 (3회 시도 제한)
+        String enclosureId = selectEnclosureWithRetry();
+        if (enclosureId == null) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "잘못된 입력이 3회 반복되어 작업을 취소합니다.");
+            return;
+        }
+        
+        // 4. 동물 선택 (3회 시도 제한)
+        String animalId = selectAnimalWithRetry();
+        if (animalId == null) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "잘못된 입력이 3회 반복되어 작업을 취소합니다.");
+            return;
+        }
+        
+        // 5. 입사 처리 - 실제 데이터 이동
+        processAnimalAdmission(enclosureId, animalId);
+        
+        // 6. 결과 출력 - 입사한 사육장의 현재 상황 표시
+        displayAdmissionResult(enclosureId);
+    }
+
+    /**
+     * 동물 입사를 위한 필수 데이터가 있는지 확인합니다.
+     * 사육장과 배치 가능한 동물이 모두 있어야 동물 입사가 가능합니다.
+     * 
+     * @return 필수 데이터 존재 여부 (true: 실행 가능, false: 실행 불가능)
+     */
+    private boolean hasRequiredDataForAdmission() {
+        // 사육장 존재 여부 확인
+        if (repository.isEmpty()) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 사육장이 없습니다.");
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 입사를 위해서는 먼저 사육장을 등록해주세요.");
+            return false;
+        }
+        
+        // AnimalManager의 배치 가능한 동물 존재 여부 확인
+        boolean hasAnimals = AnimalManager.getInstance().hasAvailableAnimals();
+        
+        if (!hasAnimals) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "배치 가능한 동물이 없습니다.");
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 입사를 위해서는 먼저 동물을 등록해주세요.");
+            return false;
+        }
+        
+        return true; // 둘 다 있으면 실행 가능
+    }
+
+    /**
+     * 동물 입사를 위한 데이터를 사용자에게 표시합니다.
+     * 현재 등록된 사육장 목록과 배치 가능한 동물 목록을 보여줍니다.
+     */
+    private void displayDataForAdmission() {
+        System.out.println();
+        System.out.println("사용 가능한 사육장 목록:");
+        viewEnclosures(); // 기존 메서드 재사용
+        
+        System.out.println();
+        System.out.println("배치 가능한 동물 목록:");
+        AnimalManager.getInstance().displayAvailableAnimalsTable();
+    }
+
+    /**
+     * 사육장을 선택받습니다. 잘못된 입력 시 최대 3회까지 재시도할 수 있습니다.
+     * 각 시도마다 사용자에게 확인을 받아 정확한 선택을 보장합니다.
+     * 
+     * @return 선택된 사육장 ID (3회 실패 시 null 반환)
+     */
+    private String selectEnclosureWithRetry() {
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            System.out.printf("\n[%d/3] 입사시킬 사육장 ID를 입력하세요: ", attempt);
+            String enclosureId = MenuUtil.Question.askTextInput("");
+            
+            // 입력된 ID로 사육장 검색
+            Optional<Enclosure> foundEnclosure = repository.findById(enclosureId);
+            if (foundEnclosure.isPresent()) {
+                Enclosure enclosure = foundEnclosure.get();
+                System.out.printf("선택된 사육장: %s (%s)\n", enclosure.getName(), enclosureId);
+                
+                // 사용자 확인 받기
+                boolean confirmed = MenuUtil.Question.askSimpleConfirm("이 사육장이 맞습니까?");
+                if (confirmed) {
+                    return enclosureId; // 정상 선택 완료
+                } else {
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "사육장 선택을 다시 진행합니다.");
+                    continue; // 다음 시도로
+                }
+            } else {
+                System.out.printf(MenuUtil.DEFAULT_PREFIX + "존재하지 않는 사육장 ID입니다: %s\n", enclosureId);
+            }
+            
+            // 아직 시도 기회가 남았다면 안내 메시지
+            if (attempt < 3) {
+                System.out.println(MenuUtil.DEFAULT_PREFIX + "다시 시도해주세요.");
+            }
+        }
+        return null; // 3회 모두 실패
+    }
+
+    /**
+     * 동물을 선택받습니다. 잘못된 입력 시 최대 3회까지 재시도할 수 있습니다.
+     * 각 시도마다 사용자에게 확인을 받아 정확한 선택을 보장합니다.
+     * 
+     * @return 선택된 동물 ID (3회 실패 시 null 반환)
+     */
+    private String selectAnimalWithRetry() {
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            System.out.printf("\n[%d/3] 입사시킬 동물 ID를 입력하세요: ", attempt);
+            String animalId = MenuUtil.Question.askTextInput("");
+            
+            // AnimalManager에서 동물 검색
+            Optional<app.animal.Animal> foundAnimal = AnimalManager.getInstance().getAnimalFromAll(animalId);
+            if (foundAnimal.isPresent()) {
+                app.animal.Animal animal = foundAnimal.get();
+                // 배치 가능한 동물인지 확인 (enclosureId가 null이거나 빈 문자열)
+                String currentEnclosureId = animal.getEnclosureId();
+                if (currentEnclosureId == null || currentEnclosureId.trim().isEmpty()) {
+                    System.out.printf("선택된 동물: %s (%s - %s)\n", 
+                                    animal.getName(), animalId, animal.getSpecies());
+                    
+                    // 사용자 확인 받기
+                    boolean confirmed = MenuUtil.Question.askSimpleConfirm("이 동물이 맞습니까?");
+                    if (confirmed) {
+                        return animalId; // 정상 선택 완료
+                    } else {
+                        System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 선택을 다시 진행합니다.");
+                        continue; // 다음 시도로
+                    }
+                } else {
+                    System.out.printf(MenuUtil.DEFAULT_PREFIX + "이미 배치된 동물입니다: %s (사육장: %s)\n", 
+                                    animalId, currentEnclosureId);
+                }
+            } else {
+                System.out.printf(MenuUtil.DEFAULT_PREFIX + "존재하지 않는 동물 ID입니다: %s\n", animalId);
+            }
+            
+            // 아직 시도 기회가 남았다면 안내 메시지
+            if (attempt < 3) {
+                System.out.println(MenuUtil.DEFAULT_PREFIX + "다시 시도해주세요.");
+            }
+        }
+        return null; // 3회 모두 실패
+    }
+
+    /**
+     * 동물 입사를 실제로 처리합니다.
+     * 선택된 동물을 사육장의 inhabitants에 추가하고, 
+     * AnimalManager의 배치 가능한 동물 목록에서 제거합니다.
+     * 
+     * @param enclosureId 입사할 사육장 ID
+     * @param animalId    입사할 동물 ID
+     */
+    private void processAnimalAdmission(String enclosureId, String animalId) {
+        // 사육장 객체 가져오기 (이미 검증됨)
+        Optional<Enclosure> enclosureOpt = repository.findById(enclosureId);
+        Enclosure enclosure = enclosureOpt.get();
+        
+        // AnimalManager에서 동물 객체 가져오기 및 사육장 배치 처리
+        app.animal.Animal animal = AnimalManager.getInstance().removeAvailableAnimal(animalId, enclosureId);
+        
+        if (animal != null) {
+            // 사육장에 동물 추가 (Enclosure.addInhabitant 사용)
+            enclosure.addInhabitant(animalId, animal);
+            
+            System.out.println();
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 입사가 성공적으로 처리되었습니다!");
+        } else {
+            System.out.println();
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 배치 중 오류가 발생했습니다.");
+        }
+    }
+
+    /**
+     * 동물 입사 결과를 표로 출력합니다.
+     * 입사가 진행된 사육장의 현재 동물 현황을 테이블 형태로 보여줍니다.
+     * 표시 항목: Animal ID, Name, Species, Age, Admission Date
+     * 각 항목은 최대 15글자로 제한됩니다.
+     * 
+     * @param enclosureId 입사가 처리된 사육장 ID
+     */
+    private void displayAdmissionResult(String enclosureId) {
+        Optional<Enclosure> enclosureOpt = repository.findById(enclosureId);
+        Enclosure enclosure = enclosureOpt.get();
+        
+        // 사육장에 입주한 동물들 가져오기
+        Map<String, Object> inhabitants = enclosure.getAllInhabitants();
+        
+        if (inhabitants.isEmpty()) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "사육장에 동물이 없습니다.");
+            return;
+        }
+        
+        // 테이블 헤더 정의 (15글자 제한)
+        String[] headers = {"Animal ID", "Name", "Species", "Age", "Admission Date"};
+        String[][] data = new String[inhabitants.size()][];
+        int index = 0;
+        
+        // 현재 날짜를 입사일로 사용
+        String currentDate = java.time.LocalDate.now().toString();
+        
+        // 동물 데이터를 테이블 형태로 변환
+        for (Map.Entry<String, Object> entry : inhabitants.entrySet()) {
+            String animalId = entry.getKey();
+            Object animalObj = entry.getValue();
+            
+            // Animal 객체에서 실제 정보 추출
+            if (animalObj instanceof Animal) {
+                Animal animal = (Animal) animalObj;
+                data[index] = new String[]{
+                    truncateString(animalId, 15),
+                    truncateString(animal.getName(), 15),
+                    truncateString(animal.getSpecies(), 15),
+                    truncateString(String.valueOf(animal.getAge()), 15),
+                    truncateString(currentDate, 15)
+                };
+            } else {
+                // 임시 데이터 (호환성 보장)
+                data[index] = new String[]{
+                    truncateString(animalId, 15),
+                    truncateString("Unknown", 15),
+                    truncateString("Unknown", 15),
+                    truncateString("0", 15),
+                    truncateString(currentDate, 15)
+                };
+            }
+            index++;
+        }
+        
+        // 테이블 제목 생성 (사육장 이름도 15글자 제한)
+        String title = String.format("%s (%s) 현재 거주 동물 현황", 
+                      truncateString(enclosure.getName(), 15), enclosureId);
+        
+        // 테이블 출력
+        TableUtil.printTable(title, headers, data);
+    }
+
+    /**
+     * 문자열을 지정된 최대 길이로 자르는 유틸리티 메서드입니다.
+     * CMD 환경에서의 표시 호환성을 위해 문자열 길이를 제한합니다.
+     * 
+     * @param str       원본 문자열
+     * @param maxLength 최대 허용 길이
+     * @return 잘린 문자열 (null인 경우 빈 문자열 반환)
+     */
+    private String truncateString(String str, int maxLength) {
+        if (str == null) return "";
+        return str.length() > maxLength ? str.substring(0, maxLength) : str;
     }
 }
