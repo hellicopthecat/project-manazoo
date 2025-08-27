@@ -3,7 +3,7 @@ package app.visitor;
 public class VisitorMain {
 
 	public static void main(String[] args) {
-		Visitor v = new Visitor();
+		VisitorManager v = new VisitorManager();
 		v.run();
 
 	}
