@@ -3,6 +3,38 @@ package app.common.ui;
 /**
  * 120자 콘솔 너비에 최적화된 표 형식 출력 유틸리티 클래스입니다.
  * Windows CMD 환경에서 안정적으로 동작하도록 설계되었습니다.
+ * 
+ * <h3>사용 예시:</h3>
+ * <pre>
+ * // 단일 행 표 출력
+ * String[] headers = {"ID", "Name", "Age"};
+ * String[] values = {"001", "John", "25"};
+ * TableUtil.printSingleRowTable("User Information", headers, values);
+ * 
+ * // 다중 행 표 출력
+ * String[] headers = {"Product", "Price", "Stock"};
+ * String[][] data = {
+ *     {"Apple", "$1.50", "100"},
+ *     {"Banana", "$0.80", "150"},
+ *     {"Orange", "$2.00", "80"}
+ * };
+ * TableUtil.printTable("Product List", headers, data);
+ * 
+ * // 리스트를 이용한 다중 행 표 출력
+ * List&lt;String[]&gt; dataList = Arrays.asList(
+ *     new String[]{"Item1", "Value1"},
+ *     new String[]{"Item2", "Value2"}
+ * );
+ * TableUtil.printMultiRowTable("Items", new String[]{"Item", "Value"}, dataList);
+ * </pre>
+ * 
+ * <h3>특징:</h3>
+ * <ul>
+ * <li>모든 컬럼이 15자 고정 폭으로 정렬됩니다.</li>
+ * <li>한글과 영문 혼용 시 올바른 정렬을 제공합니다.</li>
+ * <li>Windows CMD 환경에서 최적화되어 있습니다.</li>
+ * <li>최대 8개 컬럼까지 지원합니다.</li>
+ * </ul>
  */
 public final class TableUtil {
     
@@ -16,27 +48,6 @@ public final class TableUtil {
      * private 생성자로 인스턴스 생성을 방지합니다.
      */
     private TableUtil() {
-    }
-    
-    /**
-     * 사육장 정보를 표 형식으로 출력합니다.
-     * CMD 호환성을 위해 영문 헤더와 ASCII 문자로 변경했습니다.
-     * 
-     * @param title 제목
-     * @param enclosure 출력할 사육장 객체
-     */
-    public static void printEnclosureInfo(String title, app.enclosure.Enclosure enclosure) {
-        String[] headers = {"Enclosure ID", "Name", "Size(m2)", "Temp(C)", "Location", "Environment"};
-        String[] values = {
-            enclosure.getId(),
-            enclosure.getName(),
-            String.format("%.1f", enclosure.getAreaSize()),
-            String.format("%.1f", enclosure.getTemperature()),
-            enclosure.getLocationType().toString(),
-            enclosure.getEnvironmentType().toString()
-        };
-        
-        printSingleRowTable(title, headers, values);
     }
     
     /**
