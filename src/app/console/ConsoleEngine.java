@@ -64,7 +64,7 @@ public class ConsoleEngine {
      * 관리자 메뉴를 표시하고 처리합니다.
      */
     private static void showAdminMenu() {
-        String[] option = {"동물 관리", "사육장 관리", "직원 관리", "제정 관리"};
+        String[] option = {"동물 관리", "사육장 관리", "직원 관리", "재정 관리"};
         String[] specialOptions = {"뒤로가기"};
         MenuUtil.generateMenuWithSpecialOptions(TextArtUtil::printAdminMenuTitle, option, specialOptions);
 
