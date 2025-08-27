@@ -132,12 +132,12 @@ public class AnimalManager {
 		while (true) {
 			System.out.println("동물 나이 : ");
 			String inAge = in.nextLine();
-			if (!StringIsLong(inAge)) {
+			if (!StringIsInt(inAge)) {
 				System.out.println("숫자로 정확히 입력해 주세요.");
 			} else {
-				int longAge = Integer.parseInt(inAge);
-				if (0 <= longAge && longAge < 200) {
-					age = longAge;
+				int intAge = Integer.parseInt(inAge);
+				if (0 <= intAge && intAge < 200) {
+					age = intAge;
 					break;
 				} else {
 					System.out.println("다시 입력해 주세요.");
@@ -180,9 +180,9 @@ public class AnimalManager {
 	}
 
 	//	< 입력된 String 값이 Long값으로 변환 가능한지 체크하는 메소드 >
-	public static boolean StringIsLong(String str) {
+	public static boolean StringIsInt(String str) {
 		try {
-			Long.parseLong(str);
+			Integer.parseInt(str);
 			return true;
 		} catch (NumberFormatException e) {
 			return false;
@@ -349,7 +349,7 @@ public class AnimalManager {
 					while (true) {
 						System.out.println("수정할 나이 : ");
 						String age = in.nextLine();
-						if (!StringIsLong(age)) {
+						if (!StringIsInt(age)) {
 							System.out.println("숫자로 정확히 입력해 주세요.");
 						} else {
 							int longAge = Integer.parseInt(age);
@@ -413,7 +413,7 @@ public class AnimalManager {
 			Animal animal = null;
 			String findId = null;
 			while (true) {
-				System.out.println("수정할 동물 ID 입력 : ");
+				System.out.println("삭제할 동물 ID 입력 : ");
 				findId = in.nextLine();
 				if (animals.containsKey(findId)) {
 					animal = animals.get(findId);

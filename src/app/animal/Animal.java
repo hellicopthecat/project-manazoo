@@ -10,8 +10,9 @@ public class Animal {
 	private String enclosureId; // 케이지 아이디
 	private String zkId; // 사육사 아이디
 
-	public Animal(String id, String name, String species, int age, String gender, String healthStatus,
-			String enclosureId, String zkId) {
+	public Animal(String id, String name, String species, int age,
+			String gender, String healthStatus, String enclosureId,
+			String zkId) {
 		this.id = id;
 		this.name = name;
 		this.species = species;
@@ -50,7 +51,7 @@ public class Animal {
 		return enclosureId;
 	}
 
-	public String zkId() {
+	public String getZkId() {
 		return zkId;
 	}
 
@@ -84,8 +85,8 @@ public class Animal {
 
 	@Override
 	public String toString() {
-		return String.format("%s / %s / %s / %d / %s / %s / %s / %s", id, name, species, age, gender, healthStatus,
-				enclosureId, zkId);
+		return String.format("%s : %s / %s / %d / %s / %s / %s / %s", id, name,
+				species, age, gender, healthStatus, enclosureId, zkId);
 	}
 
 }
