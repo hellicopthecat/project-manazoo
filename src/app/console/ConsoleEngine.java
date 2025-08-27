@@ -1,10 +1,14 @@
 package app.console;
 
+import app.animal.AnimalManager;
 import app.common.InputUtil;
 import app.common.ui.MenuUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
 import app.enclosure.EnclosureManager;
+import app.finance.FinanceManager;
+import app.visitor.VisitorManager;
+import app.zooKeeper.ZooKeeperManager;
 
 /**
  * 콘솔 기반 동물원 관리 시스템의 메인 엔진 클래스입니다.
@@ -60,7 +64,7 @@ public class ConsoleEngine {
      * 관리자 메뉴를 표시하고 처리합니다.
      */
     private static void showAdminMenu() {
-        String[] option = {"동물 관리", "사육장 관리", "직원 관리"};
+        String[] option = {"동물 관리", "사육장 관리", "직원 관리", "제정 관리"};
         String[] specialOptions = {"뒤로가기"};
         MenuUtil.generateMenuWithSpecialOptions(TextArtUtil::printAdminMenuTitle, option, specialOptions);
 
@@ -73,14 +77,15 @@ public class ConsoleEngine {
                 }
                 case 2 -> {
                     handleEnclosureManagement();
-                    return; // 사육장 관리 완료 후 접속 메뉴로 돌아가기
                 }
                 case 3 -> {
                     handleStaffManagement();
                 }
+                case 4 -> {
+                    handleFinancialManagement();
+                }
                 case 0 -> {
                     handleBackToAccessMenu();
-                    return; // 접속 메뉴로 돌아가기
                 }
                 default -> {
                     showInvalidAdminChoice();
@@ -91,12 +96,10 @@ public class ConsoleEngine {
     
     /**
      * 동물 관리 기능을 처리합니다.
-     * TODO: AnimalManager 구현 후 연결
      */
     private static void handleAnimalManagement() {
-        System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 관리 기능은 준비 중입니다.");
-        // TODO: AnimalManager m = new AnimalManager();
-        // TODO: m.handleAnimalManagement();
+        AnimalManager manager = new AnimalManager();
+        manager.run();
     }
     
     /**
@@ -109,14 +112,19 @@ public class ConsoleEngine {
     
     /**
      * 직원 관리 기능을 처리합니다.
-     * TODO: StaffManager 구현 후 연결
      */
     private static void handleStaffManagement() {
-        System.out.println(MenuUtil.DEFAULT_PREFIX + "직원 관리 기능은 준비 중입니다.");
-        // TODO: StaffManager m = new StaffManager();
-        // TODO: m.handleStaffManagement();
+        ZooKeeperManager manager = new ZooKeeperManager();
+        manager.handleZookeeperManagement();
     }
-    
+
+    /**
+     * 재정 관리 기능을 처리합니다.
+     */
+    private static void handleFinancialManagement() {
+        FinanceManager.getInstance().handleFinanceManagement();
+    }
+
     /**
      * 관람객 모드를 처리합니다.
      * TODO: 관람객용 기능 구현
@@ -124,8 +132,10 @@ public class ConsoleEngine {
     private static void handleVisitorMode() {
         System.out.println(MenuUtil.DEFAULT_PREFIX + "관람객 모드로 접속합니다...");
         TextArtUtil.printWelcomeMessage();
-        // TODO: 관람객 모드 기능 구현
-        System.out.println(MenuUtil.DEFAULT_PREFIX + "관람객 모드는 준비 중입니다.");
+        TextArtUtil.printVisitorMenuTitle();
+        UIUtil.printSeparator('━');
+        VisitorManager manager = new VisitorManager();
+        manager.run();
     }
     
     /**

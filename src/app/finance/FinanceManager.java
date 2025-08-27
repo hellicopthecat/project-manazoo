@@ -21,7 +21,7 @@ import app.incomeExpend.IncomeExpendType;
  * - 총수입, 총지출, 순이익 계산 
  * - 재무 보고서 생성
  */
-public class FinanceManager {
+public final class FinanceManager {
 	private static final FinanceManager instance = new FinanceManager();
 	// 수입 내역 리스트
 	private List<IncomeExpend> incomes = new ArrayList<>();
@@ -46,6 +46,7 @@ public class FinanceManager {
 	public static FinanceManager getInstance() {
 		return instance;
 	}
+
 
 	// Constructor
 	private FinanceManager() {
