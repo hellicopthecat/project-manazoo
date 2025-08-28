@@ -1,5 +1,6 @@
 package app.enclosure;
 
+import java.util.Map;
 
 /**
  * 동물원 사육장를 위한 인터페이스로, 동물 및 사육장 속성 관리를 위한 필수 메서드를 정의합니다.
@@ -87,12 +88,68 @@ public interface EnclosureInterface {
      */
     void setTemperature(Float temperature);
 
-//    void addAnimal();
-//
-//    void removeAnimal(Animal animal);
-//
-//    void addZooKeeper();
-//
-//    void removeZooKeeper(ZooKeeper zooKeeper);
+    // ==================== 동물 관리 핵심 메서드 ====================
+    
+    /**
+     * 사육장에 동물을 입주시킵니다.
+     *
+     * @param animalId 동물 ID
+     * @param animal 동물 객체
+     */
+    void addInhabitant(String animalId, Object animal);
+
+    /**
+     * 사육장에서 동물을 이주시킵니다.
+     *
+     * @param animalId 동물 ID
+     * @return 이주된 동물 객체
+     */
+    Object removeInhabitant(String animalId);
+
+    /**
+     * 사육장의 모든 거주 동물을 조회합니다.
+     *
+     * @return 동물 Map
+     */
+    Map<String, Object> getAllInhabitants();
+
+    /**
+     * 사육장에 거주하는 동물 수를 반환합니다.
+     *
+     * @return 동물 수
+     */
+    int getInhabitantCount();
+
+    // ==================== 사육사 관리 핵심 메서드 ====================
+    
+    /**
+     * 사육장에 사육사를 배정합니다.
+     *
+     * @param keeperId 사육사 ID
+     * @param keeper 사육사 객체
+     */
+    void assignCaretaker(String keeperId, Object keeper);
+
+    /**
+     * 사육장에서 사육사 배정을 해제합니다.
+     *
+     * @param keeperId 사육사 ID
+     * @return 배정 해제된 사육사 객체
+     */
+    Object unassignCaretaker(String keeperId);
+
+    /**
+     * 사육장에 배정된 모든 사육사를 조회합니다.
+     *
+     * @return 사육사 Map
+     */
+    Map<String, Object> getAllCaretakers();
+
+    /**
+     * 사육장에 배정된 사육사 수를 반환합니다.
+     *
+     * @return 사육사 수
+     */
+    int getCaretakerCount();
 
 }
