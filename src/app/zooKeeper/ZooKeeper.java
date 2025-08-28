@@ -3,6 +3,7 @@ package app.zooKeeper;
 import java.util.ArrayList;
 import java.util.List;
 
+import app.common.ui.MenuUtil;
 import app.zooKeeper.zooKeeperEnum.Department;
 import app.zooKeeper.zooKeeperEnum.Gender;
 import app.zooKeeper.zooKeeperEnum.ZooKeeperConverter;
@@ -22,8 +23,8 @@ public class ZooKeeper implements ZooKeeperBasicBehavior {
 	private boolean canHandleDangerAnimal;
 	private boolean canAssignTask;
 	private List<String> licenses = new ArrayList<>();
-	// public List<Animal> caredAnimals ;
 	// public List<Enclosures> enclosures;
+	private long salary = 0l;
 
 	// constructor
 	public ZooKeeper(String id, String name, int age, Gender gender, ZooKeeperRank rank, Department department,
@@ -131,6 +132,10 @@ public class ZooKeeper implements ZooKeeperBasicBehavior {
 		this.licenses.add(licenses);
 	}
 
+	public void setSalary(long money) {
+		this.salary += money;
+	}
+
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
@@ -142,13 +147,9 @@ public class ZooKeeper implements ZooKeeperBasicBehavior {
 		String at = ZooKeeperConverter.possibleImpossibleStringConverter(canAssignTask);
 		String licensesStr = licenses.isEmpty() ? "없음" : String.join(", ", licenses);
 
-		return String.format(
-				"""
-						----------------------------------------------------------------------------------------------------------------------------------------------
-						id : %s | 이름 : %s | 나이 : %d | 성별 : %s | 직급 : %s | 부서 : %s | 재직여부 : %s | 연차 : %d | 고위험군생물관리 : %s | 업무부여 : %s | 자격증 : %s
-						----------------------------------------------------------------------------------------------------------------------------------------------
-						""",
-				id, name, age, g, r, d, w, experieneceYear, da, at, licensesStr);
+		return String.format(MenuUtil.DEFAULT_PREFIX
+				+ "id : %s | 이름 : %s | 나이 : %d | 성별 : %s | 직급 : %s | 부서 : %s | 재직여부 : %s | 연차 : %d | 고위험군생물관리 : %s | 업무부여 : %s | 자격증 : %s | 누적급여 : %d",
+				id, name, age, g, r, d, w, experieneceYear, da, at, licensesStr, salary);
 	}
 
 	/**
