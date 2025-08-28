@@ -101,131 +101,64 @@ public class VisitorManager {
 	}
 
 	public void reservation() {
-		while (true) {
-			// 예약번호 생성
-			id = IdGeneratorUtil.generateId();
+		id = IdGeneratorUtil.generateId();
+		name = MenuUtil.Question.askTextInput("성함을 입력하세요.");
+		phone = inputPhone("연락처를 입력하세요. (000-0000-0000) : ");
+		date = inputDate("방문일시를 입력하세요. (YYYY-MM-DD)");
+		adultCount = MenuUtil.Question.askNumberInputInt("대인 인원수를 입력하세요.");
+		childCount = MenuUtil.Question.askNumberInputInt("대인 인원수를 입력하세요.");
+		totalPrice = adultCount * ADULT_PRICE + childCount * CHILD_PRICE;
 
-			// 예약 정보 입력 받기
-			inputInformation();
-
-			// 예약 정보 확인 받고, 결제 여부 결정
-			if (confirmInformation()) {
-				break; // while문 깨고 payment() 진행
-			}
-		}
-		// 결제 진행
-		payment();
-	}
-
-	public void inputInformation() {
-		System.out.println("예약 정보를 입력해 주세요.");
-
-		// 방문날짜 입력 받기
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-		while (true) {
-			System.out.println("방문 일시 (YYYY-MM-DD) : ");
-			String inDate = InputUtil.getStringInput();
-			try {
-				LocalDate localDate = LocalDate.parse(inDate, formatter);
-				date = localDate.format(formatter);
-				break; // 성공적으로 파싱되면 루프 종료
-			} catch (DateTimeParseException e) {
-				System.out.println("잘못된 날짜 형식입니다. 다시 입력해 주세요.");
-			}
-		}
-
-		// 대인 인원수 입력 받기
-		while (true) {
-			System.out.println("대인 인원수 : ");
-			String inputAdultCount = InputUtil.getStringInput();
-			if (!StringIsInt(inputAdultCount)) {
-				System.out.println("숫자로 정확히 입력해 주세요.");
-			} else {
-				int intAdultCount = Integer.parseInt(inputAdultCount);
-				if (0 <= intAdultCount) {
-					adultCount = intAdultCount;
-					break;
-				} else {
-					System.out.println("다시 입력해 주세요.");
-				}
-			}
-		}
-
-		// 소인 인원수 입력 받기
-		while (true) {
-			System.out.println("소인 인원수 : ");
-			String inputChildCount = InputUtil.getStringInput();
-			if (!StringIsInt(inputChildCount)) {
-				System.out.println("숫자로 정확히 입력해 주세요.");
-			} else {
-				int intChildCount = Integer.parseInt(inputChildCount);
-				if (0 <= intChildCount) {
-					childCount = intChildCount;
-					break;
-				} else {
-					System.out.println("다시 입력해 주세요.");
-				}
-			}
-		}
-	}
-
-	public static boolean StringIsInt(String str) {
-		try {
-			Integer.parseInt(str);
-			return true;
-		} catch (NumberFormatException e) {
-			return false;
-		}
-	}
-
-	public boolean confirmInformation() {
-
-		// 입력 받은 예약 정보 보여주기
-		System.out.println("방문 일시 : " + date);
+		System.out.println("입력하신 정보는 아래와 같습니다.");
+		System.out.println("성함 : " + name);
+		System.out.println("연락처 : " + phone);
+		System.out.println("방문일시 : " + date);
 		System.out.println("대인 인원수 : " + adultCount);
 		System.out.println("소인 인원수 : " + childCount);
-		totalPrice = adultCount * ADULT_PRICE + childCount * CHILD_PRICE;
-		System.out.printf("금액 : %d 원 \n", totalPrice);
-		while (true) {
+		System.out.printf("결제 총액 : %d 원 \n", totalPrice);
 
-			// 예약 정보 확정 받고, 결제 여부 결정
-			System.out.println("1.다시 입력 2.결제");
-			String answer = InputUtil.getStringInput();
-			if (answer.equals("1")) {
-				// < 다시입력 > (내부 while문 깨고, 외부 while로 반복)
-				break;
-			} else if (answer.equals("2")) {
-				return true; // 결제로 이동
+		boolean choice = MenuUtil.Question.askYesNo("결제하시겠습니까?");
+		if (choice) {
+			Reservation reservation = new Reservation(id, name, phone, date, adultCount, childCount, totalPrice);
+			reservations.put(id, reservation);
+
+			System.out.println("예약 및 결제 성공!");
+			System.out.println(reservation);
+			System.out.println();
+		}
+
+//		payment();
+	}
+
+	public String inputPhone(String question) {
+		String phonePattern = "^\\d{3}-\\d{4}-\\d{4}$";
+
+		while (true) {
+			String inPhone = MenuUtil.Question.askTextInput(question);
+			if (inPhone.matches(phonePattern)) {
+				return inPhone;
 			} else {
-				System.out.println("잘못된 선택입니다.");
+				System.out.println("  잘못된 날짜 형식입니다.");
 			}
 		}
-		return false;
+	}
+
+	public String inputDate(String question) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		while (true) {
+			String inDate = MenuUtil.Question.askTextInput(question);
+			try {
+				LocalDate localDate = LocalDate.parse(inDate, formatter);
+				return localDate.format(formatter);
+			} catch (DateTimeParseException e) {
+				System.out.println("잘못된 날짜 형식입니다.");
+			}
+		}
 	}
 
 	public void payment() {
 		while (true) {
 
-			// 결제 정보 입력 받기
-			System.out.println("결제 정보를 입력해 주세요.");
-			System.out.println("이름: ");
-			name = InputUtil.getStringInput();
-
-			// 전화번호 : 지정된 형식으로 받기
-			String phonePattern = "^\\d{3}-\\d{4}-\\d{4}$";
-			while (true) {
-				System.out.println("폰 번호 (000-0000-0000) : ");
-				String inPhone = InputUtil.getStringInput();
-				if (inPhone.matches(phonePattern)) {
-					phone = inPhone;
-					break;
-				} else {
-					System.out.println("잘못된 날짜 형식입니다. 다시 입력해 주세요.");
-				}
-			}
-
-			// 결제 정보 확인 받고, 결제 진행 여부 결정
-			System.out.printf("결제 금액 : %d 원 \n", totalPrice);
 			System.out.println("결제하시겠습니까?");
 			System.out.println("1.예 2.아니오(나가기)");
 			String answer = InputUtil.getStringInput();
@@ -255,22 +188,21 @@ public class VisitorManager {
 
 			// 예약 목록이 없을 경우
 			if (reservations.isEmpty()) {
-				System.out.println("(예약 목록 없음)");
+				System.out.println("등록된 예약이 없습니다.");
+				return;
+			}
+
+			// 예약번호로 검색
+			System.out.println("예약번호 : ");
+			String findId = InputUtil.getStringInput();
+			if (reservations.containsKey(findId)) {
+
+				// 검색된 예약 내용 보여주기
+				Reservation reservation = reservations.get(findId);
+				System.out.println(reservation);
 				return;
 			} else {
-
-				// 예약번호로 검색
-				System.out.println("예약번호 : ");
-				String findId = InputUtil.getStringInput();
-				if (reservations.containsKey(findId)) {
-
-					// 검색된 예약 내용 보여주기
-					Reservation reservation = reservations.get(findId);
-					System.out.println(reservation);
-					return;
-				} else {
-					System.out.println("예약번호를 다시 입력해 주세요. ");
-				}
+				System.out.println("예약번호를 다시 입력해 주세요. ");
 			}
 		}
 	}
@@ -280,31 +212,30 @@ public class VisitorManager {
 
 			// 예약 목록이 없을 경우
 			if (reservations.isEmpty()) {
-				System.out.println("(예약 목록 없음)");
+				System.out.println("등록된 예약이 없습니다.");
+				return;
+			}
+
+			// 예약번호로 검색
+			System.out.println("예약번호 : ");
+			String findId = InputUtil.getStringInput();
+			if (reservations.containsKey(findId)) {
+
+				// 검색된 예약의 방문일정 보여주기
+				Reservation reservation = reservations.get(findId);
+				System.out.println("현재 방문일정 : " + reservation.getDate());
+
+				// 변경할 일정 입력 받기
+				System.out.println("변경 일정 (YYYY-MM-DD) : ");
+				String inDate = InputUtil.getStringInput();
+
+				// 일정 변경하기
+				reservation.setDate(inDate);
+				System.out.println("방문일정 변경 성공!");
+				System.out.println("방문일정 : " + reservation.getDate());
 				return;
 			} else {
-
-				// 예약번호로 검색
-				System.out.println("예약번호 : ");
-				String findId = InputUtil.getStringInput();
-				if (reservations.containsKey(findId)) {
-
-					// 검색된 예약의 방문일정 보여주기
-					Reservation reservation = reservations.get(findId);
-					System.out.println("현재 방문일정 : " + reservation.getDate());
-
-					// 변경할 일정 입력 받기
-					System.out.println("변경 일정 (YYYY-MM-DD) : ");
-					String inDate = InputUtil.getStringInput();
-
-					// 일정 변경하기
-					reservation.setDate(inDate);
-					System.out.println("방문일정 변경 성공!");
-					System.out.println("방문일정 : " + reservation.getDate());
-					return;
-				} else {
-					System.out.println("예약번호를 다시 입력해 주세요. ");
-				}
+				System.out.println("예약번호를 다시 입력해 주세요. ");
 			}
 		}
 	}
@@ -314,38 +245,37 @@ public class VisitorManager {
 
 			// 예약 목록이 없을 경우
 			if (reservations.isEmpty()) {
-				System.out.println("(예약 목록 없음)");
+				System.out.println("등록된 예약이 없습니다.");
 				return;
-			} else {
+			}
 
-				// 예약번호로 검색
-				System.out.println("예약번호 : ");
-				String findId = InputUtil.getStringInput();
-				if (reservations.containsKey(findId)) {
+			// 예약번호로 검색
+			System.out.println("예약번호 : ");
+			String findId = InputUtil.getStringInput();
+			if (reservations.containsKey(findId)) {
 
-					// 검색된 예약 내용 보여주기
-					Reservation reservation = reservations.get(findId);
-					System.out.println(reservation);
+				// 검색된 예약 내용 보여주기
+				Reservation reservation = reservations.get(findId);
+				System.out.println(reservation);
 
-					System.out.println("예약을 취소하시겠습니까?");
-					System.out.println("1.예 2.아니오(나가기)");
-					String answer = InputUtil.getStringInput();
-					if (answer.equals("1")) {
+				System.out.println("예약을 취소하시겠습니까?");
+				System.out.println("1.예 2.아니오(나가기)");
+				String answer = InputUtil.getStringInput();
+				if (answer.equals("1")) {
 
-						// 예약 취소, Map에서 데이터 삭제
-						reservations.remove(findId);
-						System.out.println("예약 취소 완료");
-						return;
-					} else if (answer.equals("2")) {
+					// 예약 취소, Map에서 데이터 삭제
+					reservations.remove(findId);
+					System.out.println("예약 취소 완료");
+					return;
+				} else if (answer.equals("2")) {
 
-						// 2.아니오(나가기) 선택
-						return;
-					} else {
-						System.out.println("잘못된 선택입니다.");
-					}
+					// 2.아니오(나가기) 선택
+					return;
 				} else {
-					System.out.println("예약번호를 다시 입력해 주세요. ");
+					System.out.println("잘못된 선택입니다.");
 				}
+			} else {
+				System.out.println("예약번호를 다시 입력해 주세요. ");
 			}
 		}
 	}
