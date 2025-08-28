@@ -272,8 +272,8 @@ public final class FinanceManager {
 	 */
 
 	private String generateReport() {
-		return String.format(MenuUtil.DEFAULT_PREFIX + "[총 자산 : %d , 총 수입 : %d , 총 지출 : %d , 순이익 : %d]", capital,
-				getTotalIncomes(), getTotalExpends(), getNetProfit());
+		return String.format(MenuUtil.DEFAULT_PREFIX + "[총 자산 : %s , 총 수입 : %s , 총 지출 : %s , 순이익 : %s]", getCapital(),
+				getTotalIncomesString(), getTotalExpendsString(), getNetProfit());
 	}
 
 	/**
