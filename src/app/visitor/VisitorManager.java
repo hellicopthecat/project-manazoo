@@ -5,14 +5,16 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 import app.animal.AnimalEnum.Species;
 import app.common.IdGeneratorUtil;
+import app.common.InputUtil;
+import app.common.ui.MenuUtil;
+import app.common.ui.TextArtUtil;
+import app.common.ui.UIUtil;
 
 public class VisitorManager {
 
-	Scanner in = new Scanner(System.in);
 	Map<String, Reservation> reservations = new HashMap<>();
 
 	String id; // 예약 번호
@@ -26,37 +28,58 @@ public class VisitorManager {
 	final int CHILD_PRICE = 5000;
 
 	public void run() {
+
 		while (true) {
-			showMenu();
-			String menu = in.nextLine();
-			switch (menu) {
-			case "1" -> zooInformation();
-			case "2" -> reservation();
-			case "3" -> viewReservation();
-			case "4" -> changeReservationDate();
-			case "5" -> cancelReservation();
-			case "6" -> {
-				System.out.println("뒤로 가기");
+			displayVisitorMenu();
+			int choice = InputUtil.getIntInput();
+			switch (choice) {
+			case 1 -> {
+				UIUtil.printSeparator('━');
+				TextArtUtil.printViewMenuTitle();
+				UIUtil.printSeparator('━');
+				viewInformation();
+			}
+			case 2 -> {
+				UIUtil.printSeparator('━');
+				TextArtUtil.printReservationMenuTitle();
+				UIUtil.printSeparator('━');
+				reservation();
+			}
+			case 3 -> {
+				UIUtil.printSeparator('━');
+				TextArtUtil.printViewMenuTitle();
+				UIUtil.printSeparator('━');
+				viewReservation();
+			}
+			case 4 -> {
+				UIUtil.printSeparator('━');
+				TextArtUtil.printViewMenuTitle();
+				UIUtil.printSeparator('━');
+				editReservationDate();
+			}
+			case 5 -> {
+				UIUtil.printSeparator('━');
+				TextArtUtil.printRemoveMenuTitle();
+				UIUtil.printSeparator('━');
+				removeReservation();
+			}
+			case 0 -> {
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "이전 메뉴로 돌아갑니다.");
 				return;
 			}
-			default -> System.out.println("잘못된 선택입니다.");
+			default -> System.out.println("잘못된 입력입니다. 다시 선택해주세요.");
 			}
 		}
 	}
 
-	public void showMenu() {
-		System.out.println("=== =Manazoo 동물원 ====");
-		System.out.println("1. 동물원 정보");
-		System.out.println("2. 관람 예약");
-		System.out.println("3. 예약 확인");
-		System.out.println("4. 예약일정 변경");
-		System.out.println("5. 예약 취소");
-		System.out.println("6. 뒤로 가기");
-		System.out.println("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ");
-		System.out.println("선택>> ");
+	private static void displayVisitorMenu() {
+		String[] option = { "동물원 정보", "관람 예약", "예약 확인", "예약 변경(방문일정)", "예약 취소" };
+		String[] specialOptions = { "뒤로가기" };
+		UIUtil.printSeparator('━');
+		MenuUtil.generateMenuWithSpecialOptions(TextArtUtil::printVisitorMenuTitle, option, specialOptions);
 	}
 
-	public void zooInformation() {
+	public void viewInformation() {
 
 		// 동물원 정보
 		System.out.println("이름 : Manazoo 동물원");
@@ -101,7 +124,7 @@ public class VisitorManager {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		while (true) {
 			System.out.println("방문 일시 (YYYY-MM-DD) : ");
-			String inDate = in.nextLine();
+			String inDate = InputUtil.getStringInput();
 			try {
 				LocalDate localDate = LocalDate.parse(inDate, formatter);
 				date = localDate.format(formatter);
@@ -114,7 +137,7 @@ public class VisitorManager {
 		// 대인 인원수 입력 받기
 		while (true) {
 			System.out.println("대인 인원수 : ");
-			String inputAdultCount = in.nextLine();
+			String inputAdultCount = InputUtil.getStringInput();
 			if (!StringIsInt(inputAdultCount)) {
 				System.out.println("숫자로 정확히 입력해 주세요.");
 			} else {
@@ -131,7 +154,7 @@ public class VisitorManager {
 		// 소인 인원수 입력 받기
 		while (true) {
 			System.out.println("소인 인원수 : ");
-			String inputChildCount = in.nextLine();
+			String inputChildCount = InputUtil.getStringInput();
 			if (!StringIsInt(inputChildCount)) {
 				System.out.println("숫자로 정확히 입력해 주세요.");
 			} else {
@@ -167,7 +190,7 @@ public class VisitorManager {
 
 			// 예약 정보 확정 받고, 결제 여부 결정
 			System.out.println("1.다시 입력 2.결제");
-			String answer = in.nextLine();
+			String answer = InputUtil.getStringInput();
 			if (answer.equals("1")) {
 				// < 다시입력 > (내부 while문 깨고, 외부 while로 반복)
 				break;
@@ -186,13 +209,13 @@ public class VisitorManager {
 			// 결제 정보 입력 받기
 			System.out.println("결제 정보를 입력해 주세요.");
 			System.out.println("이름: ");
-			name = in.nextLine();
+			name = InputUtil.getStringInput();
 
 			// 전화번호 : 지정된 형식으로 받기
 			String phonePattern = "^\\d{3}-\\d{4}-\\d{4}$";
 			while (true) {
-				System.out.println("폰 번호 : ");
-				String inPhone = in.nextLine();
+				System.out.println("폰 번호 (000-0000-0000) : ");
+				String inPhone = InputUtil.getStringInput();
 				if (inPhone.matches(phonePattern)) {
 					phone = inPhone;
 					break;
@@ -205,7 +228,7 @@ public class VisitorManager {
 			System.out.printf("결제 금액 : %d 원 \n", totalPrice);
 			System.out.println("결제하시겠습니까?");
 			System.out.println("1.예 2.아니오(나가기)");
-			String answer = in.nextLine();
+			String answer = InputUtil.getStringInput();
 			if (answer.equals("1")) {
 
 				// 예약(Reservation) 객체 생성하여 Map에 저장
@@ -238,7 +261,7 @@ public class VisitorManager {
 
 				// 예약번호로 검색
 				System.out.println("예약번호 : ");
-				String findId = in.nextLine();
+				String findId = InputUtil.getStringInput();
 				if (reservations.containsKey(findId)) {
 
 					// 검색된 예약 내용 보여주기
@@ -252,7 +275,7 @@ public class VisitorManager {
 		}
 	}
 
-	public void changeReservationDate() {
+	public void editReservationDate() {
 		while (true) {
 
 			// 예약 목록이 없을 경우
@@ -263,7 +286,7 @@ public class VisitorManager {
 
 				// 예약번호로 검색
 				System.out.println("예약번호 : ");
-				String findId = in.nextLine();
+				String findId = InputUtil.getStringInput();
 				if (reservations.containsKey(findId)) {
 
 					// 검색된 예약의 방문일정 보여주기
@@ -272,7 +295,7 @@ public class VisitorManager {
 
 					// 변경할 일정 입력 받기
 					System.out.println("변경 일정 (YYYY-MM-DD) : ");
-					String inDate = in.nextLine();
+					String inDate = InputUtil.getStringInput();
 
 					// 일정 변경하기
 					reservation.setDate(inDate);
@@ -286,7 +309,7 @@ public class VisitorManager {
 		}
 	}
 
-	public void cancelReservation() {
+	public void removeReservation() {
 		while (true) {
 
 			// 예약 목록이 없을 경우
@@ -297,7 +320,7 @@ public class VisitorManager {
 
 				// 예약번호로 검색
 				System.out.println("예약번호 : ");
-				String findId = in.nextLine();
+				String findId = InputUtil.getStringInput();
 				if (reservations.containsKey(findId)) {
 
 					// 검색된 예약 내용 보여주기
@@ -306,7 +329,7 @@ public class VisitorManager {
 
 					System.out.println("예약을 취소하시겠습니까?");
 					System.out.println("1.예 2.아니오(나가기)");
-					String answer = in.nextLine();
+					String answer = InputUtil.getStringInput();
 					if (answer.equals("1")) {
 
 						// 예약 취소, Map에서 데이터 삭제
