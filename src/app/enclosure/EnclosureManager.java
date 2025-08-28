@@ -84,9 +84,6 @@ public class EnclosureManager {
             switch (choice) {
                 case 1 -> registerManagement();
                 case 2 -> {
-                    UIUtil.printSeparator('━');
-                    TextArtUtil.printViewMenuTitle();
-                    UIUtil.printSeparator('━');
                     viewEnclosures();
                 }
                 case 3 -> {
@@ -158,7 +155,42 @@ public class EnclosureManager {
         printEnclosureInfo("사육장이 등록되었습니다. 등록된 사육장의 정보는 아래와 같습니다.", newEnclosure);
     }
 
+    /**
+     * 사육장 조회 메뉴를 표시하고 처리합니다.
+     * 모든 사육장 조회와 특정 사육장 지정 조회 옵션을 제공합니다.
+     */
     private void viewEnclosures() {
+        while (true) {
+            displayViewEnclosuresMenu();
+            int choice = InputUtil.getIntInput();
+            
+            switch (choice) {
+                case 1 -> viewAllEnclosures();
+                case 2 -> viewSpecificEnclosure();
+                case 0 -> {
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "이전 메뉴로 돌아갑니다.");
+                    return;
+                }
+                default -> System.out.println(MenuUtil.DEFAULT_PREFIX + "잘못된 입력입니다. 다시 선택해주세요.");
+            }
+        }
+    }
+
+    /**
+     * 사육장 조회 메뉴를 표시합니다.
+     */
+    private static void displayViewEnclosuresMenu() {
+        String[] options = {"모든 사육장 조회", "사육장 지정 조회"};
+        String[] specialOptions = {"뒤로가기"};
+        UIUtil.printSeparator('━');
+        MenuUtil.generateMenuWithSpecialOptions(TextArtUtil::printViewMenuTitle, options, specialOptions);
+    }
+
+    /**
+     * 모든 사육장을 테이블 형태로 조회합니다.
+     * 기존 viewEnclosures() 로직을 함수화한 메서드입니다.
+     */
+    private void viewAllEnclosures() {
         if (repository.isEmpty()) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 사육장이 없습니다.");
             return;
@@ -196,6 +228,101 @@ public class EnclosureManager {
 
         // TableUtil.printTable 사용하여 다중 행 표 출력
         String title = String.format("사육장 목록 (총 %d개)", repository.size());
+        TableUtil.printTable(title, headers, data);
+    }
+
+    /**
+     * 지정된 사육장의 상세 정보를 조회합니다.
+     * 사육장 기본 정보와 거주 동물 목록을 모두 표시합니다.
+     */
+    private void viewSpecificEnclosure() {
+        if (repository.isEmpty()) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 사육장이 없습니다.");
+            return;
+        }
+        
+        // 먼저 전체 사육장 목록을 간단히 표시
+        System.out.println("등록된 사육장 목록:");
+        viewAllEnclosures();
+        
+        System.out.println();
+        String enclosureId = MenuUtil.Question.askTextInput("조회할 사육장 ID를 입력하세요");
+        
+        Optional<Enclosure> foundEnclosure = repository.findById(enclosureId);
+        
+        if (foundEnclosure.isEmpty()) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "입력하신 ID '" + enclosureId + "'의 사육장이 존재하지 않습니다.");
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "위의 목록에서 올바른 사육장 ID를 확인해주세요.");
+            return;
+        }
+        
+        Enclosure enclosure = foundEnclosure.get();
+        
+        // 1. 사육장 기본 정보 표시
+        printEnclosureInfo("사육장 기본 정보", enclosure);
+        
+        System.out.println();
+        
+        // 2. 거주 동물 상세 목록 표시 (displayAdmissionResult와 동일한 형식)
+        displayEnclosureInhabitants(enclosure);
+    }
+
+    /**
+     * 사육장에 거주하는 동물들의 상세 목록을 표시합니다.
+     * displayAdmissionResult()와 동일한 테이블 형식을 사용합니다.
+     * 
+     * @param enclosure 조회할 사육장 객체
+     */
+    private void displayEnclosureInhabitants(Enclosure enclosure) {
+        // 사육장에 입주한 동물들 가져오기
+        Map<String, Object> inhabitants = enclosure.getAllInhabitants();
+        
+        if (inhabitants.isEmpty()) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "이 사육장에는 현재 거주하는 동물이 없습니다.");
+            return;
+        }
+        
+        // 테이블 헤더 정의 (displayAdmissionResult와 동일)
+        String[] headers = {"Animal ID", "Name", "Species", "Age", "Admission Date"};
+        String[][] data = new String[inhabitants.size()][];
+        int index = 0;
+        
+        // 현재 날짜를 입사일로 사용 (실제 구현에서는 Animal 객체에 입사일 필드 추가 권장)
+        String currentDate = java.time.LocalDate.now().toString();
+        
+        // 동물 데이터를 테이블 형태로 변환
+        for (Map.Entry<String, Object> entry : inhabitants.entrySet()) {
+            String animalId = entry.getKey();
+            Object animalObj = entry.getValue();
+            
+            // Animal 객체에서 실제 정보 추출
+            if (animalObj instanceof Animal) {
+                Animal animal = (Animal) animalObj;
+                data[index] = new String[]{
+                    truncateString(animalId, 15),
+                    truncateString(animal.getName(), 15),
+                    truncateString(animal.getSpecies(), 15),
+                    truncateString(String.valueOf(animal.getAge()), 15),
+                    truncateString(currentDate, 15)
+                };
+            } else {
+                // 임시 데이터 (호환성 보장)
+                data[index] = new String[]{
+                    truncateString(animalId, 15),
+                    truncateString("Unknown", 15),
+                    truncateString("Unknown", 15),
+                    truncateString("0", 15),
+                    truncateString(currentDate, 15)
+                };
+            }
+            index++;
+        }
+        
+        // 테이블 제목 생성
+        String title = String.format("%s (%s) 거주 동물 목록", 
+                      truncateString(enclosure.getName(), 15), enclosure.getId());
+        
+        // 테이블 출력
         TableUtil.printTable(title, headers, data);
     }
 
@@ -433,7 +560,7 @@ public class EnclosureManager {
     private void displayDataForAdmissionWithWorkingData(Map<String, Animal> workingAnimals) {
         System.out.println();
         System.out.println("사용 가능한 사육장 목록:");
-        viewEnclosures(); // 기존 메서드 재사용
+        viewAllEnclosures(); // 메뉴 없이 직접 전체 사육장 목록 표시
         
         System.out.println();
         System.out.println("배치 가능한 동물 목록:");
