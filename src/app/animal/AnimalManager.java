@@ -4,9 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 import app.animal.AnimalEnum.Species;
 import app.common.IdGeneratorUtil;
+import app.common.ui.TableUtil;
 import app.common.InputUtil;
 import app.common.ui.MenuUtil;
 import app.common.ui.TextArtUtil;
@@ -14,7 +16,8 @@ import app.common.ui.UIUtil;
 
 public class AnimalManager {
 
-	Map<String, Animal> animals = new HashMap<>();
+	Scanner in = new Scanner(System.in);
+	Map<String, Animal> animals; // 싱글톤 데이터를 참조하도록 변경
 
 	String id;
 	String name;
@@ -24,6 +27,30 @@ public class AnimalManager {
 	String healthStatus;
 	String enclosureId;
 	String zkId;
+
+	/**
+	 * 기본 생성자
+	 * 싱글톤 인스턴스가 있으면 해당 데이터를 참조하고, 없으면 새로운 Map을 생성합니다.
+	 */
+	public AnimalManager() {
+		if (instance != null) {
+			this.animals = instance.animals;
+		} else {
+			this.animals = new HashMap<>();
+		}
+	}
+
+	/**
+	 * 기존 인스턴스를 싱글톤과 동기화합니다.
+	 * 기존 registerAnimal로 등록된 동물들이 배치 시스템에서도 보이도록 합니다.
+	 */
+	public void syncWithSingleton() {
+		AnimalManager singleton = getInstance();
+		// 현재 인스턴스의 데이터를 싱글톤에 복사
+		singleton.animals.putAll(this.animals);
+		// 현재 인스턴스가 싱글톤의 데이터를 참조하도록 변경
+		this.animals = singleton.animals;
+	}
 
 	public void run() {
 		while (true) {
@@ -92,6 +119,10 @@ public class AnimalManager {
 
 					Animal animal = new Animal(id, name, species, age, gender, healthStatus, enclosureId, zkId);
 					animals.put(id, animal);
+					
+					// 싱글톤과 동기화 (추가된 부분)
+					syncWithSingleton();
+					
 					System.out.println("동물 등록 완료 \n");
 					return;
 				} else if (answer.equals("2")) {
@@ -454,6 +485,163 @@ public class AnimalManager {
 			animals.remove(findId);
 			System.out.println("동물 삭제 완료");
 		}
+	}
+
+	// =================================================================
+	// EnclosureManager 연동을 위한 배치 관리 메서드들
+	// =================================================================
+
+	/**
+	 * 배치 가능한 동물이 있는지 확인합니다.
+	 * enclosureId가 null이거나 빈 문자열인 동물이 배치 가능한 동물로 간주됩니다.
+	 * 
+	 * @return 배치 가능한 동물 존재 여부
+	 */
+	public boolean hasAvailableAnimals() {
+		return animals.values().stream()
+				.anyMatch(animal -> animal.getEnclosureId() == null || animal.getEnclosureId().trim().isEmpty());
+	}
+
+	/**
+	 * Working Data Pattern: 배치 가능한 동물들의 작업용 복사본을 반환합니다.
+	 * 원본 데이터를 수정하지 않고 작업할 수 있도록 새로운 HashMap으로 복사합니다.
+	 * 
+	 * @return 배치 가능한 동물들의 복사본 Map
+	 */
+	public Map<String, Animal> getWorkingCopyOfAvailableAnimals() {
+		Map<String, Animal> availableAnimals = getAvailableAnimals();
+		// 새로운 HashMap을 생성하여 복사본 반환
+		return new HashMap<>(availableAnimals);
+	}
+
+	/**
+	 * 배치 가능한 동물들의 목록을 반환합니다.
+	 * enclosureId가 null이거나 빈 문자열인 동물들을 필터링하여 반환합니다.
+	 * 
+	 * @return 배치 가능한 동물들의 Map
+	 */
+	public Map<String, Animal> getAvailableAnimals() {
+		return animals.entrySet().stream()
+				.filter(entry -> {
+					String enclosureId = entry.getValue().getEnclosureId();
+					return enclosureId == null || enclosureId.trim().isEmpty();
+				})
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+	}
+
+	/**
+	 * 배치 가능한 동물들을 테이블 형태로 출력합니다.
+	 * EnclosureManager의 동물 입사 관리에서 사용됩니다.
+	 * TableUtil을 사용하여 일관된 형태의 표를 출력합니다.
+	 */
+	public void displayAvailableAnimalsTable() {
+		Map<String, Animal> availableAnimals = getAvailableAnimals();
+		
+		if (availableAnimals.isEmpty()) {
+			System.out.println("  배치 가능한 동물이 없습니다.");
+			return;
+		}
+
+		// TableUtil에 맞는 헤더와 데이터 준비
+		String[] headers = {"Animal ID", "Name", "Species", "Age", "Gender", "Health"};
+		
+		// 데이터 배열 생성
+		String[][] data = new String[availableAnimals.size()][];
+		int index = 0;
+		
+		for (Animal animal : availableAnimals.values()) {
+			data[index] = new String[]{
+				animal.getId(),
+				animal.getName(),
+				animal.getSpecies(),
+				String.valueOf(animal.getAge()),
+				animal.getGender(),
+				animal.getHealthStatus()
+			};
+			index++;
+		}
+		
+		// TableUtil을 사용하여 표 출력
+		String title = String.format("배치 가능한 동물 목록 (총 %d마리)", availableAnimals.size());
+		TableUtil.printTable(title, headers, data);
+	}
+
+	/**
+	 * 전체 동물 목록에서 특정 ID의 동물을 검색합니다.
+	 * 
+	 * @param animalId 검색할 동물 ID
+	 * @return Optional<Animal> 검색된 동물 (없으면 empty)
+	 */
+	public Optional<Animal> getAnimalFromAll(String animalId) {
+		return Optional.ofNullable(animals.get(animalId));
+	}
+
+	/**
+	 * 특정 동물을 배치 가능한 상태에서 제거합니다.
+	 * 동물의 enclosureId를 설정하여 배치된 상태로 변경합니다.
+	 * 
+	 * @param animalId    배치할 동물 ID
+	 * @param enclosureId 배치할 사육장 ID
+	 * @return 배치된 동물 객체 (없으면 null)
+	 */
+	public Animal removeAvailableAnimal(String animalId, String enclosureId) {
+		Animal animal = animals.get(animalId);
+		if (animal != null) {
+			// 배치 가능한 동물인지 확인
+			String currentEnclosureId = animal.getEnclosureId();
+			if (currentEnclosureId == null || currentEnclosureId.trim().isEmpty()) {
+				animal.setEnclosureId(enclosureId);
+				return animal;
+			}
+		}
+		return null; // 동물이 없거나 이미 배치된 경우
+	}
+
+	/**
+	 * 동물을 사육장에서 해제하여 다시 배치 가능한 상태로 만듭니다.
+	 * 동물의 enclosureId를 null로 설정합니다.
+	 * 
+	 * @param animalId 해제할 동물 ID
+	 * @return 해제된 동물 객체 (없으면 null)
+	 */
+	public Animal releaseAnimalFromEnclosure(String animalId) {
+		Animal animal = animals.get(animalId);
+		if (animal != null) {
+			animal.setEnclosureId(null);
+			return animal;
+		}
+		return null;
+	}
+
+	/**
+	 * 동물이 특정 사육장에 배치되어 있는지 확인합니다.
+	 * 
+	 * @param animalId    확인할 동물 ID
+	 * @param enclosureId 확인할 사육장 ID
+	 * @return 해당 사육장에 배치되어 있으면 true
+	 */
+	public boolean isAnimalInEnclosure(String animalId, String enclosureId) {
+		Animal animal = animals.get(animalId);
+		if (animal != null) {
+			String animalEnclosureId = animal.getEnclosureId();
+			return enclosureId.equals(animalEnclosureId);
+		}
+		return false;
+	}
+
+	/**
+	 * AnimalManager의 인스턴스를 반환합니다.
+	 * Singleton 패턴을 위한 메서드입니다.
+	 * 
+	 * @return AnimalManager 인스턴스
+	 */
+	private static AnimalManager instance = null;
+	
+	public static AnimalManager getInstance() {
+		if (instance == null) {
+			instance = new AnimalManager();
+		}
+		return instance;
 	}
 
 }

@@ -14,7 +14,6 @@ import app.zooKeeper.ZooKeeperManager;
  * 콘솔 기반 동물원 관리 시스템의 메인 엔진 클래스입니다. 사용자 인터페이스와 메뉴 네비게이션을 담당합니다.
  */
 public class ConsoleEngine {
-
 	/**
 	 * 애플리케이션을 시작합니다. 로딩 애니메이션 후 메인 메뉴로 진입합니다.
 	 */

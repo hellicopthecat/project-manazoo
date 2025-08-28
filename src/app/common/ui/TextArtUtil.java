@@ -5,7 +5,6 @@ package app.common.ui;
  * 제공합니다.
  */
 public final class TextArtUtil {
-
 	/**
 	 * private 생성자로 인스턴스 생성을 방지합니다.
 	 */
@@ -171,6 +170,19 @@ public final class TextArtUtil {
 		System.out.println("╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝");
 
 	}
+  
+    /**
+     * 미구현 기능에 대한 사과 메시지를 출력합니다.
+     * 현재 개발 중인 기능에 대해 사용자에게 안내할 때 사용합니다.
+     */
+    public static void printSorryMessage() {
+        System.out.println("███████╗ ██████╗ ██████╗ ██████╗ ██╗   ██╗");
+        System.out.println("██╔════╝██╔═══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝");
+        System.out.println("███████╗██║   ██║██████╔╝██████╔╝ ╚████╔╝ ");
+        System.out.println("╚════██║██║   ██║██╔══██╗██╔══██╗  ╚██╔╝  ");
+        System.out.println("███████║╚██████╔╝██║  ██║██║  ██║   ██║   ");
+        System.out.println("╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ");
+    }
 
 	/**
 	 * 완전한 환영 화면을 출력합니다. Welcome 텍스트 아트와 접속 메뉴를 함께 출력하여 완성된 시작 화면을 구성합니다.
@@ -236,4 +248,3 @@ public final class TextArtUtil {
 		UIUtil.clearScreen();
 		printZooLogo();
 	}
-}
