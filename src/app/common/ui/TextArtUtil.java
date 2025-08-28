@@ -237,4 +237,17 @@ public final class TextArtUtil {
         UIUtil.clearScreen();
         printZooLogo();
     }
+
+    /**
+     * 미구현 기능에 대한 사과 메시지를 출력합니다.
+     * 현재 개발 중인 기능에 대해 사용자에게 안내할 때 사용합니다.
+     */
+    public static void printSorryMessage() {
+        System.out.println("███████╗ ██████╗ ██████╗ ██████╗ ██╗   ██╗");
+        System.out.println("██╔════╝██╔═══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝");
+        System.out.println("███████╗██║   ██║██████╔╝██████╔╝ ╚████╔╝ ");
+        System.out.println("╚════██║██║   ██║██╔══██╗██╔══██╗  ╚██╔╝  ");
+        System.out.println("███████║╚██████╔╝██║  ██║██║  ██║   ██║   ");
+        System.out.println("╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ");
+    }
 }

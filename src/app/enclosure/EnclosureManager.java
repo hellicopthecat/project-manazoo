@@ -122,7 +122,13 @@ public class EnclosureManager {
             switch (choice) {
                 case 1 -> registerEnclosure();
                 case 2 -> manageAnimalAdmission();
-                case 3 -> System.out.println("사육사배치관리");
+                case 3 -> {
+                    UIUtil.printSeparator('━');
+                    TextArtUtil.printSorryMessage();
+                    UIUtil.printSeparator('━');
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "사육사 배치 관리 기능은 현재 개발 중입니다.");
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "빠른 시일 내에 업데이트하겠습니다.");
+                }
                 case 0 -> {
                     System.out.println(MenuUtil.DEFAULT_PREFIX + "이전 메뉴로 돌아갑니다.");
                     return;
