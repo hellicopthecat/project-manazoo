@@ -1,23 +1,13 @@
 package app.zooKeeper.zooKeeperInterface;
 
-import app.zooKeeper.ZooKeeper;
-
 public interface ZooKeeperManagerService {
-	void registerZooKeeper(ZooKeeper keeper);
+	void registerZooKeeper();
 
-	void setIsWorking(String keeperId);
+	void setCanAssignTask(String keeperId, String targetId);
 
-	void setIsWorkingByName(String keeperName);
+	void setPermissionDangerAnimal(String keeperId, String targetId);
 
-	void setCanAssignTask(String keeperId);
-
-	void setCanAssignTaskByName(String keeperName);
-
-	void setPermissionDangerAnimal(String keeperId);
-
-	void setPermissionDangerAnimalByName(String keeperName);
-
-	boolean removeZooKeeper(String keeperId);
+	boolean removeZooKeeper(String keeperId, String targetId);
 
 	boolean removeCaredAnimal(String animalId, String keeperId);
 
