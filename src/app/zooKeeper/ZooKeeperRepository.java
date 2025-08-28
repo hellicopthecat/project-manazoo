@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import app.common.ui.MenuUtil;
 import app.zooKeeper.zooKeeperEnum.Department;
 import app.zooKeeper.zooKeeperEnum.Gender;
 import app.zooKeeper.zooKeeperEnum.ZooKeeperConverter;
@@ -85,8 +86,9 @@ public class ZooKeeperRepository {
 
 	private boolean existManager(String id) {
 		ZooKeeper manager = getZooKeeperById(id);
-		boolean existManager = manager.isWorking() && (manager.getRank() == ZooKeeperRank.DIRECTOR
-				|| manager.getRank() == ZooKeeperRank.MANAGER || manager.getRank() == ZooKeeperRank.HEAD_KEEPER);
+		boolean existManager = manager.isWorking()
+				&& (manager.getRank().equals(ZooKeeperRank.DIRECTOR) || manager.getRank().equals(ZooKeeperRank.MANAGER)
+						|| manager.getRank().equals(ZooKeeperRank.HEAD_KEEPER));
 		return existManager;
 	}
 
@@ -99,11 +101,11 @@ public class ZooKeeperRepository {
 				boolean isWorking = ZooKeeperConverter.workingConverter(index);
 				targetZooKeeper.setIsWorking(isWorking);
 			} else {
-				System.out.println("매니저가 아닙니다.");
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "당신은 퇴사자이거나 매니저가 아닙니다.");
 			}
 
 		} catch (NullPointerException e) {
-			System.out.println("존재하지 않은 회원입니다.");
+			System.out.println(MenuUtil.DEFAULT_PREFIX + "존재하지 않은 회원입니다.");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -118,10 +120,10 @@ public class ZooKeeperRepository {
 				boolean canAssignTask = ZooKeeperConverter.possibleImpossibleConverter(index);
 				targetZooKeeper.setCanAssignTask(canAssignTask);
 			} else {
-				System.out.println("매니저가 아닙니다.");
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "당신은 퇴사자이거나 매니저가 아닙니다.");
 			}
 		} catch (NullPointerException e) {
-			System.out.println("존재하지 않은 회원입니다.");
+			System.out.println(MenuUtil.DEFAULT_PREFIX + "존재하지 않은 회원입니다.");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -137,15 +139,35 @@ public class ZooKeeperRepository {
 				boolean canHandleDangerAnimal = ZooKeeperConverter.possibleImpossibleConverter(index);
 				targetZooKeeper.setCanHandleDangerAnimal(canHandleDangerAnimal);
 			} else {
-				System.out.println("매니저가 아닙니다.");
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "당신은 퇴사자이거나 매니저가 아닙니다.");
 			}
 
 		} catch (NullPointerException e) {
-			System.out.println("존재하지 않은 회원입니다.");
+			System.out.println(MenuUtil.DEFAULT_PREFIX + "존재하지 않은 회원입니다.");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
 
+	public boolean setSalary(String keeperId, String targetId, long money) {
+		try {
+			boolean isManager = existManager(keeperId);
+			if (isManager) {
+				ZooKeeper targetZooKeeper = getZooKeeperById(targetId);
+				targetZooKeeper.setSalary(money);
+				return true;
+			} else {
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "당신은 퇴사자이거나 매니저가 아닙니다.");
+				return false;
+			}
+
+		} catch (NullPointerException e) {
+			System.out.println(MenuUtil.DEFAULT_PREFIX + "존재하지 않은 회원입니다.");
+			return false;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public ZooKeeper removeZooKeeper(String keeperId, String targetId) {
@@ -157,11 +179,11 @@ public class ZooKeeperRepository {
 				ZooKeeper targetZooKeeper = getZooKeeperById(targetId);
 				removedZooKeeper = repository.remove(targetZooKeeper.getId());
 			} else {
-				System.out.println("매니저가 아닙니다.");
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "당신은 퇴사자이거나 매니저가 아닙니다.");
 			}
 
 		} catch (NullPointerException e) {
-			System.out.println("존재하지 않은 회원입니다.");
+			System.out.println(MenuUtil.DEFAULT_PREFIX + "존재하지 않은 회원입니다.");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -177,7 +199,7 @@ public class ZooKeeperRepository {
 			if (zooKeeper.isWorking()) {
 
 			} else {
-				System.out.println("퇴사한 직원입니다.");
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "퇴사한 직원입니다.");
 			}
 
 		} catch (Exception e) {
@@ -187,7 +209,8 @@ public class ZooKeeperRepository {
 
 	// util methods
 	private boolean canHaveAssingTask(ZooKeeperRank rank) {
-		if (rank == ZooKeeperRank.DIRECTOR || rank == ZooKeeperRank.MANAGER || rank == ZooKeeperRank.HEAD_KEEPER) {
+		if (rank.equals(ZooKeeperRank.DIRECTOR) || rank.equals(ZooKeeperRank.MANAGER)
+				|| rank.equals(ZooKeeperRank.HEAD_KEEPER)) {
 			return true;
 		} else {
 			return false;
