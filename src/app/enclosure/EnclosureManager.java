@@ -325,46 +325,68 @@ public class EnclosureManager {
 
     /**
      * 동물 입사 관리 기능을 처리합니다.
-     * 기존 동물을 특정 사육장에 입주시키는 기능으로, 다음과 같은 과정을 거칩니다:
+     * Working Data Pattern을 사용하여 AnimalManager의 원본 데이터를 보호합니다.
+     * 
+     * 처리 과정:
      * 1. 사전 조건 확인 (사육장과 동물 존재 여부)
-     * 2. 사용자에게 사육장과 동물 목록 표시
-     * 3. 사육장 선택 (3회 시도 제한)
-     * 4. 동물 선택 (3회 시도 제한)
-     * 5. 입사 처리 (사육장에 추가, 대기 목록에서 제거)
-     * 6. 결과 표시 (입사한 사육장의 동물 현황)
+     * 2. Working Data 생성 (AnimalManager에서 복사본 획득)
+     * 3. 사용자 인터페이스 처리 (목록 표시, 선택받기)
+     * 4. 입사 처리 시뮬레이션 (working data로 먼저 검증)
+     * 5. 실제 데이터 업데이트 (검증 완료 후 원본 수정)
+     * 6. 결과 표시
      */
     private void manageAnimalAdmission() {
         UIUtil.printSeparator('━');
         System.out.println("동물 입사 관리");
         UIUtil.printSeparator('━');
         
-        // 1. 사전 조건 확인 - 사육장과 동물이 모두 있어야 실행 가능
+        // 1. 사전 조건 확인
         if (!hasRequiredDataForAdmission()) {
-            return; // Early return으로 중첩 방지
+            return;
         }
         
-        // 2. 현재 상황을 사용자에게 표시
-        displayDataForAdmission();
+        // 2. Working Data 패턴: AnimalManager로부터 작업용 복사본 획득
+        Map<String, Animal> workingAnimals = AnimalManager.getInstance().getWorkingCopyOfAvailableAnimals();
         
-        // 3. 사육장 선택 (3회 시도 제한)
+        if (workingAnimals.isEmpty()) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "현재 배치 가능한 동물이 없습니다.");
+            return;
+        }
+        
+        // 3. 현재 상황 표시
+        displayDataForAdmissionWithWorkingData(workingAnimals);
+        
+        // 4. 사육장 선택
         String enclosureId = selectEnclosureWithRetry();
         if (enclosureId == null) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "잘못된 입력이 3회 반복되어 작업을 취소합니다.");
             return;
         }
         
-        // 4. 동물 선택 (3회 시도 제한)
-        String animalId = selectAnimalWithRetry();
+        // 5. 동물 선택 (working data 기준)
+        String animalId = selectAnimalWithRetryFromWorkingData(workingAnimals);
         if (animalId == null) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "잘못된 입력이 3회 반복되어 작업을 취소합니다.");
             return;
         }
         
-        // 5. 입사 처리 - 실제 데이터 이동
-        processAnimalAdmission(enclosureId, animalId);
+        // 6. 입사 처리 시뮬레이션 (working data로 사전 검증)
+        if (!simulateAnimalAdmission(enclosureId, animalId, workingAnimals)) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 입사 처리 중 오류가 발생했습니다.");
+            return;
+        }
         
-        // 6. 결과 출력 - 입사한 사육장의 현재 상황 표시
-        displayAdmissionResult(enclosureId);
+        // 7. 실제 데이터 업데이트 (시뮬레이션 성공 후 실행)
+        boolean success = executeAnimalAdmission(enclosureId, animalId);
+        
+        if (success) {
+            System.out.println();
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 입사가 성공적으로 처리되었습니다!");
+            displayAdmissionResult(enclosureId);
+        } else {
+            System.out.println();
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 입사 처리 중 오류가 발생했습니다.");
+        }
     }
 
     /**
@@ -394,17 +416,158 @@ public class EnclosureManager {
     }
 
     /**
-     * 동물 입사를 위한 데이터를 사용자에게 표시합니다.
-     * 현재 등록된 사육장 목록과 배치 가능한 동물 목록을 보여줍니다.
+     * Working Data Pattern: 작업용 동물 데이터와 함께 현재 상황을 표시합니다.
+     * 
+     * @param workingAnimals 작업용 동물 데이터 (AnimalManager로부터 복사된 데이터)
      */
-    private void displayDataForAdmission() {
+    private void displayDataForAdmissionWithWorkingData(Map<String, Animal> workingAnimals) {
         System.out.println();
         System.out.println("사용 가능한 사육장 목록:");
         viewEnclosures(); // 기존 메서드 재사용
         
         System.out.println();
         System.out.println("배치 가능한 동물 목록:");
-        AnimalManager.getInstance().displayAvailableAnimalsTable();
+        displayWorkingAnimalsTable(workingAnimals);
+    }
+    
+    /**
+     * 작업용 동물 데이터를 테이블 형태로 출력합니다.
+     * 
+     * @param workingAnimals 작업용 동물 데이터
+     */
+    private void displayWorkingAnimalsTable(Map<String, Animal> workingAnimals) {
+        if (workingAnimals.isEmpty()) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "배치 가능한 동물이 없습니다.");
+            return;
+        }
+        
+        String[] headers = {"Animal ID", "Name", "Species", "Age", "Status"};
+        String[][] data = new String[workingAnimals.size()][];
+        int index = 0;
+        
+        for (Map.Entry<String, Animal> entry : workingAnimals.entrySet()) {
+            String animalId = entry.getKey();
+            Animal animal = entry.getValue();
+            
+            data[index] = new String[]{
+                animalId,
+                animal.getName(),
+                animal.getSpecies(),
+                String.valueOf(animal.getAge()),
+                "대기중"
+            };
+            index++;
+        }
+        
+        String title = String.format("배치 가능한 동물 목록 (총 %d마리)", workingAnimals.size());
+        TableUtil.printTable(title, headers, data);
+    }
+    
+    /**
+     * Working Data Pattern: 작업용 데이터에서 동물을 선택받습니다.
+     * 
+     * @param workingAnimals 작업용 동물 데이터
+     * @return 선택된 동물 ID (3회 실패 시 null 반환)
+     */
+    private String selectAnimalWithRetryFromWorkingData(Map<String, Animal> workingAnimals) {
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            System.out.printf("\n[%d/3] 입사시킬 동물 ID를 입력하세요: ", attempt);
+            String animalId = MenuUtil.Question.askTextInput("");
+            
+            // Working data에서 동물 검색
+            if (workingAnimals.containsKey(animalId)) {
+                Animal animal = workingAnimals.get(animalId);
+                System.out.printf("선택된 동물: %s (%s - %s)\n", 
+                                animal.getName(), animalId, animal.getSpecies());
+                
+                // 사용자 확인 받기
+                boolean confirmed = MenuUtil.Question.askSimpleConfirm("이 동물이 맞습니까?");
+                if (confirmed) {
+                    return animalId; // 정상 선택 완료
+                } else {
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 선택을 다시 진행합니다.");
+                    continue; // 다음 시도로
+                }
+            } else {
+                System.out.printf(MenuUtil.DEFAULT_PREFIX + "배치 가능한 동물 목록에 없는 ID입니다: %s\n", animalId);
+            }
+            
+            // 아직 시도 기회가 남았다면 안내 메시지
+            if (attempt < 3) {
+                System.out.println(MenuUtil.DEFAULT_PREFIX + "다시 시도해주세요.");
+            }
+        }
+        return null; // 3회 모두 실패
+    }
+    
+    /**
+     * Working Data Pattern: 입사 처리를 시뮬레이션합니다.
+     * 실제 데이터를 수정하기 전에 작업의 유효성을 검증합니다.
+     * 
+     * @param enclosureId    대상 사육장 ID
+     * @param animalId       대상 동물 ID
+     * @param workingAnimals 작업용 동물 데이터
+     * @return 시뮬레이션 성공 여부
+     */
+    private boolean simulateAnimalAdmission(String enclosureId, String animalId, Map<String, Animal> workingAnimals) {
+        // 1. 사육장 존재 확인
+        Optional<Enclosure> enclosureOpt = repository.findById(enclosureId);
+        if (enclosureOpt.isEmpty()) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "사육장을 찾을 수 없습니다: " + enclosureId);
+            return false;
+        }
+        
+        // 2. Working data에서 동물 존재 확인
+        if (!workingAnimals.containsKey(animalId)) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "배치 가능한 동물 목록에서 찾을 수 없습니다: " + animalId);
+            return false;
+        }
+        
+        // 3. 시뮬레이션: working data에서 동물을 제거해보기
+        Animal animal = workingAnimals.remove(animalId);
+        if (animal == null) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "시뮬레이션 중 오류가 발생했습니다.");
+            return false;
+        }
+        
+        // 4. 시뮬레이션 성공 - 로그 출력
+        System.out.println(String.format("시뮬레이션 성공: %s를 %s 사육장에 배치할 수 있습니다.", 
+                                        animal.getName(), enclosureOpt.get().getName()));
+        
+        return true;
+    }
+    
+    /**
+     * Working Data Pattern: 실제 데이터 업데이트를 수행합니다.
+     * 시뮬레이션이 성공한 후에만 호출되어야 합니다.
+     * 
+     * @param enclosureId 대상 사육장 ID
+     * @param animalId    대상 동물 ID
+     * @return 실제 처리 성공 여부
+     */
+    private boolean executeAnimalAdmission(String enclosureId, String animalId) {
+        try {
+            // 1. 사육장 객체 가져오기
+            Optional<Enclosure> enclosureOpt = repository.findById(enclosureId);
+            if (enclosureOpt.isEmpty()) {
+                return false;
+            }
+            Enclosure enclosure = enclosureOpt.get();
+            
+            // 2. AnimalManager에서 실제 동물 이동 처리
+            Animal animal = AnimalManager.getInstance().removeAvailableAnimal(animalId, enclosureId);
+            if (animal == null) {
+                return false;
+            }
+            
+            // 3. 사육장에 동물 추가
+            enclosure.addInhabitant(animalId, animal);
+            
+            return true;
+        } catch (Exception e) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "처리 중 예외가 발생했습니다: " + e.getMessage());
+            return false;
+        }
     }
 
     /**
@@ -442,79 +605,6 @@ public class EnclosureManager {
             }
         }
         return null; // 3회 모두 실패
-    }
-
-    /**
-     * 동물을 선택받습니다. 잘못된 입력 시 최대 3회까지 재시도할 수 있습니다.
-     * 각 시도마다 사용자에게 확인을 받아 정확한 선택을 보장합니다.
-     * 
-     * @return 선택된 동물 ID (3회 실패 시 null 반환)
-     */
-    private String selectAnimalWithRetry() {
-        for (int attempt = 1; attempt <= 3; attempt++) {
-            System.out.printf("\n[%d/3] 입사시킬 동물 ID를 입력하세요: ", attempt);
-            String animalId = MenuUtil.Question.askTextInput("");
-            
-            // AnimalManager에서 동물 검색
-            Optional<app.animal.Animal> foundAnimal = AnimalManager.getInstance().getAnimalFromAll(animalId);
-            if (foundAnimal.isPresent()) {
-                app.animal.Animal animal = foundAnimal.get();
-                // 배치 가능한 동물인지 확인 (enclosureId가 null이거나 빈 문자열)
-                String currentEnclosureId = animal.getEnclosureId();
-                if (currentEnclosureId == null || currentEnclosureId.trim().isEmpty()) {
-                    System.out.printf("선택된 동물: %s (%s - %s)\n", 
-                                    animal.getName(), animalId, animal.getSpecies());
-                    
-                    // 사용자 확인 받기
-                    boolean confirmed = MenuUtil.Question.askSimpleConfirm("이 동물이 맞습니까?");
-                    if (confirmed) {
-                        return animalId; // 정상 선택 완료
-                    } else {
-                        System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 선택을 다시 진행합니다.");
-                        continue; // 다음 시도로
-                    }
-                } else {
-                    System.out.printf(MenuUtil.DEFAULT_PREFIX + "이미 배치된 동물입니다: %s (사육장: %s)\n", 
-                                    animalId, currentEnclosureId);
-                }
-            } else {
-                System.out.printf(MenuUtil.DEFAULT_PREFIX + "존재하지 않는 동물 ID입니다: %s\n", animalId);
-            }
-            
-            // 아직 시도 기회가 남았다면 안내 메시지
-            if (attempt < 3) {
-                System.out.println(MenuUtil.DEFAULT_PREFIX + "다시 시도해주세요.");
-            }
-        }
-        return null; // 3회 모두 실패
-    }
-
-    /**
-     * 동물 입사를 실제로 처리합니다.
-     * 선택된 동물을 사육장의 inhabitants에 추가하고, 
-     * AnimalManager의 배치 가능한 동물 목록에서 제거합니다.
-     * 
-     * @param enclosureId 입사할 사육장 ID
-     * @param animalId    입사할 동물 ID
-     */
-    private void processAnimalAdmission(String enclosureId, String animalId) {
-        // 사육장 객체 가져오기 (이미 검증됨)
-        Optional<Enclosure> enclosureOpt = repository.findById(enclosureId);
-        Enclosure enclosure = enclosureOpt.get();
-        
-        // AnimalManager에서 동물 객체 가져오기 및 사육장 배치 처리
-        app.animal.Animal animal = AnimalManager.getInstance().removeAvailableAnimal(animalId, enclosureId);
-        
-        if (animal != null) {
-            // 사육장에 동물 추가 (Enclosure.addInhabitant 사용)
-            enclosure.addInhabitant(animalId, animal);
-            
-            System.out.println();
-            System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 입사가 성공적으로 처리되었습니다!");
-        } else {
-            System.out.println();
-            System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 배치 중 오류가 발생했습니다.");
-        }
     }
 
     /**

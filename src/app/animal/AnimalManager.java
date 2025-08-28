@@ -1,5 +1,6 @@
 package app.animal;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -32,7 +33,7 @@ public class AnimalManager {
 		if (instance != null) {
 			this.animals = instance.animals;
 		} else {
-			this.animals = new java.util.HashMap<>();
+			this.animals = new HashMap<>();
 		}
 	}
 
@@ -471,6 +472,18 @@ public class AnimalManager {
 	public boolean hasAvailableAnimals() {
 		return animals.values().stream()
 				.anyMatch(animal -> animal.getEnclosureId() == null || animal.getEnclosureId().trim().isEmpty());
+	}
+
+	/**
+	 * Working Data Pattern: 배치 가능한 동물들의 작업용 복사본을 반환합니다.
+	 * 원본 데이터를 수정하지 않고 작업할 수 있도록 새로운 HashMap으로 복사합니다.
+	 * 
+	 * @return 배치 가능한 동물들의 복사본 Map
+	 */
+	public Map<String, Animal> getWorkingCopyOfAvailableAnimals() {
+		Map<String, Animal> availableAnimals = getAvailableAnimals();
+		// 새로운 HashMap을 생성하여 복사본 반환
+		return new HashMap<>(availableAnimals);
 	}
 
 	/**
