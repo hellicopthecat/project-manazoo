@@ -61,14 +61,16 @@ public class EnclosureManager {
      * @param enclosure 출력할 사육장 객체
      */
     private void printEnclosureInfo(String title, Enclosure enclosure) {
-        String[] headers = {"Enclosure ID", "Name", "Size(m2)", "Temp(C)", "Location", "Environment"};
+        String[] headers = {"Enclosure ID", "Name", "Size(m2)", "Temp(C)", "Location", "Environment", "Inhabitants", "Caretakers"};
         String[] values = {
                 enclosure.getId(),
                 enclosure.getName(),
                 String.format("%.1f", enclosure.getAreaSize()),
                 String.format("%.1f", enclosure.getTemperature()),
                 enclosure.getLocationType().toString(),
-                enclosure.getEnvironmentType().toString()
+                enclosure.getEnvironmentType().toString(),
+                String.valueOf(enclosure.getInhabitantCount()),  // 거주 동물 수
+                String.valueOf(enclosure.getCaretakerCount())    // 배정된 사육사 수
         };
 
         TableUtil.printSingleRowTable(title, headers, values);
@@ -162,8 +164,8 @@ public class EnclosureManager {
             return;
         }
 
-        // 헤더는 printEnclosureInfo와 동일
-        String[] headers = {"Enclosure ID", "Name", "Size(m2)", "Temp(C)", "Location", "Environment"};
+        // 헤더에 Inhabitants, Caretakers 컬럼 추가 (총 8개)
+        String[] headers = {"Enclosure ID", "Name", "Size(m2)", "Temp(C)", "Location", "Environment", "Inhabitants", "Caretakers"};
 
         // repository의 모든 사육장 데이터를 2차원 배열로 변환
         Collection<Object> allEnclosures = repository.findAll();
@@ -172,13 +174,21 @@ public class EnclosureManager {
 
         for (Object obj : allEnclosures) {
             if (obj instanceof Enclosure enclosure) {
+                // 거주 동물 수 계산
+                int inhabitantCount = enclosure.getInhabitantCount();
+                
+                // 배정된 사육사 수 계산
+                int caretakerCount = enclosure.getCaretakerCount();
+                
                 data[index] = new String[]{
                         enclosure.getId(),
                         enclosure.getName(),
                         String.format("%.1f", enclosure.getAreaSize()),
                         String.format("%.1f", enclosure.getTemperature()),
                         enclosure.getLocationType().toString(),
-                        enclosure.getEnvironmentType().toString()
+                        enclosure.getEnvironmentType().toString(),
+                        String.valueOf(inhabitantCount),     // 거주 동물 수
+                        String.valueOf(caretakerCount)       // 배정된 사육사 수
                 };
                 index++;
             }
