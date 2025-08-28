@@ -85,12 +85,7 @@ public final class FinanceManager {
 			case 1 -> useMoney();
 			case 2 -> getAssetData();
 			case 3 -> editAssetData();
-			case 0 -> {
-				goBack(run);
-				String[] option = { "동물 관리", "사육장 관리", "직원 관리", "재정 관리" };
-				String[] specialOptions = { "뒤로가기" };
-				MenuUtil.generateMenuWithSpecialOptions(TextArtUtil::printAdminMenuTitle, option, specialOptions);
-			}
+			case 0 -> goBack(run);
 			default -> wrongIndex();
 			}
 		}

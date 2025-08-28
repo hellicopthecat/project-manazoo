@@ -15,14 +15,6 @@ public class ZooKeeperManager {
 
 	private final ZooKeeperRepository repository = ZooKeeperRepository.getInstance();
 
-	/**
-	 * test용 main 함수입니다.
-	 */
-	public static void main(String[] args) {
-		ZooKeeperManager z = new ZooKeeperManager();
-		z.handleZookeeperManagement();
-	}
-
 	private void createDummyData() {
 		// 비관리자
 		repository.createZooKeeper(IdGeneratorUtil.generateId(), "루피", 20, 1, 1, 1, 1, 1, 1, "");
@@ -56,12 +48,7 @@ public class ZooKeeperManager {
 			case 3 -> editZooKeeper();
 			case 4 -> deleteZooKeeper();
 			case 5 -> createSalaryService();
-			case 0 -> {
-				goBack(run);
-				String[] option = { "동물 관리", "사육장 관리", "직원 관리", "재정 관리" };
-				String[] specialOptions = { "뒤로가기" };
-				MenuUtil.generateMenuWithSpecialOptions(TextArtUtil::printAdminMenuTitle, option, specialOptions);
-			}
+			case 0 -> goBack(run);
 			default -> wrongIndex();
 			}
 		}

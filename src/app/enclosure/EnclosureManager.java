@@ -102,6 +102,7 @@ public class EnclosureManager {
                 case 0 -> {
                     System.out.println(MenuUtil.DEFAULT_PREFIX + "이전 메뉴로 돌아갑니다.");
                     UIUtil.printSeparator('━');
+                    return;
                 }
                 default -> System.out.println("잘못된 입력입니다. 다시 선택해주세요.");
             }

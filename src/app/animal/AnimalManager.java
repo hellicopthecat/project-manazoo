@@ -15,8 +15,6 @@ import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
 
 public class AnimalManager {
-
-	Scanner in = new Scanner(System.in);
 	Map<String, Animal> animals; // 싱글톤 데이터를 참조하도록 변경
 
 	String id;
