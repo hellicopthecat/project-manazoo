@@ -3,15 +3,17 @@ package app.animal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.stream.Collectors;
 
 import app.animal.AnimalEnum.Species;
 import app.common.IdGeneratorUtil;
+import app.common.InputUtil;
+import app.common.ui.MenuUtil;
+import app.common.ui.TextArtUtil;
+import app.common.ui.UIUtil;
 
 public class AnimalManager {
 
-	Scanner in = new Scanner(System.in);
 	Map<String, Animal> animals = new HashMap<>();
 
 	String id;
@@ -25,15 +27,35 @@ public class AnimalManager {
 
 	public void run() {
 		while (true) {
-			showMenu();
-			String menu = in.nextLine();
-			switch (menu) {
-			case "1" -> registerAnimal();
-			case "2" -> viewAnimals();
-			case "3" -> updateAnimal();
-			case "4" -> deleteAnimal();
-			case "5" -> {
-				System.out.println("뒤로 가기");
+			displayAnimalMenu();
+			int choice = InputUtil.getIntInput();
+			switch (choice) {
+			case 1 -> {
+				UIUtil.printSeparator('━');
+				TextArtUtil.printRegisterMenuTitle();
+				UIUtil.printSeparator('━');
+				registerAnimal();
+			}
+			case 2 -> {
+				UIUtil.printSeparator('━');
+				TextArtUtil.printViewMenuTitle();
+				UIUtil.printSeparator('━');
+				viewAnimals();
+			}
+			case 3 -> {
+				UIUtil.printSeparator('━');
+				TextArtUtil.printEditMenuTitle();
+				UIUtil.printSeparator('━');
+				editAnimal();
+			}
+			case 4 -> {
+				UIUtil.printSeparator('━');
+				TextArtUtil.printRemoveMenuTitle();
+				UIUtil.printSeparator('━');
+				removeAnimal();
+			}
+			case 0 -> {
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "이전 메뉴로 돌아갑니다.");
 				return;
 			}
 			default -> System.out.println("잘못된 선택입니다.");
@@ -41,15 +63,11 @@ public class AnimalManager {
 		}
 	}
 
-	public void showMenu() {
-		System.out.println("=== < 동물 관리 프로그램> ===");
-		System.out.println("1. 동물 등록");
-		System.out.println("2. 동물 조회");
-		System.out.println("3. 동물 수정");
-		System.out.println("4. 동물 삭제");
-		System.out.println("5. 뒤로 가기");
-		System.out.println("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ");
-		System.out.println("선택>> ");
+	private static void displayAnimalMenu() {
+		String[] option = { "동물 등록", "동물 조회", "동물 수정", "동물 삭제" };
+		String[] specialOptions = { "뒤로가기" };
+		UIUtil.printSeparator('━');
+		MenuUtil.generateMenuWithSpecialOptions(TextArtUtil::printAnimalMenuTitle, option, specialOptions);
 	}
 
 	// << 1. 동물 등록 >>
@@ -67,7 +85,7 @@ public class AnimalManager {
 
 			while (true) {
 				System.out.println("1.등록 2.다시입력");
-				String answer = in.nextLine();
+				String answer = InputUtil.getStringInput();
 
 				if (answer.equals("1")) {
 					// < 동물 등록 >
@@ -94,7 +112,7 @@ public class AnimalManager {
 		// < 동물 이름 입력 >
 		while (true) {
 			System.out.println("동물 이름 : ");
-			String inName = in.nextLine();
+			String inName = InputUtil.getStringInput();
 			if (animals.isEmpty()) {
 				name = inName;
 				break;
@@ -113,24 +131,25 @@ public class AnimalManager {
 		// < 동물 종 입력 >
 		while (true) {
 			System.out.println("동물 종 : ");
-			String inSpe = in.nextLine().trim();
+			System.out.println("종 목록:");
+			for (Species s : Species.values()) {
+				System.out.print(s.name() + " ");
+			}
+			System.out.println();
+
+			String inSpe = InputUtil.getStringInput().trim();
 			if (Species.isValid(inSpe)) {
 				species = inSpe;
 				break;
 			} else {
 				System.out.println("동물 종을 정확히 입력하세요.");
-				System.out.println("등록 가능한 종 목록:");
-				for (Species s : Species.values()) {
-					System.out.print(s.name() + " ");
-				}
-				System.out.println();
 			}
 		}
 
 		// < 나이 입력 >
 		while (true) {
 			System.out.println("동물 나이 : ");
-			String inAge = in.nextLine();
+			String inAge = InputUtil.getStringInput();
 			if (!StringIsInt(inAge)) {
 				System.out.println("숫자로 정확히 입력해 주세요.");
 			} else {
@@ -147,7 +166,7 @@ public class AnimalManager {
 		// < 성별 입력 >
 		while (true) {
 			System.out.println("동물 성별(수컷/암컷) : ");
-			String inGen = in.nextLine();
+			String inGen = InputUtil.getStringInput();
 			if (inGen.equals("수컷") || inGen.equals("암컷")) {
 				gender = inGen;
 				break;
@@ -159,7 +178,7 @@ public class AnimalManager {
 		// < 건강상태 입력 >
 		while (true) {
 			System.out.println("동물 건강상태(양호/보통/나쁨) : ");
-			String inHeal = in.nextLine();
+			String inHeal = InputUtil.getStringInput();
 			if (inHeal.equals("양호") || inHeal.equals("보통") || inHeal.equals("나쁨")) {
 				healthStatus = inHeal;
 				break;
@@ -170,11 +189,11 @@ public class AnimalManager {
 
 		// < 케이지 ID 입력 >
 		System.out.println("케이지 ID : ");
-		enclosureId = in.nextLine();
+		enclosureId = InputUtil.getStringInput();
 
 		// < 사육사 ID 입력 >
 		System.out.println("사육사 ID : ");
-		zkId = in.nextLine();
+		zkId = InputUtil.getStringInput();
 	}
 
 	// < 입력된 String 값이 int 값으로 변환 가능한지 체크하는 메소드 >
@@ -191,17 +210,11 @@ public class AnimalManager {
 	// << 2. 동물 조회 >>
 	public void viewAnimals() {
 		while (true) {
-			System.out.println("\n1.동물 목록 조회");
-			System.out.println("2.동물 ID로 검색");
-			System.out.println("3.동물 이름으로 검색");
-			System.out.println("4.동물 종으로 검색");
-			System.out.println("5.뒤로 가기");
-			System.out.println("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ");
-			System.out.println("선택>> ");
+			displayViewMenu();
 
-			String menu = in.nextLine();
-			switch (menu) {
-			case "1" -> {
+			int choice = InputUtil.getIntInput();
+			switch (choice) {
+			case 1 -> {
 				System.out.println("동물 목록");
 
 				for (Map.Entry<String, Animal> ent : animals.entrySet()) {
@@ -211,16 +224,23 @@ public class AnimalManager {
 					System.out.println("(동물 목록 없음)");
 				}
 			}
-			case "2" -> searchId();
-			case "3" -> searchName();
-			case "4" -> searchSpecies();
-			case "5" -> {
+			case 2 -> searchId();
+			case 3 -> searchName();
+			case 4 -> searchSpecies();
+			case 0 -> {
 				System.out.println("뒤로 가기");
 				return;
 			}
 			default -> System.out.println("잘못된 선택입니다.");
 			}
 		}
+	}
+
+	private static void displayViewMenu() {
+		String[] option = { "동물 목록 조회", "동물 ID로 검색", "동물 이름으로 검색", "동물 종으로 검색" };
+		String[] specialOptions = { "뒤로가기" };
+		UIUtil.printSeparator('━');
+		MenuUtil.generateMenuWithSpecialOptions(TextArtUtil::printVisitorMenuTitle, option, specialOptions);
 	}
 
 	// << 2-3. 동물 ID로 검색 >>
@@ -231,7 +251,7 @@ public class AnimalManager {
 				return;
 			} else {
 				System.out.println("검색할 동물 ID : ");
-				String findId = in.nextLine();
+				String findId = InputUtil.getStringInput();
 				if (animals.containsKey(findId)) {
 					Animal animal = animals.get(findId);
 					System.out.println(animal);
@@ -251,7 +271,7 @@ public class AnimalManager {
 				return;
 			} else {
 				System.out.println("검색할 동물 이름 : ");
-				String findName = in.nextLine();
+				String findName = InputUtil.getStringInput();
 
 				List<Animal> findAnimal = animals.values().stream().filter(k -> findName.equals(k.getName()))
 						.collect(Collectors.toList());
@@ -274,7 +294,7 @@ public class AnimalManager {
 				return;
 			} else {
 				System.out.println("검색할 동물 종 : ");
-				String findSpecies = in.nextLine();
+				String findSpecies = InputUtil.getStringInput();
 
 				List<Animal> findAnimals = animals.values().stream()
 
@@ -291,7 +311,7 @@ public class AnimalManager {
 	}
 
 	// << 3. 동물 수정 >>
-	public void updateAnimal() {
+	public void editAnimal() {
 		if (animals.isEmpty()) {
 			System.out.println("(동물 목록 없음)");
 			return;
@@ -301,7 +321,7 @@ public class AnimalManager {
 			String findId = null;
 			while (true) {
 				System.out.println("수정할 동물 ID 입력 : ");
-				findId = in.nextLine();
+				findId = InputUtil.getStringInput();
 				if (animals.containsKey(findId)) {
 					animal = animals.get(findId);
 					System.out.println(animal);
@@ -319,16 +339,23 @@ public class AnimalManager {
 				System.out.println("2.나이");
 				System.out.println("3.성별");
 				System.out.println("4.건강상태");
-				System.out.println("5.나가기");
+				System.out.println("0.나가기");
 
-				String select = in.nextLine();
+				int choice = InputUtil.getIntInput();
 
 				// < 정보 수정 >
-				switch (select) {
-				case "1" -> {
+				switch (choice) {
+				case 1 -> {
 					while (true) {
 						System.out.println("수정할 종 : ");
-						String sp = in.nextLine().trim();
+
+						System.out.println("종 목록:");
+						for (Species s : Species.values()) {
+							System.out.print(s.name() + " ");
+						}
+						System.out.println();
+
+						String sp = InputUtil.getStringInput().trim();
 						if (Species.isValid(sp)) {
 							animal.setSpecies(sp);
 							System.out.println("동물 수정 완료");
@@ -344,10 +371,10 @@ public class AnimalManager {
 						}
 					}
 				}
-				case "2" -> {
+				case 2 -> {
 					while (true) {
 						System.out.println("수정할 나이 : ");
-						String age = in.nextLine();
+						String age = InputUtil.getStringInput();
 						if (!StringIsInt(age)) {
 							System.out.println("숫자로 정확히 입력해 주세요.");
 						} else {
@@ -363,10 +390,10 @@ public class AnimalManager {
 						}
 					}
 				}
-				case "3" -> {
+				case 3 -> {
 					while (true) {
 						System.out.println("수정할 성별(수컷/암컷) : ");
-						String gen = in.nextLine();
+						String gen = InputUtil.getStringInput();
 						if (gen.equals("수컷") || gen.equals("암컷")) {
 							animal.setGender(gen);
 							System.out.println("동물 수정 완료");
@@ -377,10 +404,10 @@ public class AnimalManager {
 						}
 					}
 				}
-				case "4" -> {
+				case 4 -> {
 					while (true) {
 						System.out.println("수정할 건강상태(양호/보통/나쁨) : ");
-						String heal = in.nextLine();
+						String heal = InputUtil.getStringInput();
 						if (heal.equals("양호") || heal.equals("보통") || heal.equals("나쁨")) {
 							animal.setHealthStatus(heal);
 							System.out.println("동물 수정 완료");
@@ -391,7 +418,7 @@ public class AnimalManager {
 						}
 					}
 				}
-				case "5" -> {
+				case 0 -> {
 					System.out.println("나가기");
 					return;
 				}
@@ -402,7 +429,7 @@ public class AnimalManager {
 	}
 
 	// << 4. 동물 삭제 >>
-	public void deleteAnimal() {
+	public void removeAnimal() {
 		if (animals.isEmpty()) {
 			System.out.println("(동물 목록 없음)");
 			return;
@@ -412,7 +439,7 @@ public class AnimalManager {
 			String findId = null;
 			while (true) {
 				System.out.println("삭제할 동물 ID 입력 : ");
-				findId = in.nextLine();
+				findId = InputUtil.getStringInput();
 				if (animals.containsKey(findId)) {
 					animal = animals.get(findId);
 					System.out.println(animal);
