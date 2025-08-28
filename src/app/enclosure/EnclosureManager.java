@@ -12,6 +12,7 @@ import app.common.ui.TextArtUtil;
 import app.common.ui.TableUtil;
 import app.common.ui.UIUtil;
 import app.animal.AnimalManager;
+import app.console.ConsoleEngine;
 
 /**
  * 동물원 우리를 생성, 조회 및 동물 관리 등 전반적으로 관리하는 클래스입니다.
@@ -100,7 +101,8 @@ public class EnclosureManager {
                 }
                 case 0 -> {
                     System.out.println(MenuUtil.DEFAULT_PREFIX + "이전 메뉴로 돌아갑니다.");
-                    return;
+                    UIUtil.printSeparator('━');
+                    ConsoleEngine.showAdminMenu();
                 }
                 default -> System.out.println("잘못된 입력입니다. 다시 선택해주세요.");
             }
