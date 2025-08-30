@@ -2,3 +2,5 @@
 
 ## 프로젝트 기획서
 [GO TO Project Proposal](https://malachite-tracker-84f.notion.site/Java_Project-24d4c526bbe58014be23e4ff6eeccf34)
+
+To test pr msg to discord
