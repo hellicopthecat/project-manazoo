@@ -405,10 +405,22 @@ public class EnclosureManager {
         System.out.println("환경 타입이 " + newEnvironmentType + "으로 수정되었습니다.");
     }
 
+    /**
+     * 사육장 정보를 수정합니다.
+     * 각 편집 작업 후 즉시 Repository에 저장하여 데이터 안전성을 확보합니다.
+     * 
+     * <p>수정 가능한 항목:</p>
+     * <ul>
+     *   <li>사육장 이름</li>
+     *   <li>사육장 크기</li>
+     *   <li>사육장 온도</li>
+     *   <li>위치 타입</li>
+     *   <li>환경 타입</li>
+     * </ul>
+     */
     private void editEnclosure() {
         viewEnclosures();
 
-        // Early return 패턴 적용
         if (repository.count() == 0) {
             return;
         }
@@ -417,13 +429,11 @@ public class EnclosureManager {
 
         Optional<Enclosure> foundEnclosure = repository.findById(enclosureId);
         
-        // Early return 패턴 적용
         if (foundEnclosure.isEmpty()) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "입력하신 아이디의 사육장이 없습니다.");
             return;
         }
         
-        // 메인 로직 - 중첩 레벨 감소
         Enclosure enclosure = foundEnclosure.get();
         printEnclosureInfo("현재 사육장 정보", enclosure);
         UIUtil.printSeparator('━');
@@ -435,15 +445,34 @@ public class EnclosureManager {
 
             int choice = InputUtil.getIntInput();
             switch (choice) {
-                case 1 -> editName(enclosure);
-                case 2 -> editAreaSize(enclosure);
-                case 3 -> editTemperature(enclosure);
-                case 4 -> editLocationType(enclosure);
-                case 5 -> editEnvironmentType(enclosure);
-                case 0 -> {
+                case 1 -> {
+                    editName(enclosure);
                     repository.update(enclosure);
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "변경사항이 저장되었습니다.");
+                }
+                case 2 -> {
+                    editAreaSize(enclosure);
+                    repository.update(enclosure);
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "변경사항이 저장되었습니다.");
+                }
+                case 3 -> {
+                    editTemperature(enclosure);
+                    repository.update(enclosure);
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "변경사항이 저장되었습니다.");
+                }
+                case 4 -> {
+                    editLocationType(enclosure);
+                    repository.update(enclosure);
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "변경사항이 저장되었습니다.");
+                }
+                case 5 -> {
+                    editEnvironmentType(enclosure);
+                    repository.update(enclosure);
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "변경사항이 저장되었습니다.");
+                }
+                case 0 -> {
                     System.out.println(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다!");
-                    printEnclosureInfo("수정된 사육장 정보", enclosure);
+                    printEnclosureInfo("최종 사육장 정보", enclosure);
                     return;
                 }
                 default -> System.out.println(MenuUtil.DEFAULT_PREFIX + "잘못된 입력입니다. 다시 선택해주세요.");
