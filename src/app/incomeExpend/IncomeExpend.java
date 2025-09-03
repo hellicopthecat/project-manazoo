@@ -24,7 +24,6 @@ public class IncomeExpend {
 	 * 생성자
 	 * @param money 거래 금액
 	 * @param desc 설명
-	 * @param spendType 수입/지출 구분
 	 * @param eventType 구체적인 이벤트 구분
 	 */
 	public IncomeExpend(String id, Long money, String desc, IncomeExpendType IEType, EventType eventType) {
@@ -41,11 +40,26 @@ public class IncomeExpend {
 	 */
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
 		String convertIEType = IEConverter.IETypeStringConverter(IEType);
 		String convertEventType = IEConverter.eventTypeStringConverter(eventType);
 		return String.format(MenuUtil.DEFAULT_PREFIX + "[id: %s , 금액 : %d , 수입지출타 : %s , 수입지출모델 : %s , 설명 : %s]\n", id,
 				money, convertIEType, convertEventType, desc);
+	}
+
+	/**
+	 * ID getter 메서드
+	 * @return ID
+	 */
+	public String getId() {
+		return id;
+	}
+
+	/**
+	 * ID setter 메서드
+	 * @param id 설정할 ID
+	 */
+	public void setId(String id) {
+		this.id = id;
 	}
 
 }

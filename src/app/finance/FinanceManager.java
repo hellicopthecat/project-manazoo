@@ -1,10 +1,7 @@
 package app.finance;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import app.common.IdGeneratorUtil;
@@ -16,6 +13,8 @@ import app.incomeExpend.EventType;
 import app.incomeExpend.IEConverter;
 import app.incomeExpend.IncomeExpend;
 import app.incomeExpend.IncomeExpendType;
+import app.repository.interfaces.IncomeExpendRepository;
+import app.repository.memory.MemoryIncomeExpendRepository;
 
 /**
  * FinanceManager 클래스 
@@ -28,10 +27,10 @@ import app.incomeExpend.IncomeExpendType;
  */
 public final class FinanceManager {
 	private static final FinanceManager instance = new FinanceManager();
-	// 수입 내역 리스트
-	private List<IncomeExpend> incomes = new ArrayList<>();
-	// 지출 내역 리스트
-	private List<IncomeExpend> expends = new ArrayList<>();
+	
+	// Repository를 통한 데이터 관리
+	private final IncomeExpendRepository incomeExpendRepository;
+	
 	// 자본 (초기값:1억)
 	private Long capital = 1000000000l; // 자본
 
@@ -54,20 +53,23 @@ public final class FinanceManager {
 
 	// Constructor
 	private FinanceManager() {
-		incomes.add(new IncomeExpend(IdGeneratorUtil.generateId(), 30000000l, "아쿠아쇼 수익금", IncomeExpendType.INCOME,
+		this.incomeExpendRepository = new MemoryIncomeExpendRepository();
+		
+		// 초기 데이터 설정
+		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 30000000l, "아쿠아쇼 수익금", IncomeExpendType.INCOME,
 				EventType.AQUASHOW));
-		expends.add(new IncomeExpend(IdGeneratorUtil.generateId(), 4000000l, "아기 코끼리 일주일 식비", IncomeExpendType.EXPEND,
+		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 4000000l, "아기 코끼리 일주일 식비", IncomeExpendType.EXPEND,
 				EventType.FOOD));
-		expends.add(new IncomeExpend(IdGeneratorUtil.generateId(), 50000040l, "시설비", IncomeExpendType.EXPEND,
+		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 50000040l, "시설비", IncomeExpendType.EXPEND,
 				EventType.EMPLOYEE_EXTRA));
-		incomes.add(new IncomeExpend(IdGeneratorUtil.generateId(), 400112000l, "일주일 입장료", IncomeExpendType.INCOME,
+		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 400112000l, "일주일 입장료", IncomeExpendType.INCOME,
 				EventType.FEE));
-		expends.add(new IncomeExpend(IdGeneratorUtil.generateId(), 9002100l, "수도세", IncomeExpendType.EXPEND,
+		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 9002100l, "수도세", IncomeExpendType.EXPEND,
 				EventType.AQUASHOW));
-		expends.add(new IncomeExpend(IdGeneratorUtil.generateId(), 3053000l, "직원월급", IncomeExpendType.EXPEND,
+		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 3053000l, "직원월급", IncomeExpendType.EXPEND,
 				EventType.EMPLOYEE_MONTH));
-		Long incomeReduce = incomes.stream().map(i -> i.money).reduce((x, y) -> x + y).orElse(0l);
-		Long expendReduce = expends.stream().map(i -> i.money).reduce((x, y) -> x + y).orElse(0l);
+		Long incomeReduce = incomeExpendRepository.getTotalIncomes();
+		Long expendReduce = incomeExpendRepository.getTotalExpends();
 		setCapital(incomeReduce - expendReduce);
 	}
 
@@ -133,14 +135,14 @@ public final class FinanceManager {
 			if (ieType == IncomeExpendType.INCOME) {
 				// 자본증가
 				capital += money;
-				// 수입리스트 추가
-				incomes.add(ie);
+				// Repository를 통한 데이터 저장
+				incomeExpendRepository.save(ie);
 			} else {
 				// 지출일경우
 				// 자본감소
 				capital -= money;
-				// 지출리스트에 추가
-				expends.add(ie);
+				// Repository를 통한 데이터 저장
+				incomeExpendRepository.save(ie);
 			}
 			System.out.println();
 			System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서가 작성되었습니다.");
@@ -153,8 +155,6 @@ public final class FinanceManager {
 
 	/**
 	 * 수입/지출 내역, 자산 및 재무보고서를 조회하는 메서드
-	 * 
-	 * @param in Scanner
 	 */
 	private void getAssetData() {
 		AtomicBoolean run = new AtomicBoolean(true);
@@ -186,7 +186,7 @@ public final class FinanceManager {
 	// return incomes;
 	// }
 	private void getIncomesList() {
-		incomes.stream().forEach(t -> System.out.println(t));
+		incomeExpendRepository.getIncomeList().stream().forEach(t -> System.out.println(t));
 	}
 
 	// 지출 내역 리스트 반환
@@ -194,7 +194,7 @@ public final class FinanceManager {
 	// return expends;
 	// }
 	private void getExpendList() {
-		expends.stream().forEach(t -> System.out.println(t));
+		incomeExpendRepository.getExpendList().stream().forEach(t -> System.out.println(t));
 	}
 
 	/**
@@ -232,8 +232,7 @@ public final class FinanceManager {
 	 * @return 수입 리스트 합계 (없으면 0 반환)
 	 */
 	private Long getTotalIncomes() {
-		OptionalLong incomeReduce = incomes.stream().mapToLong((val) -> val.money).reduce((x, y) -> x + y);
-		return incomeReduce.orElse(0l);
+		return incomeExpendRepository.getTotalIncomes();
 	}
 
 	/**
@@ -251,8 +250,7 @@ public final class FinanceManager {
 	 * @return 지출 리스트 합계 (없으면 0 반환)
 	 */
 	private Long getTotalExpends() {
-		OptionalLong expendsReduce = expends.stream().mapToLong((val) -> val.money).reduce((x, y) -> x + y);
-		return expendsReduce.orElse(0l);
+		return incomeExpendRepository.getTotalExpends();
 	}
 
 	/**
@@ -261,8 +259,7 @@ public final class FinanceManager {
 	 * @return 지출 리스트 합계 (없으면 0 반환)
 	 */
 	private String getTotalExpendsString() {
-		OptionalLong expendsReduce = expends.stream().mapToLong((val) -> val.money).reduce((x, y) -> x + y);
-		return formattingMoney(expendsReduce.orElse(0l));
+		return formattingMoney(incomeExpendRepository.getTotalExpends());
 	}
 
 	/**
