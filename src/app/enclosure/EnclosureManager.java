@@ -1,6 +1,6 @@
 package app.enclosure;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -12,14 +12,28 @@ import app.common.ui.TextArtUtil;
 import app.common.ui.TableUtil;
 import app.common.ui.UIUtil;
 import app.animal.AnimalManager;
-import app.console.ConsoleEngine;
+import app.repository.MemoryEnclosureRepository;
+import app.repository.interfaces.EnclosureRepository;
 
 /**
- * 동물원 우리를 생성, 조회 및 동물 관리 등 전반적으로 관리하는 클래스입니다.
+ * 동물원 사육장을 생성, 조회, 수정, 삭제 및 동물 배치 등을 전반적으로 관리하는 클래스입니다.
+ * Repository 패턴을 적용하여 데이터 계층을 분리하고 타입 안전성을 확보했습니다.
+ * 
+ * <p>주요 기능:</p>
+ * <ul>
+ *   <li>사육장 등록 및 관리</li>
+ *   <li>동물 입사 관리 (Working Data Pattern 적용)</li>
+ *   <li>사육장 정보 조회 및 수정</li>
+ *   <li>사육장별 거주 동물 현황 관리</li>
+ * </ul>
  */
 public class EnclosureManager {
 
-    private final EnclosureRepository repository = EnclosureRepository.getInstance();
+    /**
+     * 사육장 데이터를 관리하는 Repository입니다.
+     * 메모리 기반 구현체를 사용하여 CRUD 연산을 수행합니다.
+     */
+    private final EnclosureRepository repository = new MemoryEnclosureRepository();
 
     /**
      * 사용자로부터 LocationType을 선택받는 헬퍼 메서드입니다.
@@ -88,15 +102,9 @@ public class EnclosureManager {
                     viewEnclosures();
                 }
                 case 3 -> {
-                    UIUtil.printSeparator('━');
-                    TextArtUtil.printViewMenuTitle();
-                    UIUtil.printSeparator('━');
                     editEnclosure();
                 }
                 case 4 -> {
-                    UIUtil.printSeparator('━');
-                    TextArtUtil.printRemoveMenuTitle();
-                    UIUtil.printSeparator('━');
                     removeEnclosure();
                 }
                 case 0 -> {
@@ -147,7 +155,19 @@ public class EnclosureManager {
         MenuUtil.generateMenuWithSpecialOptions(TextArtUtil::printRegisterMenuTitle, option, specialOptions);
     }
 
-    // 사육장 관련 메서드들
+    /**
+     * 새로운 사육장을 등록합니다.
+     * 사용자로부터 사육장 정보를 입력받아 시스템에 저장하고 결과를 출력합니다.
+     * 
+     * <p>입력받는 정보:</p>
+     * <ul>
+     *   <li>사육장 이름</li>
+     *   <li>사육장 크기 (㎡)</li>
+     *   <li>사육장 온도 (°C)</li>
+     *   <li>위치 타입 (실내/야외)</li>
+     *   <li>환경 타입 (육상/수상/혼합)</li>
+     * </ul>
+     */
     private void registerEnclosure() {
         UIUtil.printSeparator('━');
         String id = IdGeneratorUtil.generateId();
@@ -159,7 +179,9 @@ public class EnclosureManager {
         EnvironmentType environmentType = selectEnvironmentType();
 
         Enclosure newEnclosure = new Enclosure(id, name, areaSize, temperature, locationType, environmentType);
-        repository.save(newEnclosure.getId(), newEnclosure);
+        
+        repository.save(newEnclosure);
+        
         printEnclosureInfo("사육장이 등록되었습니다. 등록된 사육장의 정보는 아래와 같습니다.", newEnclosure);
     }
 
@@ -196,46 +218,40 @@ public class EnclosureManager {
 
     /**
      * 모든 사육장을 테이블 형태로 조회합니다.
-     * 기존 viewEnclosures() 로직을 함수화한 메서드입니다.
+     * 사육장의 기본 정보와 함께 거주 동물 수, 배정된 사육사 수를 표시합니다.
+     * 
+     * @see TableUtil#printTable(String, String[], String[][]) 테이블 출력 유틸리티
      */
     private void viewAllEnclosures() {
-        if (repository.isEmpty()) {
+        if (repository.count() == 0) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 사육장이 없습니다.");
             return;
         }
 
-        // 헤더에 Inhabitants, Caretakers 컬럼 추가 (총 8개)
         String[] headers = {"Enclosure ID", "Name", "Size(m2)", "Temp(C)", "Location", "Environment", "Inhabitants", "Caretakers"};
 
-        // repository의 모든 사육장 데이터를 2차원 배열로 변환
-        Collection<Object> allEnclosures = repository.findAll();
+        List<Enclosure> allEnclosures = repository.findAll();
         String[][] data = new String[allEnclosures.size()][];
-        int index = 0;
 
-        for (Object obj : allEnclosures) {
-            if (obj instanceof Enclosure enclosure) {
-                // 거주 동물 수 계산
-                int inhabitantCount = enclosure.getInhabitantCount();
-                
-                // 배정된 사육사 수 계산
-                int caretakerCount = enclosure.getCaretakerCount();
-                
-                data[index] = new String[]{
-                        enclosure.getId(),
-                        enclosure.getName(),
-                        String.format("%.1f", enclosure.getAreaSize()),
-                        String.format("%.1f", enclosure.getTemperature()),
-                        enclosure.getLocationType().toString(),
-                        enclosure.getEnvironmentType().toString(),
-                        String.valueOf(inhabitantCount),     // 거주 동물 수
-                        String.valueOf(caretakerCount)       // 배정된 사육사 수
-                };
-                index++;
-            }
+        for (int i = 0; i < allEnclosures.size(); i++) {
+            Enclosure enclosure = allEnclosures.get(i);
+            
+            int inhabitantCount = enclosure.getInhabitantCount();
+            int caretakerCount = enclosure.getCaretakerCount();
+            
+            data[i] = new String[]{
+                    enclosure.getId(),
+                    enclosure.getName(),
+                    String.format("%.1f", enclosure.getAreaSize()),
+                    String.format("%.1f", enclosure.getTemperature()),
+                    enclosure.getLocationType().toString(),
+                    enclosure.getEnvironmentType().toString(),
+                    String.valueOf(inhabitantCount),
+                    String.valueOf(caretakerCount)
+            };
         }
 
-        // TableUtil.printTable 사용하여 다중 행 표 출력
-        String title = String.format("사육장 목록 (총 %d개)", repository.size());
+        String title = String.format("사육장 목록 (총 %d개)", repository.count());
         TableUtil.printTable(title, headers, data);
     }
 
@@ -244,7 +260,7 @@ public class EnclosureManager {
      * 사육장 기본 정보와 거주 동물 목록을 모두 표시합니다.
      */
     private void viewSpecificEnclosure() {
-        if (repository.isEmpty()) {
+        if (repository.count() == 0) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 사육장이 없습니다.");
             return;
         }
@@ -276,13 +292,20 @@ public class EnclosureManager {
     }
 
     /**
-     * 사육장에 거주하는 동물들의 상세 목록을 표시합니다.
-     * displayAdmissionResult()와 동일한 테이블 형식을 사용합니다.
+     * 사육장에 거주하는 동물들의 상세 목록을 테이블 형태로 표시합니다.
+     * 
+     * <p>표시 정보:</p>
+     * <ul>
+     *   <li>동물 ID</li>
+     *   <li>동물 이름</li>
+     *   <li>종류</li>
+     *   <li>나이</li>
+     *   <li>입사일</li>
+     * </ul>
      * 
      * @param enclosure 조회할 사육장 객체
      */
     private void displayEnclosureInhabitants(Enclosure enclosure) {
-        // 사육장에 입주한 동물들 가져오기
         Map<String, Object> inhabitants = enclosure.getAllInhabitants();
         
         if (inhabitants.isEmpty()) {
@@ -290,20 +313,16 @@ public class EnclosureManager {
             return;
         }
         
-        // 테이블 헤더 정의 (displayAdmissionResult와 동일)
         String[] headers = {"Animal ID", "Name", "Species", "Age", "Admission Date"};
         String[][] data = new String[inhabitants.size()][];
         int index = 0;
         
-        // 현재 날짜를 입사일로 사용 (실제 구현에서는 Animal 객체에 입사일 필드 추가 권장)
         String currentDate = java.time.LocalDate.now().toString();
         
-        // 동물 데이터를 테이블 형태로 변환
         for (Map.Entry<String, Object> entry : inhabitants.entrySet()) {
             String animalId = entry.getKey();
             Object animalObj = entry.getValue();
             
-            // Animal 객체에서 실제 정보 추출
             if (animalObj instanceof Animal) {
                 Animal animal = (Animal) animalObj;
                 data[index] = new String[]{
@@ -314,7 +333,6 @@ public class EnclosureManager {
                     truncateString(currentDate, 15)
                 };
             } else {
-                // 임시 데이터 (호환성 보장)
                 data[index] = new String[]{
                     truncateString(animalId, 15),
                     truncateString("Unknown", 15),
@@ -326,11 +344,9 @@ public class EnclosureManager {
             index++;
         }
         
-        // 테이블 제목 생성
         String title = String.format("%s (%s) 거주 동물 목록", 
                       truncateString(enclosure.getName(), 15), enclosure.getId());
         
-        // 테이블 출력
         TableUtil.printTable(title, headers, data);
     }
 
@@ -389,11 +405,23 @@ public class EnclosureManager {
         System.out.println("환경 타입이 " + newEnvironmentType + "으로 수정되었습니다.");
     }
 
+    /**
+     * 사육장 정보를 수정합니다.
+     * 각 편집 작업 후 즉시 Repository에 저장하여 데이터 안전성을 확보합니다.
+     * 
+     * <p>수정 가능한 항목:</p>
+     * <ul>
+     *   <li>사육장 이름</li>
+     *   <li>사육장 크기</li>
+     *   <li>사육장 온도</li>
+     *   <li>위치 타입</li>
+     *   <li>환경 타입</li>
+     * </ul>
+     */
     private void editEnclosure() {
         viewEnclosures();
 
-        // Early return 패턴 적용
-        if (repository.isEmpty()) {
+        if (repository.count() == 0) {
             return;
         }
         
@@ -401,13 +429,11 @@ public class EnclosureManager {
 
         Optional<Enclosure> foundEnclosure = repository.findById(enclosureId);
         
-        // Early return 패턴 적용
         if (foundEnclosure.isEmpty()) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "입력하신 아이디의 사육장이 없습니다.");
             return;
         }
         
-        // 메인 로직 - 중첩 레벨 감소
         Enclosure enclosure = foundEnclosure.get();
         printEnclosureInfo("현재 사육장 정보", enclosure);
         UIUtil.printSeparator('━');
@@ -419,14 +445,34 @@ public class EnclosureManager {
 
             int choice = InputUtil.getIntInput();
             switch (choice) {
-                case 1 -> editName(enclosure);
-                case 2 -> editAreaSize(enclosure);
-                case 3 -> editTemperature(enclosure);
-                case 4 -> editLocationType(enclosure);
-                case 5 -> editEnvironmentType(enclosure);
+                case 1 -> {
+                    editName(enclosure);
+                    repository.update(enclosure);
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "변경사항이 저장되었습니다.");
+                }
+                case 2 -> {
+                    editAreaSize(enclosure);
+                    repository.update(enclosure);
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "변경사항이 저장되었습니다.");
+                }
+                case 3 -> {
+                    editTemperature(enclosure);
+                    repository.update(enclosure);
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "변경사항이 저장되었습니다.");
+                }
+                case 4 -> {
+                    editLocationType(enclosure);
+                    repository.update(enclosure);
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "변경사항이 저장되었습니다.");
+                }
+                case 5 -> {
+                    editEnvironmentType(enclosure);
+                    repository.update(enclosure);
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "변경사항이 저장되었습니다.");
+                }
                 case 0 -> {
                     System.out.println(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다!");
-                    printEnclosureInfo("수정된 사육장 정보", enclosure);
+                    printEnclosureInfo("최종 사육장 정보", enclosure);
                     return;
                 }
                 default -> System.out.println(MenuUtil.DEFAULT_PREFIX + "잘못된 입력입니다. 다시 선택해주세요.");
@@ -437,7 +483,7 @@ public class EnclosureManager {
     private void removeEnclosure() {
         viewEnclosures();
 
-        if (repository.isEmpty()) {
+        if (repository.count() == 0) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "삭제할 수 있는 사육장이 없습니다.");
         } else {
             String enclosureId = MenuUtil.Question.askTextInput("삭제할 사육장 번호를 입력하세요.");
@@ -452,8 +498,8 @@ public class EnclosureManager {
                 boolean confirmed = MenuUtil.Question.askSimpleConfirm("정말로 이 사육장을 삭제하시겠습니까?");
 
                 if (confirmed) {
-                    Object deletedEnclosure = repository.deleteById(enclosureId);
-                    if (deletedEnclosure != null) {
+                    boolean deleted = repository.deleteById(enclosureId);
+                    if (deleted) {
                         System.out.println("사육장 '" + enclosure.getName() + "' [" + enclosureId + "]이(가) 성공적으로 삭제되었습니다.");
                     } else {
                         System.out.println(MenuUtil.DEFAULT_PREFIX + "삭제 중 오류가 발생했습니다.");
@@ -542,7 +588,7 @@ public class EnclosureManager {
      */
     private boolean hasRequiredDataForAdmission() {
         // 사육장 존재 여부 확인
-        if (repository.isEmpty()) {
+        if (repository.count() == 0) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 사육장이 없습니다.");
             System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 입사를 위해서는 먼저 사육장을 등록해주세요.");
             return false;
@@ -576,9 +622,18 @@ public class EnclosureManager {
     }
     
     /**
-     * 작업용 동물 데이터를 테이블 형태로 출력합니다.
+     * Working Data Pattern에서 사용되는 작업용 동물 데이터를 테이블 형태로 출력합니다.
      * 
-     * @param workingAnimals 작업용 동물 데이터
+     * <p>표시 정보:</p>
+     * <ul>
+     *   <li>동물 ID</li>
+     *   <li>동물 이름</li>
+     *   <li>종류</li>
+     *   <li>나이</li>
+     *   <li>상태 (대기중)</li>
+     * </ul>
+     * 
+     * @param workingAnimals 작업용 동물 데이터 맵
      */
     private void displayWorkingAnimalsTable(Map<String, Animal> workingAnimals) {
         if (workingAnimals.isEmpty()) {
@@ -609,10 +664,11 @@ public class EnclosureManager {
     }
     
     /**
-     * Working Data Pattern: 작업용 데이터에서 동물을 선택받습니다.
+     * Working Data Pattern에서 사용자로부터 동물을 선택받습니다.
+     * 최대 3회까지 재시도 가능하며, 각 시도마다 사용자 확인을 받습니다.
      * 
-     * @param workingAnimals 작업용 동물 데이터
-     * @return 선택된 동물 ID (3회 실패 시 null 반환)
+     * @param workingAnimals 작업용 동물 데이터 맵
+     * @return 선택된 동물 ID, 3회 모두 실패 시 null 반환
      */
     private String selectAnimalWithRetryFromWorkingData(Map<String, Animal> workingAnimals) {
         for (int attempt = 1; attempt <= 3; attempt++) {
@@ -646,12 +702,12 @@ public class EnclosureManager {
     }
     
     /**
-     * Working Data Pattern: 입사 처리를 시뮬레이션합니다.
-     * 실제 데이터를 수정하기 전에 작업의 유효성을 검증합니다.
+     * 동물 입사 처리를 시뮬레이션합니다.
+     * Working Data Pattern을 사용하여 실제 데이터를 수정하기 전에 작업의 유효성을 검증합니다.
      * 
      * @param enclosureId    대상 사육장 ID
      * @param animalId       대상 동물 ID
-     * @param workingAnimals 작업용 동물 데이터
+     * @param workingAnimals 작업용 동물 데이터 맵
      * @return 시뮬레이션 성공 여부
      */
     private boolean simulateAnimalAdmission(String enclosureId, String animalId, Map<String, Animal> workingAnimals) {
@@ -683,8 +739,15 @@ public class EnclosureManager {
     }
     
     /**
-     * Working Data Pattern: 실제 데이터 업데이트를 수행합니다.
-     * 시뮬레이션이 성공한 후에만 호출되어야 합니다.
+     * 실제 동물 입사 데이터를 업데이트합니다.
+     * Working Data Pattern에서 시뮬레이션이 성공한 후에만 호출되어야 합니다.
+     * 
+     * <p>처리 과정:</p>
+     * <ol>
+     *   <li>사육장 객체 조회</li>
+     *   <li>AnimalManager에서 동물 이동 처리</li>
+     *   <li>사육장에 동물 추가</li>
+     * </ol>
      * 
      * @param enclosureId 대상 사육장 ID
      * @param animalId    대상 동물 ID
@@ -692,20 +755,17 @@ public class EnclosureManager {
      */
     private boolean executeAnimalAdmission(String enclosureId, String animalId) {
         try {
-            // 1. 사육장 객체 가져오기
             Optional<Enclosure> enclosureOpt = repository.findById(enclosureId);
             if (enclosureOpt.isEmpty()) {
                 return false;
             }
             Enclosure enclosure = enclosureOpt.get();
             
-            // 2. AnimalManager에서 실제 동물 이동 처리
             Animal animal = AnimalManager.getInstance().removeAvailableAnimal(animalId, enclosureId);
             if (animal == null) {
                 return false;
             }
             
-            // 3. 사육장에 동물 추가
             enclosure.addInhabitant(animalId, animal);
             
             return true;
@@ -753,10 +813,17 @@ public class EnclosureManager {
     }
 
     /**
-     * 동물 입사 결과를 표로 출력합니다.
-     * 입사가 진행된 사육장의 현재 동물 현황을 테이블 형태로 보여줍니다.
-     * 표시 항목: Animal ID, Name, Species, Age, Admission Date
-     * 각 항목은 최대 15글자로 제한됩니다.
+     * 동물 입사 처리 결과를 테이블 형태로 출력합니다.
+     * 처리된 사육장의 현재 동물 현황을 보여줍니다.
+     * 
+     * <p>표시 항목:</p>
+     * <ul>
+     *   <li>Animal ID (최대 15글자)</li>
+     *   <li>Name (최대 15글자)</li>
+     *   <li>Species (최대 15글자)</li>
+     *   <li>Age (최대 15글자)</li>
+     *   <li>Admission Date (최대 15글자)</li>
+     * </ul>
      * 
      * @param enclosureId 입사가 처리된 사육장 ID
      */
@@ -764,7 +831,6 @@ public class EnclosureManager {
         Optional<Enclosure> enclosureOpt = repository.findById(enclosureId);
         Enclosure enclosure = enclosureOpt.get();
         
-        // 사육장에 입주한 동물들 가져오기
         Map<String, Object> inhabitants = enclosure.getAllInhabitants();
         
         if (inhabitants.isEmpty()) {
@@ -772,20 +838,16 @@ public class EnclosureManager {
             return;
         }
         
-        // 테이블 헤더 정의 (15글자 제한)
         String[] headers = {"Animal ID", "Name", "Species", "Age", "Admission Date"};
         String[][] data = new String[inhabitants.size()][];
         int index = 0;
         
-        // 현재 날짜를 입사일로 사용
         String currentDate = java.time.LocalDate.now().toString();
         
-        // 동물 데이터를 테이블 형태로 변환
         for (Map.Entry<String, Object> entry : inhabitants.entrySet()) {
             String animalId = entry.getKey();
             Object animalObj = entry.getValue();
             
-            // Animal 객체에서 실제 정보 추출
             if (animalObj instanceof Animal) {
                 Animal animal = (Animal) animalObj;
                 data[index] = new String[]{
@@ -796,7 +858,6 @@ public class EnclosureManager {
                     truncateString(currentDate, 15)
                 };
             } else {
-                // 임시 데이터 (호환성 보장)
                 data[index] = new String[]{
                     truncateString(animalId, 15),
                     truncateString("Unknown", 15),
@@ -808,21 +869,19 @@ public class EnclosureManager {
             index++;
         }
         
-        // 테이블 제목 생성 (사육장 이름도 15글자 제한)
         String title = String.format("%s (%s) 현재 거주 동물 현황", 
                       truncateString(enclosure.getName(), 15), enclosureId);
         
-        // 테이블 출력
         TableUtil.printTable(title, headers, data);
     }
 
     /**
      * 문자열을 지정된 최대 길이로 자르는 유틸리티 메서드입니다.
-     * CMD 환경에서의 표시 호환성을 위해 문자열 길이를 제한합니다.
+     * CMD 환경에서의 테이블 표시 호환성을 위해 문자열 길이를 제한합니다.
      * 
      * @param str       원본 문자열
      * @param maxLength 최대 허용 길이
-     * @return 잘린 문자열 (null인 경우 빈 문자열 반환)
+     * @return 잘린 문자열, null인 경우 빈 문자열 반환
      */
     private String truncateString(String str, int maxLength) {
         if (str == null) return "";

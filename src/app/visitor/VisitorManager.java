@@ -3,8 +3,6 @@ package app.visitor;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
-import java.util.Map;
 
 import app.animal.AnimalEnum.Species;
 import app.common.IdGeneratorUtil;
@@ -12,10 +10,12 @@ import app.common.InputUtil;
 import app.common.ui.MenuUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
+import app.repository.MemoryVisitorRepository;
+import app.repository.interfaces.VisitorRepository;
 
 public class VisitorManager {
 
-	Map<String, Reservation> reservations = new HashMap<>();
+	private final VisitorRepository repository = new MemoryVisitorRepository();
 
 	String id; // 예약 번호
 	String name;
@@ -119,8 +119,7 @@ public class VisitorManager {
 
 		boolean choice = MenuUtil.Question.askYesNo("결제하시겠습니까?");
 		if (choice) {
-			Reservation reservation = new Reservation(id, name, phone, date, adultCount, childCount, totalPrice);
-			reservations.put(id, reservation);
+			Reservation reservation = repository.createReservation(id, name, phone, date, adultCount, childCount, totalPrice);
 
 			System.out.println("예약 및 결제 성공!");
 			System.out.println(reservation);
@@ -164,9 +163,8 @@ public class VisitorManager {
 			String answer = InputUtil.getStringInput();
 			if (answer.equals("1")) {
 
-				// 예약(Reservation) 객체 생성하여 Map에 저장
-				Reservation reservation = new Reservation(id, name, phone, date, adultCount, childCount, totalPrice);
-				reservations.put(id, reservation);
+				// 예약(Reservation) 객체 생성하여 Repository에 저장
+				Reservation reservation = repository.createReservation(id, name, phone, date, adultCount, childCount, totalPrice);
 
 				// 예약 및 결제 성공 메시지
 				System.out.println("예약 및 결제 성공!");
@@ -187,7 +185,7 @@ public class VisitorManager {
 		while (true) {
 
 			// 예약 목록이 없을 경우
-			if (reservations.isEmpty()) {
+			if (repository.count() == 0) {
 				System.out.println("등록된 예약이 없습니다.");
 				return;
 			}
@@ -195,10 +193,10 @@ public class VisitorManager {
 			// 예약번호로 검색
 			System.out.println("예약번호 : ");
 			String findId = InputUtil.getStringInput();
-			if (reservations.containsKey(findId)) {
+			if (repository.hasReservation(findId)) {
 
 				// 검색된 예약 내용 보여주기
-				Reservation reservation = reservations.get(findId);
+				Reservation reservation = repository.getReservationById(findId);
 				System.out.println(reservation);
 				return;
 			} else {
@@ -211,7 +209,7 @@ public class VisitorManager {
 		while (true) {
 
 			// 예약 목록이 없을 경우
-			if (reservations.isEmpty()) {
+			if (repository.count() == 0) {
 				System.out.println("등록된 예약이 없습니다.");
 				return;
 			}
@@ -219,20 +217,19 @@ public class VisitorManager {
 			// 예약번호로 검색
 			System.out.println("예약번호 : ");
 			String findId = InputUtil.getStringInput();
-			if (reservations.containsKey(findId)) {
+			if (repository.hasReservation(findId)) {
 
 				// 검색된 예약의 방문일정 보여주기
-				Reservation reservation = reservations.get(findId);
+				Reservation reservation = repository.getReservationById(findId);
 				System.out.println("현재 방문일정 : " + reservation.getDate());
 
 				// 변경할 일정 입력 받기
-				System.out.println("변경 일정 (YYYY-MM-DD) : ");
-				String inDate = InputUtil.getStringInput();
+				String newDate = inputDate("변경 일정 (YYYY-MM-DD) : ");
 
 				// 일정 변경하기
-				reservation.setDate(inDate);
+				repository.updateReservationDate(findId, newDate);
 				System.out.println("방문일정 변경 성공!");
-				System.out.println("방문일정 : " + reservation.getDate());
+				System.out.println("방문일정 : " + newDate);
 				return;
 			} else {
 				System.out.println("예약번호를 다시 입력해 주세요. ");
@@ -244,7 +241,7 @@ public class VisitorManager {
 		while (true) {
 
 			// 예약 목록이 없을 경우
-			if (reservations.isEmpty()) {
+			if (repository.count() == 0) {
 				System.out.println("등록된 예약이 없습니다.");
 				return;
 			}
@@ -252,10 +249,10 @@ public class VisitorManager {
 			// 예약번호로 검색
 			System.out.println("예약번호 : ");
 			String findId = InputUtil.getStringInput();
-			if (reservations.containsKey(findId)) {
+			if (repository.hasReservation(findId)) {
 
 				// 검색된 예약 내용 보여주기
-				Reservation reservation = reservations.get(findId);
+				Reservation reservation = repository.getReservationById(findId);
 				System.out.println(reservation);
 
 				System.out.println("예약을 취소하시겠습니까?");
@@ -263,8 +260,8 @@ public class VisitorManager {
 				String answer = InputUtil.getStringInput();
 				if (answer.equals("1")) {
 
-					// 예약 취소, Map에서 데이터 삭제
-					reservations.remove(findId);
+					// 예약 취소, Repository에서 데이터 삭제
+					repository.cancelReservation(findId);
 					System.out.println("예약 취소 완료");
 					return;
 				} else if (answer.equals("2")) {

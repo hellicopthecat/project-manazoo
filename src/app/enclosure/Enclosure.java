@@ -10,6 +10,7 @@ public class Enclosure implements EnclosureInterface {
 	private Float temperature;
 	private LocationType locationType;
 	private EnvironmentType environmentType;
+	private int maxCapacity;  // 최대 수용 인원
 	
 	/**
 	 * 이 사육장에 거주하는 동물들을 저장하는 Map입니다.
@@ -221,9 +222,31 @@ public class Enclosure implements EnclosureInterface {
 		this.temperature = temperature;
 	}
 
-	private Enclosure() {
-		this.inhabitants = new HashMap<>();
-		this.caretakers = new HashMap<>();
+	/**
+	 * 사육장의 최대 수용 인원을 반환합니다.
+	 * 
+	 * @return 최대 수용 인원
+	 */
+	public int getMaxCapacity() {
+		return maxCapacity;
+	}
+
+	/**
+	 * 사육장의 최대 수용 인원을 설정합니다.
+	 * 
+	 * @param maxCapacity 최대 수용 인원
+	 */
+	public void setMaxCapacity(int maxCapacity) {
+		this.maxCapacity = maxCapacity;
+	}
+
+	/**
+	 * 사육장의 현재 수용 인원을 반환합니다.
+	 * 
+	 * @return 현재 수용 인원 (거주 동물 수)
+	 */
+	public int getCurrentCapacity() {
+		return getInhabitantCount();
 	}
 
 	public Enclosure(String id, String name, Float areaSize, Float temperature, LocationType locationType,
@@ -234,6 +257,20 @@ public class Enclosure implements EnclosureInterface {
 		this.temperature = temperature;
 		this.locationType = locationType;
 		this.environmentType = environmentType;
+		this.maxCapacity = 10; // 기본값 설정
+		this.inhabitants = new HashMap<>();
+		this.caretakers = new HashMap<>();
+	}
+
+	public Enclosure(String id, String name, Float areaSize, Float temperature, LocationType locationType,
+			EnvironmentType environmentType, int maxCapacity) {
+		this.id = id;
+		this.name = name;
+		this.areaSize = areaSize;
+		this.temperature = temperature;
+		this.locationType = locationType;
+		this.environmentType = environmentType;
+		this.maxCapacity = maxCapacity;
 		this.inhabitants = new HashMap<>();
 		this.caretakers = new HashMap<>();
 	}
@@ -242,8 +279,8 @@ public class Enclosure implements EnclosureInterface {
 	public String toString() {
 		return String.format(
 				"id: '%s', name: '%s', areaSize: %.1f㎡, temperature: %.1f°C, locationType=%s, environmentType=%s, " +
-				"inhabitants: %d마리, caretakers: %d명", 
+				"maxCapacity: %d명, inhabitants: %d마리, caretakers: %d명", 
 				id, name, areaSize, temperature, locationType, environmentType, 
-				getInhabitantCount(), getCaretakerCount());
+				maxCapacity, getInhabitantCount(), getCaretakerCount());
 	}
 }
