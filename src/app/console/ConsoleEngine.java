@@ -95,7 +95,7 @@ public class ConsoleEngine {
 	 */
 	private static void handleAnimalManagement() {
 		AnimalManager manager = new AnimalManager();
-		manager.run();
+		manager.handleAnimalManagement();
 	}
 
 	/**

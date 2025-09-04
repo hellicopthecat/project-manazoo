@@ -3,14 +3,13 @@ package app.animal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import app.animal.AnimalEnum.Species;
 import app.common.IdGeneratorUtil;
-import app.common.ui.TableUtil;
 import app.common.InputUtil;
 import app.common.ui.MenuUtil;
+import app.common.ui.TableUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
 import app.repository.MemoryAnimalRepository;
@@ -29,22 +28,20 @@ public class AnimalManager {
 	String zkId;
 
 	/**
-	 * 기본 생성자
-	 * Repository 패턴으로 변경되어 더 이상 Map을 직접 관리하지 않습니다.
+	 * 기본 생성자 Repository 패턴으로 변경되어 더 이상 Map을 직접 관리하지 않습니다.
 	 */
 	public AnimalManager() {
 		// Repository는 필드에서 초기화됨
 	}
 
 	/**
-	 * 기존 인스턴스를 싱글톤과 동기화합니다.
-	 * Repository 패턴에서는 더 이상 필요하지 않지만 호환성을 위해 유지합니다.
+	 * 기존 인스턴스를 싱글톤과 동기화합니다. Repository 패턴에서는 더 이상 필요하지 않지만 호환성을 위해 유지합니다.
 	 */
 	public void syncWithSingleton() {
 		// Repository 패턴에서는 자동으로 동기화됨
 	}
 
-	public void run() {
+	public void handleAnimalManagement() {
 		while (true) {
 			displayAnimalMenu();
 			int choice = InputUtil.getIntInput();
@@ -77,7 +74,7 @@ public class AnimalManager {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "이전 메뉴로 돌아갑니다.");
 				return;
 			}
-			default -> System.out.println("잘못된 선택입니다.");
+			default -> System.out.println(MenuUtil.DEFAULT_PREFIX + "잘못된 선택입니다.");
 			}
 		}
 	}
@@ -89,9 +86,8 @@ public class AnimalManager {
 		MenuUtil.generateMenuWithSpecialOptions(TextArtUtil::printAnimalMenuTitle, option, specialOptions);
 	}
 
-	// << 1. 동물 등록 >>
 	public void registerAnimal() {
-		System.out.println("새 동물을 등록합니다.");
+
 		while (true) {
 			// << 정보 입력 받기 >>
 			inputInformation();
@@ -109,11 +105,12 @@ public class AnimalManager {
 				if (answer.equals("1")) {
 					// < 동물 등록 >
 
-					Animal animal = repository.createAnimal(id, name, species, age, gender, healthStatus, enclosureId, zkId);
-					
+					Animal animal = repository.createAnimal(id, name, species, age, gender, healthStatus, enclosureId,
+							zkId);
+
 					// 싱글톤과 동기화 (추가된 부분)
 					syncWithSingleton();
-					
+
 					System.out.println("동물 등록 완료 \n");
 					return;
 				} else if (answer.equals("2")) {
@@ -155,13 +152,13 @@ public class AnimalManager {
 		while (true) {
 			System.out.println("동물 종 : ");
 			System.out.println("종 목록:");
-			for (Species s : Species.values()) {
+			for (AnimalEnum s : AnimalEnum.values()) {
 				System.out.print(s.name() + " ");
 			}
 			System.out.println();
 
 			String inSpe = InputUtil.getStringInput().trim();
-			if (Species.isValid(inSpe)) {
+			if (AnimalEnum.isValid(inSpe)) {
 				species = inSpe;
 				break;
 			} else {
@@ -170,33 +167,28 @@ public class AnimalManager {
 		}
 
 		// < 나이 입력 >
-		while (true) {
-			System.out.println("동물 나이 : ");
-			String inAge = InputUtil.getStringInput();
-			if (!StringIsInt(inAge)) {
-				System.out.println("숫자로 정확히 입력해 주세요.");
-			} else {
-				int intAge = Integer.parseInt(inAge);
-				if (0 <= intAge && intAge < 200) {
-					age = intAge;
-					break;
-				} else {
-					System.out.println("다시 입력해 주세요.");
-				}
-			}
-		}
+		age = MenuUtil.Question.askNumberInputInt("동물의 나이를 입력하세요.");
 
 		// < 성별 입력 >
-		while (true) {
-			System.out.println("동물 성별(수컷/암컷) : ");
-			String inGen = InputUtil.getStringInput();
-			if (inGen.equals("수컷") || inGen.equals("암컷")) {
-				gender = inGen;
-				break;
-			} else {
-				System.out.println("다시 입력해 주세요.");
-			}
+		String[] choices = { "수컷", "암컷" };
+		int input = MenuUtil.Question.askSingleChoice("동물의 성별을 입력하세요.", choices);
+		if (input == 1) {
+			gender = "수컷";
+		} else if (input == 2) {
+			gender = "암컷";
+
 		}
+
+//		while (true) {
+//			System.out.println("동물 성별(수컷/암컷) : ");
+//			String inGen = InputUtil.getStringInput();
+//			if (inGen.equals("수컷") || inGen.equals("암컷")) {
+//				gender = inGen;
+//				break;
+//			} else {
+//				System.out.println("다시 입력해 주세요.");
+//			}
+//		}
 
 		// < 건강상태 입력 >
 		while (true) {
@@ -375,13 +367,13 @@ public class AnimalManager {
 						System.out.println("수정할 종 : ");
 
 						System.out.println("종 목록:");
-						for (Species s : Species.values()) {
+						for (AnimalEnum s : AnimalEnum.values()) {
 							System.out.print(s.name() + " ");
 						}
 						System.out.println();
 
 						String sp = InputUtil.getStringInput().trim();
-						if (Species.isValid(sp)) {
+						if (AnimalEnum.isValid(sp)) {
 							animal.setSpecies(sp);
 							repository.updateAnimal(animal.getId(), animal);
 							System.out.println("동물 수정 완료");
@@ -390,7 +382,7 @@ public class AnimalManager {
 						} else {
 							System.out.println("동물 종을 정확히 입력하세요.");
 							System.out.println("등록 가능한 종 목록:");
-							for (Species s : Species.values()) {
+							for (AnimalEnum s : AnimalEnum.values()) {
 								System.out.print(s.name() + " ");
 							}
 							System.out.println();
@@ -491,8 +483,7 @@ public class AnimalManager {
 	// =================================================================
 
 	/**
-	 * 배치 가능한 동물이 있는지 확인합니다.
-	 * enclosureId가 null이거나 빈 문자열인 동물이 배치 가능한 동물로 간주됩니다.
+	 * 배치 가능한 동물이 있는지 확인합니다. enclosureId가 null이거나 빈 문자열인 동물이 배치 가능한 동물로 간주됩니다.
 	 * 
 	 * @return 배치 가능한 동물 존재 여부
 	 */
@@ -503,8 +494,8 @@ public class AnimalManager {
 	}
 
 	/**
-	 * Working Data Pattern: 배치 가능한 동물들의 작업용 복사본을 반환합니다.
-	 * 원본 데이터를 수정하지 않고 작업할 수 있도록 새로운 HashMap으로 복사합니다.
+	 * Working Data Pattern: 배치 가능한 동물들의 작업용 복사본을 반환합니다. 원본 데이터를 수정하지 않고 작업할 수 있도록
+	 * 새로운 HashMap으로 복사합니다.
 	 * 
 	 * @return 배치 가능한 동물들의 복사본 Map
 	 */
@@ -515,53 +506,43 @@ public class AnimalManager {
 	}
 
 	/**
-	 * 배치 가능한 동물들의 목록을 반환합니다.
-	 * enclosureId가 null이거나 빈 문자열인 동물들을 필터링하여 반환합니다.
+	 * 배치 가능한 동물들의 목록을 반환합니다. enclosureId가 null이거나 빈 문자열인 동물들을 필터링하여 반환합니다.
 	 * 
 	 * @return 배치 가능한 동물들의 Map
 	 */
 	public Map<String, Animal> getAvailableAnimals() {
 		List<Animal> allAnimals = repository.getAnimalList();
-		return allAnimals.stream()
-				.filter(animal -> {
-					String enclosureId = animal.getEnclosureId();
-					return enclosureId == null || enclosureId.trim().isEmpty();
-				})
-				.collect(Collectors.toMap(Animal::getId, animal -> animal));
+		return allAnimals.stream().filter(animal -> {
+			String enclosureId = animal.getEnclosureId();
+			return enclosureId == null || enclosureId.trim().isEmpty();
+		}).collect(Collectors.toMap(Animal::getId, animal -> animal));
 	}
 
 	/**
-	 * 배치 가능한 동물들을 테이블 형태로 출력합니다.
-	 * EnclosureManager의 동물 입사 관리에서 사용됩니다.
-	 * TableUtil을 사용하여 일관된 형태의 표를 출력합니다.
+	 * 배치 가능한 동물들을 테이블 형태로 출력합니다. EnclosureManager의 동물 입사 관리에서 사용됩니다. TableUtil을
+	 * 사용하여 일관된 형태의 표를 출력합니다.
 	 */
 	public void displayAvailableAnimalsTable() {
 		Map<String, Animal> availableAnimals = getAvailableAnimals();
-		
+
 		if (availableAnimals.isEmpty()) {
 			System.out.println("  배치 가능한 동물이 없습니다.");
 			return;
 		}
 
 		// TableUtil에 맞는 헤더와 데이터 준비
-		String[] headers = {"Animal ID", "Name", "Species", "Age", "Gender", "Health"};
-		
+		String[] headers = { "Animal ID", "Name", "Species", "Age", "Gender", "Health" };
+
 		// 데이터 배열 생성
 		String[][] data = new String[availableAnimals.size()][];
 		int index = 0;
-		
+
 		for (Animal animal : availableAnimals.values()) {
-			data[index] = new String[]{
-				animal.getId(),
-				animal.getName(),
-				animal.getSpecies(),
-				String.valueOf(animal.getAge()),
-				animal.getGender(),
-				animal.getHealthStatus()
-			};
+			data[index] = new String[] { animal.getId(), animal.getName(), animal.getSpecies(),
+					String.valueOf(animal.getAge()), animal.getGender(), animal.getHealthStatus() };
 			index++;
 		}
-		
+
 		// TableUtil을 사용하여 표 출력
 		String title = String.format("배치 가능한 동물 목록 (총 %d마리)", availableAnimals.size());
 		TableUtil.printTable(title, headers, data);
@@ -579,8 +560,7 @@ public class AnimalManager {
 	}
 
 	/**
-	 * 특정 동물을 배치 가능한 상태에서 제거합니다.
-	 * 동물의 enclosureId를 설정하여 배치된 상태로 변경합니다.
+	 * 특정 동물을 배치 가능한 상태에서 제거합니다. 동물의 enclosureId를 설정하여 배치된 상태로 변경합니다.
 	 * 
 	 * @param animalId    배치할 동물 ID
 	 * @param enclosureId 배치할 사육장 ID
@@ -601,8 +581,7 @@ public class AnimalManager {
 	}
 
 	/**
-	 * 동물을 사육장에서 해제하여 다시 배치 가능한 상태로 만듭니다.
-	 * 동물의 enclosureId를 null로 설정합니다.
+	 * 동물을 사육장에서 해제하여 다시 배치 가능한 상태로 만듭니다. 동물의 enclosureId를 null로 설정합니다.
 	 * 
 	 * @param animalId 해제할 동물 ID
 	 * @return 해제된 동물 객체 (없으면 null)
@@ -634,13 +613,12 @@ public class AnimalManager {
 	}
 
 	/**
-	 * AnimalManager의 인스턴스를 반환합니다.
-	 * Singleton 패턴을 위한 메서드입니다.
+	 * AnimalManager의 인스턴스를 반환합니다. Singleton 패턴을 위한 메서드입니다.
 	 * 
 	 * @return AnimalManager 인스턴스
 	 */
 	private static AnimalManager instance = null;
-	
+
 	public static AnimalManager getInstance() {
 		if (instance == null) {
 			instance = new AnimalManager();
