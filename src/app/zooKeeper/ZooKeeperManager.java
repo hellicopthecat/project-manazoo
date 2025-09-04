@@ -161,6 +161,7 @@ public class ZooKeeperManager {
 
 	/**
 	<<<<<<< Updated upstream
+	<<<<<<< Updated upstream
 	 * 사육사 조회 메뉴를 표시하고 처리합니다.
 	 * 다양한 조회 옵션을 제공하여 사용자가 원하는 방식으로 사육사 정보를 찾을 수 있습니다.
 	 * 
@@ -171,6 +172,9 @@ public class ZooKeeperManager {
 	 *   <li>이름으로 다중 조회</li>
 	 *   <li>부서별 다중 조회</li>
 	 * </ul>
+	=======
+	 * 사육사 조회 메서드입니다.
+	>>>>>>> Stashed changes
 	=======
 	 * 사육사 조회 메서드입니다.
 	>>>>>>> Stashed changes
@@ -242,6 +246,7 @@ public class ZooKeeperManager {
 
 	/**
 	<<<<<<< Updated upstream
+	<<<<<<< Updated upstream
 	 * 사육사 정보 수정 메뉴를 표시하고 처리합니다.
 	 * 권한에 따라 제한된 정보만 수정할 수 있으며, 수정 가능한 항목을 메뉴로 제공합니다.
 	 * 
@@ -251,6 +256,9 @@ public class ZooKeeperManager {
 	 *   <li>업무배정가능여부 (가능/불가능)</li>
 	 *   <li>위험동물관리여부 (가능/불가능)</li>
 	 * </ul>
+	=======
+	 * 사육사 수정 메서드입니다.
+	>>>>>>> Stashed changes
 	=======
 	 * 사육사 수정 메서드입니다.
 	>>>>>>> Stashed changes
@@ -276,6 +284,9 @@ public class ZooKeeperManager {
 	 * 자기 자신은 언제나 수정 가능하며, 관리자 이상은 타인의 정보도 수정 가능합니다.
 	=======
 	 * 사육사 수정(재직여부) 메서드입니다.
+	<<<<<<< Updated upstream
+	>>>>>>> Stashed changes
+	=======
 	>>>>>>> Stashed changes
 	 */
 	private void editIsWorking() {
@@ -293,6 +304,9 @@ public class ZooKeeperManager {
 	 * 업무 할당과 관련된 중요한 설정이므로 신중하게 처리됩니다.
 	=======
 	 * 사육사 수정(업무할당) 메서드입니다.
+	<<<<<<< Updated upstream
+	>>>>>>> Stashed changes
+	=======
 	>>>>>>> Stashed changes
 	 */
 	private void editCanAssignTask() {
@@ -310,6 +324,9 @@ public class ZooKeeperManager {
 	 * 안전과 직결된 중요한 권한이므로 엄격하게 관리됩니다.
 	=======
 	 * 사육사 수정(고위험동물군관리여부) 메서드입니다.
+	<<<<<<< Updated upstream
+	>>>>>>> Stashed changes
+	=======
 	>>>>>>> Stashed changes
 	 */
 	private void editPermissionDangerAnimal() {
@@ -327,6 +344,9 @@ public class ZooKeeperManager {
 	 * 삭제된 사육사 정보는 복구할 수 없으므로 신중하게 처리됩니다.
 	=======
 	 * 사육사 삭제 메서드입니다.
+	<<<<<<< Updated upstream
+	>>>>>>> Stashed changes
+	=======
 	>>>>>>> Stashed changes
 	 */
 	private void deleteZooKeeper() {
