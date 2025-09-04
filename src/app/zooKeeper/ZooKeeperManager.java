@@ -23,6 +23,7 @@ import app.repository.interfaces.ZooKeeperRepository;
  *   <li>사육사 삭제 및 급여 설정</li>
  * </ul>
  */
+
 public class ZooKeeperManager {
 
 	private final ZooKeeperRepository repository = new MemoryZooKeeperRepository();
@@ -159,6 +160,7 @@ public class ZooKeeperManager {
 	}
 
 	/**
+	<<<<<<< Updated upstream
 	 * 사육사 조회 메뉴를 표시하고 처리합니다.
 	 * 다양한 조회 옵션을 제공하여 사용자가 원하는 방식으로 사육사 정보를 찾을 수 있습니다.
 	 * 
@@ -169,18 +171,15 @@ public class ZooKeeperManager {
 	 *   <li>이름으로 다중 조회</li>
 	 *   <li>부서별 다중 조회</li>
 	 * </ul>
+	=======
+	 * 사육사 조회 메서드입니다.
+	>>>>>>> Stashed changes
 	 */
 	// 읽기
 	private void getZooKeeper() {
 		AtomicBoolean run = new AtomicBoolean(true);
-		UIUtil.printSeparator('━');
-		System.out.println("사육사 조회");
-		System.out.println();
-		System.out.println(
-				MenuUtil.DEFAULT_PREFIX + "1. 전체리스트 조회, 2. ID로 찾기(개인), 3. 이름으로 찾기(다수), 4. 부서로 찾기(다수), 0. 뒤로가기");
-		System.out.println();
-		UIUtil.printSeparator('━');
-		System.out.println(MenuUtil.DEFAULT_PREFIX + "어떤 방식으로 찾으시겠습니까?  ▶ ");
+		String[] choices = { "전체리스트 조회", "ID로 찾기(개인)", "이름으로 찾기(다수)", "부서로 찾기(다수)", "뒤로가기" };
+		MenuUtil.printMenu("사육사 조회", choices);
 		int index = InputUtil.getIntInput();
 		switch (index) {
 		case 1 -> getZooKeeperList();
@@ -233,10 +232,8 @@ public class ZooKeeperManager {
 	 * 사용자가 선택한 부서에 소속된 모든 사육사의 정보를 표시합니다.
 	 */
 	private void getZooKeeperByDepartment() {
-		System.out.println(MenuUtil.DEFAULT_PREFIX
-				+ "1 : 포유류 , 2 : 조류 , 3 : 파충류 , 4 : 어류 , 5 : 양서류 , 6 : 번식/연구 , 7 : 수의/재활 , 8 : 교육");
-		System.out.println();
-		System.out.println(MenuUtil.DEFAULT_PREFIX + "부서를 고르세요 ▶ ");
+		String[] choices = { "포유류", "조류", "파충류", "어류", "양서류", "번식/연구", "수의/재활", "교육" };
+		MenuUtil.printMenu("부서를 고르세요", choices);
 		int departmentIndex = InputUtil.getIntInput();
 		UIUtil.printSeparator('━');
 		repository.getZooKeeperByDepartment(departmentIndex).forEach(System.out::println);
@@ -244,6 +241,7 @@ public class ZooKeeperManager {
 	}
 
 	/**
+	<<<<<<< Updated upstream
 	 * 사육사 정보 수정 메뉴를 표시하고 처리합니다.
 	 * 권한에 따라 제한된 정보만 수정할 수 있으며, 수정 가능한 항목을 메뉴로 제공합니다.
 	 * 
@@ -253,14 +251,14 @@ public class ZooKeeperManager {
 	 *   <li>업무배정가능여부 (가능/불가능)</li>
 	 *   <li>위험동물관리여부 (가능/불가능)</li>
 	 * </ul>
+	=======
+	 * 사육사 수정 메서드입니다.
+	>>>>>>> Stashed changes
 	 */
 	private void editZooKeeper() {
 		AtomicBoolean run = new AtomicBoolean(true);
-		System.out.println(MenuUtil.DEFAULT_PREFIX + "무엇을 수정하시겠습니까?");
-		System.out.println();
-		System.out.println(MenuUtil.DEFAULT_PREFIX + "1. 재직여부, 2. 업무배정가능여부, 3. 위험군동물관리여부, 0. 뒤로가기");
-		System.out.println();
-		System.out.println(MenuUtil.DEFAULT_PREFIX + "메뉴를 고르세요 ▶ ");
+		String[] choice = { "재직여부", "업무배정가능여부", "위험군동물관리여부", "뒤로가기" };
+		MenuUtil.printMenu("무엇을 수정하시겠습니까?", choice);
 		int index = InputUtil.getIntInput();
 		switch (index) {
 		case 1 -> editIsWorking();
@@ -272,24 +270,30 @@ public class ZooKeeperManager {
 	}
 
 	/**
+	<<<<<<< Updated upstream
 	 * 사육사의 재직 여부를 수정합니다.
 	 * 권한 검증을 통해 적절한 권한을 가진 사용자만 수정할 수 있습니다.
 	 * 자기 자신은 언제나 수정 가능하며, 관리자 이상은 타인의 정보도 수정 가능합니다.
+	=======
+	 * 사육사 수정(재직여부) 메서드입니다.
+	>>>>>>> Stashed changes
 	 */
 	private void editIsWorking() {
 		IdTracker ids = getIds();
 		int index = getValidateInt(null, "1. 재직, 2. 퇴사", 1, 2);
 		repository.setIsWorking(ids.getMyId(), ids.getTargetId(), index);
-		UIUtil.printSeparator('━');
 		System.out
 				.println(MenuUtil.DEFAULT_PREFIX + "************************ 재직여부가 수정되었습니다. ************************");
-		UIUtil.printSeparator('━');
 	}
 
 	/**
+	<<<<<<< Updated upstream
 	 * 사육사의 업무 배정 가능 여부를 수정합니다.
 	 * 권한 검증을 통해 적절한 권한을 가진 사용자만 수정할 수 있습니다.
 	 * 업무 할당과 관련된 중요한 설정이므로 신중하게 처리됩니다.
+	=======
+	 * 사육사 수정(업무할당) 메서드입니다.
+	>>>>>>> Stashed changes
 	 */
 	private void editCanAssignTask() {
 		IdTracker ids = getIds();
@@ -300,9 +304,13 @@ public class ZooKeeperManager {
 	}
 
 	/**
+	<<<<<<< Updated upstream
 	 * 사육사의 위험동물 관리 권한을 수정합니다.
 	 * 권한 검증을 통해 적절한 권한을 가진 사용자만 수정할 수 있습니다.
 	 * 안전과 직결된 중요한 권한이므로 엄격하게 관리됩니다.
+	=======
+	 * 사육사 수정(고위험동물군관리여부) 메서드입니다.
+	>>>>>>> Stashed changes
 	 */
 	private void editPermissionDangerAnimal() {
 		IdTracker ids = getIds();
@@ -313,9 +321,13 @@ public class ZooKeeperManager {
 	}
 
 	/**
+	<<<<<<< Updated upstream
 	 * 사육사를 시스템에서 삭제합니다.
 	 * 권한 검증을 통해 적절한 권한을 가진 사용자만 삭제할 수 있습니다.
 	 * 삭제된 사육사 정보는 복구할 수 없으므로 신중하게 처리됩니다.
+	=======
+	 * 사육사 삭제 메서드입니다.
+	>>>>>>> Stashed changes
 	 */
 	private void deleteZooKeeper() {
 		IdTracker ids = getIds();
