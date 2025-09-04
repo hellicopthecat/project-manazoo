@@ -128,7 +128,7 @@ public class ConsoleEngine {
 		System.out.println(MenuUtil.DEFAULT_PREFIX + "관람객 모드로 접속합니다...");
 		TextArtUtil.printWelcomeMessage();
 		VisitorManager manager = new VisitorManager();
-		manager.run();
+		manager.handleVisitorManagement();
 	}
 
 	/**
