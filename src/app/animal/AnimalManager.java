@@ -47,18 +47,8 @@ public class AnimalManager {
 			switch (choice) {
 			case 1 -> registerAnimal();
 			case 2 -> viewAnimals();
-			case 3 -> {
-				UIUtil.printSeparator('━');
-				TextArtUtil.printEditMenuTitle();
-				UIUtil.printSeparator('━');
-				editAnimal();
-			}
-			case 4 -> {
-				UIUtil.printSeparator('━');
-				TextArtUtil.printRemoveMenuTitle();
-				UIUtil.printSeparator('━');
-				removeAnimal();
-			}
+			case 3 -> editAnimal();
+			case 4 -> removeAnimal();
 			case 0 -> {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "이전 메뉴로 돌아갑니다.");
 				return;
@@ -280,6 +270,10 @@ public class AnimalManager {
 
 	// << 3. 동물 수정 >>
 	public void editAnimal() {
+		UIUtil.printSeparator('━');
+		TextArtUtil.printEditMenuTitle();
+		UIUtil.printSeparator('━');
+		
 		if (repository.count() == 0) {
 			System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 동물이 없습니다.");
 			return;
@@ -343,6 +337,10 @@ public class AnimalManager {
 
 	// << 4. 동물 삭제 >>
 	public void removeAnimal() {
+		UIUtil.printSeparator('━');
+		TextArtUtil.printRemoveMenuTitle();
+		UIUtil.printSeparator('━');
+		
 		if (repository.count() == 0) {
 			System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 동물이 없습니다.");
 			return;
