@@ -297,42 +297,39 @@ public class AnimalManager {
 
 		// < 정보 수정 >
 		switch (choice) {
-		case 1 -> {
-			int changAge = MenuUtil.Question.askNumberInputInt("수정할 나이를 입력하세요.");
-			animal.setAge(changAge);
-			System.out.println(animal);
-		}
-//		case 2 -> ;
-//		case 3 -> ;
+		case 1 -> editAnimalAge(animal);
+		case 2 -> editAnimalHealth(animal);
+		case 3 -> editAnimalEnclosureID(animal);
 		default -> System.out.println();
 		}
 
-//		case 4 -> {
-//			while (true) {
-//				System.out.println("수정할 건강상태(양호/보통/나쁨) : ");
-//				String heal = InputUtil.getStringInput();
-//				if (heal.equals("양호") || heal.equals("보통") || heal.equals("나쁨")) {
-//					animal.setHealthStatus(heal);
-//					repository.updateAnimal(animal.getId(), animal);
-//					System.out.println("동물 수정 완료");
-//					System.out.println(animal);
-//					break;
-//				} else {
-//					System.out.println("다시 입력해 주세요.");
-//				}
-//			}
-//		}
-//		
 	}
 
-	// < 입력된 String 값이 int 값으로 변환 가능한지 체크하는 메소드 >
-	public static boolean StringIsInt(String str) {
-		try {
-			Integer.parseInt(str);
-			return true;
-		} catch (NumberFormatException e) {
-			return false;
+	public void editAnimalAge(Animal animal) {
+		int changeAge = MenuUtil.Question.askNumberInputInt("수정할 나이를 입력하세요.");
+		animal.setAge(changeAge);
+		System.out.println(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
+		System.out.println(animal);
+	}
+
+	public void editAnimalHealth(Animal animal) {
+		String changeHealth = "";
+		String[] healthChoices = { "Good", "Fair", "Poor" };
+		int inHealth = MenuUtil.Question.askSingleChoice("수정할 건강상태를 입력하세요.", healthChoices);
+		if (inHealth == 1) {
+			changeHealth = "Good";
+		} else if (inHealth == 2) {
+			changeHealth = "Fair";
+		} else if (inHealth == 3) {
+			changeHealth = "Poor";
 		}
+		animal.setHealthStatus(changeHealth);
+		System.out.println(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
+		System.out.println(animal);
+	}
+
+	public void editAnimalEnclosureID(Animal animal) {
+
 	}
 
 	// << 4. 동물 삭제 >>
