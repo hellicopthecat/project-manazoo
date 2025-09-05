@@ -25,7 +25,6 @@ public class AnimalManager {
 	String gender;
 	String healthStatus;
 	String enclosureId;
-	String zkId;
 
 	/**
 	 * 기본 생성자 Repository 패턴으로 변경되어 더 이상 Map을 직접 관리하지 않습니다.
@@ -87,51 +86,34 @@ public class AnimalManager {
 	}
 
 	public void registerAnimal() {
+		id = IdGeneratorUtil.generateId();
+		inputName("동물의 이름을 입력하세요.");
+		inputSpecies("동물의 종을 입력하세요.");
+		age = MenuUtil.Question.askNumberInputInt("동물의 나이를 입력하세요.");
+		inputGender("동물의 성별을 입력하세요.");
+		inputHealth("동물의 건강상태를 입력하세요.");
 
-		while (true) {
-			// << 정보 입력 받기 >>
-			inputInformation();
+		// < 케이지 ID 입력 >
+		System.out.println("케이지 ID : ");
+		enclosureId = InputUtil.getStringInput();
 
-			// << 정보 확인하고 확답 받기 & 동물 등록 후 완료 메시지 >>
-			System.out.println("\n입력하신 정보를 확인하세요.");
+		String[] headers = { "Name", "Species", "Age", "Gender", "HealthStatus", "EnclosureId" };
+		String[][] data = { { name, species, Integer.toString(age), gender, healthStatus, enclosureId } };
+		TableUtil.printTable("입력하신 정보는 아래와 같습니다.", headers, data);
 
-			System.out.printf("%s / %s / %s / %d / %s / %s / %s / %s \n", id, name, species, age, gender, healthStatus,
-					enclosureId, zkId);
-
-			while (true) {
-				System.out.println("1.등록 2.다시입력");
-				String answer = InputUtil.getStringInput();
-
-				if (answer.equals("1")) {
-					// < 동물 등록 >
-
-					Animal animal = repository.createAnimal(id, name, species, age, gender, healthStatus, enclosureId,
-							zkId);
-
-					// 싱글톤과 동기화 (추가된 부분)
-					syncWithSingleton();
-
-					System.out.println("동물 등록 완료 \n");
-					return;
-				} else if (answer.equals("2")) {
-					// < 다시입력 > (내부 while만 깨고 외부 while은 계속 진행)
-					break;
-				} else {
-					System.out.println("잘못된 선택입니다.");
-				}
-			}
+		boolean choice = MenuUtil.Question.askYesNo("등록하시겠습니까?");
+		if (choice) {
+			Animal animal = repository.createAnimal(id, name, species, age, gender, healthStatus, enclosureId);
+			syncWithSingleton();
+			System.out.printf(MenuUtil.DEFAULT_PREFIX + "동물 등록 성공!");
+			System.out.println(animal);
 		}
 	}
 
-	// < 동물 신규 등록시, 정보 입력 받는 메소드 >
-	public void inputInformation() {
-		// < ID 자동 생성 >
-		id = IdGeneratorUtil.generateId();
-
-		// < 동물 이름 입력 >
+	public void inputName(String question) {
 		while (true) {
-			System.out.println("동물 이름 : ");
-			String inName = InputUtil.getStringInput();
+			String inName = MenuUtil.Question.askTextInput(question);
+
 			List<Animal> allAnimals = repository.getAnimalList();
 			if (allAnimals.isEmpty()) {
 				name = inName;
@@ -143,76 +125,55 @@ public class AnimalManager {
 					name = inName;
 					break;
 				} else {
-					System.out.println("동일한 이름이 있습니다. 다시 입력해 주세요.");
+					System.out.println(MenuUtil.DEFAULT_PREFIX + "동일한 이름이 있습니다.");
 				}
 			}
 		}
+	}
 
-		// < 동물 종 입력 >
+	public void inputSpecies(String question) {
 		while (true) {
-			System.out.println("동물 종 : ");
-			System.out.println("종 목록:");
-			for (AnimalEnum s : AnimalEnum.values()) {
-				System.out.print(s.name() + " ");
-			}
+			System.out.println(MenuUtil.DEFAULT_PREFIX + question);
 			System.out.println();
+			String[] headers = { "Lion", "Tiger", "Bear", "Elephant" };
+			String[][] data = { { "Wolf", "Eagle", "Owl", "Snake" } };
+			TableUtil.printTable("(등록 가능한 종 목록)", headers, data);
+			System.out.print(MenuUtil.DEFAULT_PREFIX + "입력하세요 ▶ ");
 
-			String inSpe = InputUtil.getStringInput().trim();
-			if (AnimalEnum.isValid(inSpe)) {
-				species = inSpe;
+			String inSpecies = InputUtil.getStringInput().trim();
+			if (AnimalEnum.isValid(inSpecies)) {
+				species = inSpecies;
+				UIUtil.printSeparator('━');
 				break;
 			} else {
-				System.out.println("동물 종을 정확히 입력하세요.");
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 종을 정확히 입력하세요.\n");
 			}
 		}
+	}
 
-		// < 나이 입력 >
-		age = MenuUtil.Question.askNumberInputInt("동물의 나이를 입력하세요.");
-
-		// < 성별 입력 >
-		String[] choices = { "수컷", "암컷" };
-		int input = MenuUtil.Question.askSingleChoice("동물의 성별을 입력하세요.", choices);
-		if (input == 1) {
-			gender = "수컷";
-		} else if (input == 2) {
-			gender = "암컷";
-
+	public void inputGender(String question) {
+		String[] genderChoices = { "Male", "Female" };
+		int inGender = MenuUtil.Question.askSingleChoice(question, genderChoices);
+		if (inGender == 1) {
+			gender = "Male";
+		} else if (inGender == 2) {
+			gender = "Female";
 		}
+	}
 
-//		while (true) {
-//			System.out.println("동물 성별(수컷/암컷) : ");
-//			String inGen = InputUtil.getStringInput();
-//			if (inGen.equals("수컷") || inGen.equals("암컷")) {
-//				gender = inGen;
-//				break;
-//			} else {
-//				System.out.println("다시 입력해 주세요.");
-//			}
-//		}
-
-		// < 건강상태 입력 >
-		while (true) {
-			System.out.println("동물 건강상태(양호/보통/나쁨) : ");
-			String inHeal = InputUtil.getStringInput();
-			if (inHeal.equals("양호") || inHeal.equals("보통") || inHeal.equals("나쁨")) {
-				healthStatus = inHeal;
-				break;
-			} else {
-				System.out.println("다시 입력해 주세요.");
-			}
+	public void inputHealth(String question) {
+		String[] healthChoices = { "Good", "Fair", "Poor" };
+		int inHealth = MenuUtil.Question.askSingleChoice(question, healthChoices);
+		if (inHealth == 1) {
+			healthStatus = "Good";
+		} else if (inHealth == 2) {
+			healthStatus = "Fair";
+		} else if (inHealth == 3) {
+			healthStatus = "Poor";
 		}
-
-		// < 케이지 ID 입력 >
-		System.out.println("케이지 ID : ");
-		enclosureId = InputUtil.getStringInput();
-
-		// < 사육사 ID 입력 >
-		System.out.println("사육사 ID : ");
-		zkId = InputUtil.getStringInput();
 	}
 
 	// < 입력된 String 값이 int 값으로 변환 가능한지 체크하는 메소드 >
-
 	public static boolean StringIsInt(String str) {
 		try {
 			Integer.parseInt(str);
