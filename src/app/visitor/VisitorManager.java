@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-import app.animal.AnimalEnum.Species;
+import app.animal.AnimalEnum;
 import app.common.IdGeneratorUtil;
 import app.common.InputUtil;
 import app.common.ui.MenuUtil;
@@ -88,7 +88,7 @@ public class VisitorManager {
 
 		// 동물 목록
 		System.out.println("관람 가능 동물 : ");
-		for (Species s : Species.values()) {
+		for (AnimalEnum s : AnimalEnum.values()) {
 			System.out.print(s.name() + " ");
 		}
 		System.out.println(); // 줄 바꾸기
@@ -119,7 +119,8 @@ public class VisitorManager {
 
 		boolean choice = MenuUtil.Question.askYesNo("결제하시겠습니까?");
 		if (choice) {
-			Reservation reservation = repository.createReservation(id, name, phone, date, adultCount, childCount, totalPrice);
+			Reservation reservation = repository.createReservation(id, name, phone, date, adultCount, childCount,
+					totalPrice);
 
 			System.out.println("예약 및 결제 성공!");
 			System.out.println(reservation);
@@ -164,7 +165,8 @@ public class VisitorManager {
 			if (answer.equals("1")) {
 
 				// 예약(Reservation) 객체 생성하여 Repository에 저장
-				Reservation reservation = repository.createReservation(id, name, phone, date, adultCount, childCount, totalPrice);
+				Reservation reservation = repository.createReservation(id, name, phone, date, adultCount, childCount,
+						totalPrice);
 
 				// 예약 및 결제 성공 메시지
 				System.out.println("예약 및 결제 성공!");
