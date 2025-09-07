@@ -136,7 +136,6 @@ public final class ZooKeeperManager {
      * ZooKeeperManagement으로 콘솔을 실행시킬 수 있습니다.
      */
     public void handleZookeeperManagement() {
-        // 더미 데이터는 초기화에서 이미 생성되었으므로 제거
         AtomicBoolean run = new AtomicBoolean(true);
         while (run.get()) {
             String[] menu = { "사육사 등록", "사육사 찾기", "사육사 수정", "사육사 삭제", "급여지출결의서작성" };
