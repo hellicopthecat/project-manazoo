@@ -2,6 +2,8 @@ package app.enclosure;
 
 import java.util.Map;
 
+import app.repository.interfaces.EnclosureRepository;
+
 /**
  * 동물원 사육장를 위한 인터페이스로, 동물 및 사육장 속성 관리를 위한 필수 메서드를 정의합니다.
  */

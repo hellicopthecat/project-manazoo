@@ -3,6 +3,9 @@ package app.enclosure;
 import java.util.HashMap;
 import java.util.Map;
 
+import app.repository.MemoryEnclosureRepository;
+import app.repository.interfaces.EnclosureRepository;
+
 public class Enclosure implements EnclosureInterface {
 	private String id;
 	private String name;
@@ -24,9 +27,20 @@ public class Enclosure implements EnclosureInterface {
 	 */
 	private final Map<String, Object> caretakers;
 
+	/**
+	 * Repository 패턴을 적용한 데이터 접근 계층입니다.
+	 * MemoryEnclosureRepository를 사용하여 사육장 데이터를 관리합니다.
+	 */
+	private static final EnclosureRepository repository = new MemoryEnclosureRepository();
+
+	/**
+	 * Repository 인스턴스를 반환합니다.
+	 * 
+	 * @return EnclosureRepository 인스턴스
+	 */
 	@Override
 	public EnclosureRepository getRepository() {
-		return EnclosureRepository.getInstance();
+		return repository;
 	}
 
 	@Override
@@ -249,6 +263,16 @@ public class Enclosure implements EnclosureInterface {
 		return getInhabitantCount();
 	}
 
+	/**
+	 * 기본 생성자 - 최대 수용 인원을 기본값(10)으로 설정합니다.
+	 * 
+	 * @param id 사육장 ID
+	 * @param name 사육장 이름
+	 * @param areaSize 면적 크기
+	 * @param temperature 온도
+	 * @param locationType 위치 타입
+	 * @param environmentType 환경 타입
+	 */
 	public Enclosure(String id, String name, Float areaSize, Float temperature, LocationType locationType,
 			EnvironmentType environmentType) {
 		this.id = id;
@@ -262,6 +286,17 @@ public class Enclosure implements EnclosureInterface {
 		this.caretakers = new HashMap<>();
 	}
 
+	/**
+	 * 최대 수용 인원을 지정하는 생성자입니다.
+	 * 
+	 * @param id 사육장 ID
+	 * @param name 사육장 이름
+	 * @param areaSize 면적 크기
+	 * @param temperature 온도
+	 * @param locationType 위치 타입
+	 * @param environmentType 환경 타입
+	 * @param maxCapacity 최대 수용 인원
+	 */
 	public Enclosure(String id, String name, Float areaSize, Float temperature, LocationType locationType,
 			EnvironmentType environmentType, int maxCapacity) {
 		this.id = id;
