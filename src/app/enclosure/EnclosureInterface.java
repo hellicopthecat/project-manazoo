@@ -2,20 +2,11 @@ package app.enclosure;
 
 import java.util.Map;
 
-import app.repository.interfaces.EnclosureRepository;
-
 /**
  * 동물원 사육장를 위한 인터페이스로, 동물 및 사육장 속성 관리를 위한 필수 메서드를 정의합니다.
  */
 
 public interface EnclosureInterface {
-
-    /**
-     * 사육장 저장소를 반환합니다.
-     *
-     * @return 사육장 저장소
-     */
-    EnclosureRepository getRepository();
 
     /**
      * 사육장 고유 식별자를 반환합니다.

@@ -3,9 +3,6 @@ package app.enclosure;
 import java.util.HashMap;
 import java.util.Map;
 
-import app.repository.MemoryEnclosureRepository;
-import app.repository.interfaces.EnclosureRepository;
-
 public class Enclosure implements EnclosureInterface {
 	private String id;
 	private String name;
@@ -26,22 +23,6 @@ public class Enclosure implements EnclosureInterface {
 	 * Key: 사육사 ID, Value: 사육사 객체
 	 */
 	private final Map<String, Object> caretakers;
-
-	/**
-	 * Repository 패턴을 적용한 데이터 접근 계층입니다.
-	 * MemoryEnclosureRepository를 사용하여 사육장 데이터를 관리합니다.
-	 */
-	private static final EnclosureRepository repository = new MemoryEnclosureRepository();
-
-	/**
-	 * Repository 인스턴스를 반환합니다.
-	 * 
-	 * @return EnclosureRepository 인스턴스
-	 */
-	@Override
-	public EnclosureRepository getRepository() {
-		return repository;
-	}
 
 	@Override
 	public String getId() {
