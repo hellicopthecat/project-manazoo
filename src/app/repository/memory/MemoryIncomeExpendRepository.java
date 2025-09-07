@@ -23,11 +23,6 @@ import java.util.stream.Collectors;
  */
 public class MemoryIncomeExpendRepository implements IncomeExpendRepository {
     
-    /**
-     * Singleton 인스턴스
-     */
-    private static MemoryIncomeExpendRepository instance;
-    
     /** 수입/지출 내역을 저장하는 메모리 저장소 */
     private final Map<String, IncomeExpend> storage = new HashMap<>();
     
@@ -37,16 +32,21 @@ public class MemoryIncomeExpendRepository implements IncomeExpendRepository {
     private MemoryIncomeExpendRepository() {}
     
     /**
+     * Initialization-on-demand holder pattern을 사용한 Thread-safe Singleton
+     * JVM의 클래스 로딩 메커니즘을 활용하여 동기화 오버헤드 없이 lazy loading 구현
+     */
+    private static class SingletonHolder {
+        private static final MemoryIncomeExpendRepository INSTANCE = new MemoryIncomeExpendRepository();
+    }
+    
+    /**
      * Singleton 인스턴스를 반환합니다.
-     * Thread-safe lazy initialization을 적용했습니다.
+     * Holder Pattern을 사용하여 최적의 성능과 Thread Safety를 보장합니다.
      * 
      * @return MemoryIncomeExpendRepository 인스턴스
      */
-    public static synchronized MemoryIncomeExpendRepository getInstance() {
-        if (instance == null) {
-            instance = new MemoryIncomeExpendRepository();
-        }
-        return instance;
+    public static MemoryIncomeExpendRepository getInstance() {
+        return SingletonHolder.INSTANCE;
     }
     
     /**

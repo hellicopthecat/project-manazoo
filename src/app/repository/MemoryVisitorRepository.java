@@ -36,11 +36,6 @@ import app.repository.interfaces.VisitorRepository;
 public class MemoryVisitorRepository implements VisitorRepository {
     
     /**
-     * Singleton 인스턴스
-     */
-    private static MemoryVisitorRepository instance;
-    
-    /**
      * 예약 데이터를 저장하는 Map
      * Key: 예약 ID (String), Value: 예약 객체 (Reservation)
      */
@@ -54,16 +49,21 @@ public class MemoryVisitorRepository implements VisitorRepository {
     }
     
     /**
+     * Initialization-on-demand holder pattern을 사용한 Thread-safe Singleton
+     * JVM의 클래스 로딩 메커니즘을 활용하여 동기화 오버헤드 없이 lazy loading 구현
+     */
+    private static class SingletonHolder {
+        private static final MemoryVisitorRepository INSTANCE = new MemoryVisitorRepository();
+    }
+    
+    /**
      * Singleton 인스턴스를 반환합니다.
-     * Thread-safe lazy initialization을 적용했습니다.
+     * Holder Pattern을 사용하여 최적의 성능과 Thread Safety를 보장합니다.
      * 
      * @return MemoryVisitorRepository 인스턴스
      */
-    public static synchronized MemoryVisitorRepository getInstance() {
-        if (instance == null) {
-            instance = new MemoryVisitorRepository();
-        }
-        return instance;
+    public static MemoryVisitorRepository getInstance() {
+        return SingletonHolder.INSTANCE;
     }
     
     // =================================================================

@@ -32,11 +32,6 @@ import app.repository.interfaces.ZooKeeperRepository;
 public class MemoryZooKeeperRepository implements ZooKeeperRepository {
     
     /**
-     * Singleton 인스턴스
-     */
-    private static MemoryZooKeeperRepository instance;
-    
-    /**
      * 사육사 데이터를 저장하는 Map
      * Key: 사육사 ID (String), Value: 사육사 객체 (ZooKeeper)
      */
@@ -50,16 +45,21 @@ public class MemoryZooKeeperRepository implements ZooKeeperRepository {
     }
     
     /**
+     * Initialization-on-demand holder pattern을 사용한 Thread-safe Singleton
+     * JVM의 클래스 로딩 메커니즘을 활용하여 동기화 오버헤드 없이 lazy loading 구현
+     */
+    private static class SingletonHolder {
+        private static final MemoryZooKeeperRepository INSTANCE = new MemoryZooKeeperRepository();
+    }
+    
+    /**
      * Singleton 인스턴스를 반환합니다.
-     * Thread-safe lazy initialization을 적용했습니다.
+     * Holder Pattern을 사용하여 최적의 성능과 Thread Safety를 보장합니다.
      * 
      * @return MemoryZooKeeperRepository 인스턴스
      */
-    public static synchronized MemoryZooKeeperRepository getInstance() {
-        if (instance == null) {
-            instance = new MemoryZooKeeperRepository();
-        }
-        return instance;
+    public static MemoryZooKeeperRepository getInstance() {
+        return SingletonHolder.INSTANCE;
     }
     
     // =================================================================
