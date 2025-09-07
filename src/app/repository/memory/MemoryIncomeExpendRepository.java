@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 /**
  * IncomeExpend 엔티티를 위한 메모리 기반 Repository 구현체입니다.
+ * Singleton 패턴을 적용하여 애플리케이션 전체에서 단일 데이터 저장소를 사용합니다.
  * 
  * <p>메모리 내 HashMap을 사용하여 수입/지출 데이터를 관리합니다.</p>
  * 
@@ -22,8 +23,31 @@ import java.util.stream.Collectors;
  */
 public class MemoryIncomeExpendRepository implements IncomeExpendRepository {
     
+    /**
+     * Singleton 인스턴스
+     */
+    private static MemoryIncomeExpendRepository instance;
+    
     /** 수입/지출 내역을 저장하는 메모리 저장소 */
     private final Map<String, IncomeExpend> storage = new HashMap<>();
+    
+    /**
+     * private 생성자 - Singleton 패턴 적용
+     */
+    private MemoryIncomeExpendRepository() {}
+    
+    /**
+     * Singleton 인스턴스를 반환합니다.
+     * Thread-safe lazy initialization을 적용했습니다.
+     * 
+     * @return MemoryIncomeExpendRepository 인스턴스
+     */
+    public static synchronized MemoryIncomeExpendRepository getInstance() {
+        if (instance == null) {
+            instance = new MemoryIncomeExpendRepository();
+        }
+        return instance;
+    }
     
     /**
      * IncomeExpend를 저장소에 저장합니다.

@@ -15,7 +15,11 @@ import app.repository.interfaces.VisitorRepository;
 
 public class VisitorManager {
 
-	private final VisitorRepository repository = new MemoryVisitorRepository();
+	/**
+	 * 방문자 데이터를 관리하는 Repository입니다.
+	 * Singleton Repository를 사용하여 데이터 일관성을 보장합니다.
+	 */
+	private final VisitorRepository repository = MemoryVisitorRepository.getInstance();
 
 	String id; // 예약 번호
 	String name;

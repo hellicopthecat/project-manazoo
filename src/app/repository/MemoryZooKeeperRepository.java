@@ -18,6 +18,7 @@ import app.repository.interfaces.ZooKeeperRepository;
 /**
  * 메모리 기반 사육사 Repository 구현체입니다.
  * 사육사 데이터를 Map에 저장하여 빠른 조회와 조작을 제공합니다.
+ * Singleton 패턴을 적용하여 애플리케이션 전체에서 단일 데이터 저장소를 사용합니다.
  * 
  * <p>주요 특징:</p>
  * <ul>
@@ -25,9 +26,15 @@ import app.repository.interfaces.ZooKeeperRepository;
  *   <li>권한 기반 접근 제어</li>
  *   <li>타입 안전성 확보</li>
  *   <li>기존 ZooKeeperRepository와의 완전 호환</li>
+ *   <li>Singleton 패턴으로 데이터 일관성 보장</li>
  * </ul>
  */
 public class MemoryZooKeeperRepository implements ZooKeeperRepository {
+    
+    /**
+     * Singleton 인스턴스
+     */
+    private static MemoryZooKeeperRepository instance;
     
     /**
      * 사육사 데이터를 저장하는 Map
@@ -36,10 +43,23 @@ public class MemoryZooKeeperRepository implements ZooKeeperRepository {
     private final Map<String, ZooKeeper> zooKeepers;
     
     /**
-     * 생성자 - 빈 저장소로 초기화합니다.
+     * private 생성자 - Singleton 패턴 적용
      */
-    public MemoryZooKeeperRepository() {
+    private MemoryZooKeeperRepository() {
         this.zooKeepers = new HashMap<>();
+    }
+    
+    /**
+     * Singleton 인스턴스를 반환합니다.
+     * Thread-safe lazy initialization을 적용했습니다.
+     * 
+     * @return MemoryZooKeeperRepository 인스턴스
+     */
+    public static synchronized MemoryZooKeeperRepository getInstance() {
+        if (instance == null) {
+            instance = new MemoryZooKeeperRepository();
+        }
+        return instance;
     }
     
     // =================================================================
