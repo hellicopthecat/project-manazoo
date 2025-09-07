@@ -369,4 +369,21 @@ public class MemoryZooKeeperRepository implements ZooKeeperRepository {
     public String toString() {
         return String.format("MemoryZooKeeperRepository{size=%d}", count());
     }
+
+    // =================================================================
+    // 사육사 배치 관리를 위한 직접 접근 메서드
+    // =================================================================
+
+    @Override
+    public List<ZooKeeper> getWorkingKeepers() {
+        return zooKeepers.values().stream()
+                        .filter(ZooKeeper::isWorking)
+                        .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean hasWorkingKeepers() {
+        return zooKeepers.values().stream()
+                        .anyMatch(ZooKeeper::isWorking);
+    }
 }

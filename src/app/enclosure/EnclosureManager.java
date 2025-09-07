@@ -14,6 +14,8 @@ import app.common.ui.UIUtil;
 import app.animal.AnimalManager;
 import app.repository.MemoryEnclosureRepository;
 import app.repository.interfaces.EnclosureRepository;
+import app.zooKeeper.ZooKeeper;
+import app.zooKeeper.ZooKeeperManager;
 
 /**
  * 동물원 사육장을 생성, 조회, 수정, 삭제 및 동물 배치 등을 전반적으로 관리하는 클래스입니다.
@@ -132,13 +134,7 @@ public class EnclosureManager {
             switch (choice) {
                 case 1 -> registerEnclosure();
                 case 2 -> manageAnimalAdmission();
-                case 3 -> {
-                    UIUtil.printSeparator('━');
-                    TextArtUtil.printSorryMessage();
-                    UIUtil.printSeparator('━');
-                    System.out.println(MenuUtil.DEFAULT_PREFIX + "사육사 배치 관리 기능은 현재 개발 중입니다.");
-                    System.out.println(MenuUtil.DEFAULT_PREFIX + "빠른 시일 내에 업데이트하겠습니다.");
-                }
+                case 3 -> manageKeeperAssignment();
                 case 0 -> {
                     System.out.println(MenuUtil.DEFAULT_PREFIX + "이전 메뉴로 돌아갑니다.");
                     return;
@@ -257,7 +253,7 @@ public class EnclosureManager {
 
     /**
      * 지정된 사육장의 상세 정보를 조회합니다.
-     * 사육장 기본 정보와 거주 동물 목록을 모두 표시합니다.
+     * 사육장 기본 정보, 거주 동물 목록, 배정된 사육사 목록을 모두 표시합니다.
      */
     private void viewSpecificEnclosure() {
         if (repository.count() == 0) {
@@ -287,8 +283,13 @@ public class EnclosureManager {
         
         System.out.println();
         
-        // 2. 거주 동물 상세 목록 표시 (displayAdmissionResult와 동일한 형식)
+        // 2. 거주 동물 상세 목록 표시
         displayEnclosureInhabitants(enclosure);
+        
+        System.out.println();
+        
+        // 3. 배정된 사육사 상세 목록 표시
+        displayEnclosureCaretakers(enclosure);
     }
 
     /**
@@ -345,6 +346,68 @@ public class EnclosureManager {
         }
         
         String title = String.format("%s (%s) 거주 동물 목록", 
+                      truncateString(enclosure.getName(), 15), enclosure.getId());
+        
+        TableUtil.printTable(title, headers, data);
+    }
+
+    /**
+     * 사육장에 배정된 사육사들의 상세 목록을 테이블 형태로 표시합니다.
+     * 
+     * <p>표시 정보:</p>
+     * <ul>
+     *   <li>사육사 ID</li>
+     *   <li>사육사 이름</li>
+     *   <li>부서</li>
+     *   <li>직급</li>
+     *   <li>위험동물 처리 가능 여부</li>
+     *   <li>배정일</li>
+     * </ul>
+     * 
+     * @param enclosure 조회할 사육장 객체
+     */
+    private void displayEnclosureCaretakers(Enclosure enclosure) {
+        Map<String, Object> caretakers = enclosure.getAllCaretakers();
+        
+        if (caretakers.isEmpty()) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "이 사육장에는 현재 배정된 사육사가 없습니다.");
+            return;
+        }
+        
+        String[] headers = {"Keeper ID", "Name", "Department", "Rank", "Danger Animal", "Assignment Date"};
+        String[][] data = new String[caretakers.size()][];
+        int index = 0;
+        
+        String currentDate = java.time.LocalDate.now().toString();
+        
+        for (Map.Entry<String, Object> entry : caretakers.entrySet()) {
+            String keeperId = entry.getKey();
+            Object keeperObj = entry.getValue();
+            
+            if (keeperObj instanceof ZooKeeper) {
+                ZooKeeper keeper = (ZooKeeper) keeperObj;
+                data[index] = new String[]{
+                    truncateString(keeperId, 15),
+                    truncateString(keeper.getName(), 15),
+                    truncateString(keeper.getDepartment().toString(), 15),
+                    truncateString(keeper.getRank().toString(), 15),
+                    keeper.isCanHandleDangerAnimal() ? "가능" : "불가능",
+                    truncateString(currentDate, 15)
+                };
+            } else {
+                data[index] = new String[]{
+                    truncateString(keeperId, 15),
+                    truncateString("Unknown", 15),
+                    truncateString("Unknown", 15),
+                    truncateString("Unknown", 15),
+                    truncateString("Unknown", 15),
+                    truncateString(currentDate, 15)
+                };
+            }
+            index++;
+        }
+        
+        String title = String.format("%s (%s) 배정된 사육사 목록", 
                       truncateString(enclosure.getName(), 15), enclosure.getId());
         
         TableUtil.printTable(title, headers, data);
@@ -886,5 +949,328 @@ public class EnclosureManager {
     private String truncateString(String str, int maxLength) {
         if (str == null) return "";
         return str.length() > maxLength ? str.substring(0, maxLength) : str;
+    }
+
+    // =================================================================
+    // 사육사 배치 관리 기능
+    // =================================================================
+
+    /**
+     * 사육사 배치 관리 기능을 처리합니다.
+     * 사육사는 여러 사육장을 담당할 수 있으므로 직접적인 참조 추가 방식을 사용합니다.
+     * 
+     * <p>처리 과정:</p>
+     * <ol>
+     *   <li>사전 조건 확인 (사육장과 사육사 존재 여부)</li>
+     *   <li>재직 중인 사육사 목록 조회</li>
+     *   <li>사용자 인터페이스 처리 (목록 표시, 선택받기)</li>
+     *   <li>배치 처리 (사육장에 사육사 참조 추가)</li>
+     *   <li>결과 표시</li>
+     * </ol>
+     */
+    private void manageKeeperAssignment() {
+        UIUtil.printSeparator('━');
+        System.out.println("사육사 배치 관리");
+        UIUtil.printSeparator('━');
+        
+        if (!hasRequiredDataForKeeperAssignment()) {
+            return;
+        }
+        
+        List<ZooKeeper> availableKeepers = ZooKeeperManager.getInstance()
+                                                          .getWorkingKeepers();
+        
+        if (availableKeepers.isEmpty()) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "현재 배치 가능한 사육사가 없습니다.");
+            return;
+        }
+        
+        displayDataForKeeperAssignment(availableKeepers);
+        
+        String enclosureId = selectEnclosureWithRetry();
+        if (enclosureId == null) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "잘못된 입력이 3회 반복되어 작업을 취소합니다.");
+            return;
+        }
+        
+        String keeperId = selectKeeperFromList(availableKeepers);
+        if (keeperId == null) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "잘못된 입력이 3회 반복되어 작업을 취소합니다.");
+            return;
+        }
+        
+        boolean success = executeKeeperAssignment(enclosureId, keeperId);
+        
+        if (success) {
+            System.out.println();
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "사육사 배치가 성공적으로 처리되었습니다!");
+            displayKeeperAssignmentResult(enclosureId);
+        } else {
+            System.out.println();
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "사육사 배치 처리 중 오류가 발생했습니다.");
+        }
+    }
+
+    /**
+     * 사육사 배치를 위한 필수 데이터가 있는지 확인합니다.
+     * 사육장과 재직 중인 사육사가 모두 있어야 배치가 가능합니다.
+     * 
+     * @return 필수 데이터 존재 여부 (true: 실행 가능, false: 실행 불가능)
+     */
+    private boolean hasRequiredDataForKeeperAssignment() {
+        if (repository.count() == 0) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 사육장이 없습니다.");
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "사육사 배치를 위해서는 먼저 사육장을 등록해주세요.");
+            return false;
+        }
+        
+        boolean hasWorkingKeepers = ZooKeeperManager.getInstance()
+                                                   .hasWorkingKeepers();
+        
+        if (!hasWorkingKeepers) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "배치 가능한 사육사가 없습니다.");
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "사육사 배치를 위해서는 먼저 재직 중인 사육사가 필요합니다.");
+            return false;
+        }
+        
+        return true;
+    }
+
+    /**
+     * 사육사 배치를 위한 현재 상황을 표시합니다.
+     * 
+     * @param availableKeepers 재직 중인 사육사 목록
+     */
+    private void displayDataForKeeperAssignment(List<ZooKeeper> availableKeepers) {
+        System.out.println();
+        System.out.println("사용 가능한 사육장 목록:");
+        viewAllEnclosures();
+        
+        System.out.println();
+        System.out.println("배치 가능한 사육사 목록:");
+        displayWorkingKeepersTable(availableKeepers);
+    }
+
+    /**
+     * 재직 중인 사육사 목록을 테이블 형태로 출력합니다.
+     * 
+     * <p>표시 정보:</p>
+     * <ul>
+     *   <li>사육사 ID</li>
+     *   <li>사육사 이름</li>
+     *   <li>부서</li>
+     *   <li>직급</li>
+     *   <li>위험동물 처리 가능 여부</li>
+     * </ul>
+     * 
+     * @param availableKeepers 재직 중인 사육사 목록
+     */
+    private void displayWorkingKeepersTable(List<ZooKeeper> availableKeepers) {
+        if (availableKeepers.isEmpty()) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "배치 가능한 사육사가 없습니다.");
+            return;
+        }
+        
+        String[] headers = {"Keeper ID", "Name", "Department", "Rank", "Danger Animal"};
+        String[][] data = new String[availableKeepers.size()][];
+        
+        for (int i = 0; i < availableKeepers.size(); i++) {
+            ZooKeeper keeper = availableKeepers.get(i);
+            String keeperId = findKeeperIdFromManager(keeper);
+            
+            data[i] = new String[]{
+                truncateString(keeperId, 15),
+                truncateString(keeper.getName(), 15),
+                truncateString(keeper.getDepartment().toString(), 15),
+                truncateString(keeper.getRank().toString(), 15),
+                keeper.isCanHandleDangerAnimal() ? "가능" : "불가능"
+            };
+        }
+        
+        String title = String.format("배치 가능한 사육사 목록 (총 %d명)", availableKeepers.size());
+        TableUtil.printTable(title, headers, data);
+    }
+
+    /**
+     * ZooKeeper 객체로부터 해당하는 ID를 찾습니다.
+     * 
+     * @param keeper ID를 찾을 ZooKeeper 객체
+     * @return 찾은 사육사 ID, 없으면 "Unknown"
+     */
+    private String findKeeperIdFromManager(ZooKeeper keeper) {
+        try {
+            // ZooKeeperManager의 전체 목록에서 해당 객체와 일치하는 ID 찾기
+            List<ZooKeeper> allKeepers = ZooKeeperManager.getInstance()
+                                                        .getRepository()
+                                                        .getZooKeeperList();
+            
+            for (ZooKeeper k : allKeepers) {
+                if (k == keeper || (k.getName().equals(keeper.getName()) && 
+                                   k.getDepartment() == keeper.getDepartment())) {
+                    // toString()에서 ID 추출
+                    String toString = k.toString();
+                    if (toString.contains("id : ")) {
+                        int start = toString.indexOf("id : ") + 5;
+                        int end = toString.indexOf(" |", start);
+                        if (end > start) {
+                            return toString.substring(start, end);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // 오류 발생 시 기본값 반환
+        }
+        return "Unknown";
+    }
+
+    /**
+     * 사육사 목록에서 사용자로부터 사육사를 선택받습니다.
+     * 최대 3회까지 재시도 가능하며, 각 시도마다 사용자 확인을 받습니다.
+     * 
+     * @param availableKeepers 재직 중인 사육사 목록
+     * @return 선택된 사육사 ID, 3회 모두 실패 시 null 반환
+     */
+    private String selectKeeperFromList(List<ZooKeeper> availableKeepers) {
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            System.out.printf("\n[%d/3] 배치할 사육사 ID를 입력하세요: ", attempt);
+            String keeperId = MenuUtil.Question.askTextInput("");
+            
+            // 입력받은 ID로 사육사 검색
+            ZooKeeper foundKeeper = null;
+            for (ZooKeeper keeper : availableKeepers) {
+                String currentId = findKeeperIdFromManager(keeper);
+                if (currentId.equals(keeperId)) {
+                    foundKeeper = keeper;
+                    break;
+                }
+            }
+            
+            if (foundKeeper != null) {
+                System.out.printf("선택된 사육사: %s (%s - %s %s)\n", 
+                                foundKeeper.getName(), keeperId, 
+                                foundKeeper.getDepartment(), foundKeeper.getRank());
+                
+                boolean confirmed = MenuUtil.Question.askSimpleConfirm("이 사육사가 맞습니까?");
+                if (confirmed) {
+                    return keeperId;
+                } else {
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "사육사 선택을 다시 진행합니다.");
+                    continue;
+                }
+            } else {
+                System.out.printf(MenuUtil.DEFAULT_PREFIX + "재직 중인 사육사 목록에 없는 ID입니다: %s\n", keeperId);
+            }
+            
+            if (attempt < 3) {
+                System.out.println(MenuUtil.DEFAULT_PREFIX + "다시 시도해주세요.");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 실제 사육사 배정 데이터를 업데이트합니다.
+     * 
+     * <p>처리 과정:</p>
+     * <ol>
+     *   <li>사육장 객체 조회</li>
+     *   <li>ZooKeeperManager에서 사육사 정보 조회</li>
+     *   <li>중복 배정 확인 및 사용자 의사 확인</li>
+     *   <li>사육장에 사육사 배정 (이동 없이 참조 추가만)</li>
+     * </ol>
+     * 
+     * @param enclosureId 대상 사육장 ID
+     * @param keeperId    대상 사육사 ID
+     * @return 실제 처리 성공 여부
+     */
+    private boolean executeKeeperAssignment(String enclosureId, String keeperId) {
+        try {
+            Optional<Enclosure> enclosureOpt = repository.findById(enclosureId);
+            if (enclosureOpt.isEmpty()) {
+                return false;
+            }
+            Enclosure enclosure = enclosureOpt.get();
+            
+            ZooKeeper keeper = ZooKeeperManager.getInstance()
+                                              .getRepository()
+                                              .getZooKeeperById(keeperId);
+            if (keeper == null) {
+                return false;
+            }
+            
+            // 중복 배정 확인
+            if (enclosure.hasCaretaker(keeperId)) {
+                System.out.printf(MenuUtil.DEFAULT_PREFIX + "이미 %s 사육장에 배정된 사육사입니다: %s\n", 
+                                 enclosure.getName(), keeper.getName());
+                
+                boolean forceAssign = MenuUtil.Question.askSimpleConfirm("그래도 배정하시겠습니까?");
+                if (!forceAssign) {
+                    System.out.println(MenuUtil.DEFAULT_PREFIX + "배정이 취소되었습니다.");
+                    return false;
+                }
+            }
+            
+            enclosure.assignCaretaker(keeperId, keeper);
+            
+            return true;
+        } catch (Exception e) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "처리 중 예외가 발생했습니다: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 사육사 배정 처리 결과를 테이블 형태로 출력합니다.
+     * 처리된 사육장의 현재 사육사 배정 현황을 보여줍니다.
+     * 
+     * @param enclosureId 배정이 처리된 사육장 ID
+     */
+    private void displayKeeperAssignmentResult(String enclosureId) {
+        Optional<Enclosure> enclosureOpt = repository.findById(enclosureId);
+        Enclosure enclosure = enclosureOpt.get();
+        
+        Map<String, Object> caretakers = enclosure.getAllCaretakers();
+        
+        if (caretakers.isEmpty()) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "사육장에 배정된 사육사가 없습니다.");
+            return;
+        }
+        
+        String[] headers = {"Keeper ID", "Name", "Department", "Rank", "Assignment Date"};
+        String[][] data = new String[caretakers.size()][];
+        int index = 0;
+        
+        String currentDate = java.time.LocalDate.now().toString();
+        
+        for (Map.Entry<String, Object> entry : caretakers.entrySet()) {
+            String keeperId = entry.getKey();
+            Object keeperObj = entry.getValue();
+            
+            if (keeperObj instanceof ZooKeeper) {
+                ZooKeeper keeper = (ZooKeeper) keeperObj;
+                data[index] = new String[]{
+                    truncateString(keeperId, 15),
+                    truncateString(keeper.getName(), 15),
+                    truncateString(keeper.getDepartment().toString(), 15),
+                    truncateString(keeper.getRank().toString(), 15),
+                    truncateString(currentDate, 15)
+                };
+            } else {
+                data[index] = new String[]{
+                    truncateString(keeperId, 15),
+                    truncateString("Unknown", 15),
+                    truncateString("Unknown", 15),
+                    truncateString("Unknown", 15),
+                    truncateString(currentDate, 15)
+                };
+            }
+            index++;
+        }
+        
+        String title = String.format("%s (%s) 배정된 사육사 현황", 
+                      truncateString(enclosure.getName(), 15), enclosureId);
+        
+        TableUtil.printTable(title, headers, data);
     }
 }
