@@ -66,28 +66,41 @@ public final class ZooKeeperManager {
     }
 
     /**
-     * 테스트용 더미 데이터를 초기화합니다.
+     * 시스템 초기화 시 필요한 테스트 데이터를 생성합니다.
+     * 다양한 부서와 직급의 사육사들을 미리 등록하여 시스템 테스트를 위한 기본 환경을 구성합니다.
+     * 운영 환경에서는 이 메서드를 제거하거나 설정으로 제어해야 합니다.
      */
     private void initializeTestData() {
-        // 기존 더미 데이터 로직을 향상된 방식으로 대체
-        createDummyData();
-    }
-
-    /**
-     * 테스트용 더미 데이터를 생성합니다.
-     * 다양한 직급과 부서의 사육사들을 미리 등록하여 시스템 테스트를 위한 환경을 구성합니다.
-     */
-    private void createDummyData() {
-        // 비관리자
-        repository.createZooKeeper(IdGeneratorUtil.generateId(), "루피", 20, 1, 1, 1, 1, 1, 1, "");
-        repository.createZooKeeper(IdGeneratorUtil.generateId(), "크롱", 22, 2, 2, 2, 1, 2, 1, "자격증, 자격증2");
-        repository.createZooKeeper(IdGeneratorUtil.generateId(), "뽀로로", 32, 1, 3, 3, 1, 7, 2, "");
-        // 관리자
-        repository.createZooKeeper(IdGeneratorUtil.generateId(), "스펀지밥", 40, 1, 4, 4, 1, 12, 2, "자격증, 자격증2, 자격증3");
-        repository.createZooKeeper(IdGeneratorUtil.generateId(), "뚱이", 4, 1, 5, 5, 2, 14, 1, "자격증 ");
-        repository.createZooKeeper(IdGeneratorUtil.generateId(), "집게사장", 50, 1, 6, 6, 1, 25, 1,
-                "자격증, 자격증2, 자격증3, 자격증4");
-        repository.createZooKeeper(IdGeneratorUtil.generateId(), "다람이", 50, 1, 3, 6, 1, 25, 1, "자격증, 자격증2, 자격증3, 자격증4");
+        try {
+            // 관리자급 사육사 (높은 직급)
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "김관리", 35, 1, 5, 1, 1, 10, 1, "동물관리사,수의사");
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "박부장", 40, 2, 6, 2, 1, 15, 1, "동물관리사,안전관리사");
+            
+            // 포유류 부서 사육사
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "이포유", 28, 2, 3, 1, 1, 5, 1, "동물관리사");
+            
+            // 조류 부서 사육사  
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "박조류", 32, 1, 4, 2, 1, 8, 1, "조류전문가,응급처치");
+            
+            // 파충류 부서 사육사 (일부 휴직)
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "최파충", 26, 2, 2, 3, 2, 3, 2, "");
+            
+            // 어류 부서 사육사
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "정어류", 30, 1, 3, 4, 1, 6, 1, "잠수자격증,수중작업");
+            
+            // 교육 부서 사육사  
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "한교육", 29, 2, 3, 8, 1, 4, 2, "교육지도사");
+            
+            // 신입 사육사
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "신입수", 24, 1, 1, 1, 1, 1, 2, "동물관리사");
+            
+            System.out.println("✅ 더미 사육사 데이터 8명이 성공적으로 생성되었습니다.");
+            System.out.println("   - 관리자: 2명, 중간직: 4명, 신입: 2명");
+            
+        } catch (Exception e) {
+            System.err.println("❌ 더미 데이터 생성 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // inner util methods
