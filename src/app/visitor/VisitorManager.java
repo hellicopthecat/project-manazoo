@@ -104,8 +104,8 @@ public class VisitorManager {
 			Reservation reservation = repository.createReservation(id, name, phone, date, adultCount, childCount,
 					totalPrice);
 			System.out.print(MenuUtil.DEFAULT_PREFIX + "예약 및 결제 성공!");
-			UIUtil.printSeparator('━');
 			reservation.showReservation();
+			UIUtil.printSeparator('━');
 		}
 
 	}
