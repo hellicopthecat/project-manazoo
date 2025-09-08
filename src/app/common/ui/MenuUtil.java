@@ -280,7 +280,8 @@ public final class MenuUtil {
 				if (input.matches(phonePattern)) {
 					return input;
 				} else {
-					System.out.println("  잘못된 날짜 형식입니다.");
+					System.out.println(MenuUtil.DEFAULT_PREFIX + "잘못된 전화번호 형식입니다.");
+					System.out.println();
 				}
 			}
 		}
@@ -292,14 +293,29 @@ public final class MenuUtil {
 		 * @return 사용자가 입력한 문자열
 		 */
 		public static String askDate(String question) {
+
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+			LocalDate today = LocalDate.now();
+			LocalDate minDate = today.plusDays(1);
+
 			while (true) {
+
 				String input = MenuUtil.Question.askTextInput(question);
+
 				try {
-					LocalDate localDate = LocalDate.parse(input, formatter);
-					return localDate.format(formatter);
+					LocalDate inputDate = LocalDate.parse(input, formatter);
+
+					if (inputDate.isBefore(minDate)) {
+						System.out.println(MenuUtil.DEFAULT_PREFIX + "내일 날짜부터 입력 가능합니다.");
+						System.out.println();
+					} else {
+						return inputDate.format(formatter);
+					}
+
 				} catch (DateTimeParseException e) {
-					System.out.println("  잘못된 날짜 형식입니다.");
+					System.out.println(MenuUtil.DEFAULT_PREFIX + "잘못된 날짜 형식입니다.");
+					System.out.println();
 				}
 			}
 		}

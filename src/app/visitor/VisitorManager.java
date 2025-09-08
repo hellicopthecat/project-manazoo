@@ -34,6 +34,7 @@ public class VisitorManager {
 				TextArtUtil.printViewMenuTitle();
 				UIUtil.printSeparator('━');
 				viewInformation();
+				UIUtil.printSeparator('━');
 			}
 			case 2 -> {
 				UIUtil.printSeparator('━');
@@ -71,7 +72,6 @@ public class VisitorManager {
 	private static void displayVisitorMenu() {
 		String[] option = { "동물원 정보", "관람 예약", "예약 확인", "예약 변경(방문일정)", "예약 취소" };
 		String[] specialOptions = { "뒤로가기" };
-		UIUtil.printSeparator('━');
 		MenuUtil.generateMenuWithSpecialOptions(TextArtUtil::printVisitorMenuTitle, option, specialOptions);
 	}
 
@@ -91,7 +91,7 @@ public class VisitorManager {
 		phone = MenuUtil.Question.askPhoneNumber("연락처를 입력하세요. (000-0000-0000) : ");
 		date = MenuUtil.Question.askDate("방문일시를 입력하세요. (YYYY-MM-DD)");
 		adultCount = MenuUtil.Question.askNumberInputInt("대인 인원수를 입력하세요.");
-		childCount = MenuUtil.Question.askNumberInputInt("대인 인원수를 입력하세요.");
+		childCount = MenuUtil.Question.askNumberInputInt("소인 인원수를 입력하세요.");
 		totalPrice = adultCount * ADULT_PRICE + childCount * CHILD_PRICE;
 
 		String[] headers = { "Name", "Phone", "Visit Date", "Adult", "Child", "Total amount" };
@@ -103,8 +103,9 @@ public class VisitorManager {
 		if (choice) {
 			Reservation reservation = repository.createReservation(id, name, phone, date, adultCount, childCount,
 					totalPrice);
-			System.out.printf(MenuUtil.DEFAULT_PREFIX + "예약 및 결제 성공!");
-			System.out.println(reservation);
+			System.out.print(MenuUtil.DEFAULT_PREFIX + "예약 및 결제 성공!");
+			UIUtil.printSeparator('━');
+			reservation.showReservation();
 		}
 
 	}
@@ -118,8 +119,9 @@ public class VisitorManager {
 			String findId = MenuUtil.Question.askTextInput("예약번호를 입력하세요.");
 			if (repository.hasReservation(findId)) {
 				Reservation reservation = repository.getReservationById(findId);
-				System.out.printf(MenuUtil.DEFAULT_PREFIX + "예약 정보");
-				System.out.println(reservation);
+				System.out.print(MenuUtil.DEFAULT_PREFIX + "예약 정보");
+				reservation.showReservation();
+				UIUtil.printSeparator('━');
 				return;
 			} else {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "예약번호를 다시 입력하세요. ");
@@ -143,6 +145,7 @@ public class VisitorManager {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "방문일정 변경 성공!");
 				System.out.println();
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "방문일정 : " + newDate);
+				UIUtil.printSeparator('━');
 				return;
 			} else {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "예약번호를 다시 입력하세요. ");
@@ -159,11 +162,12 @@ public class VisitorManager {
 			String findId = MenuUtil.Question.askTextInput("예약번호를 입력하세요.");
 			if (repository.hasReservation(findId)) {
 				Reservation reservation = repository.getReservationById(findId);
-				System.out.println(reservation);
+				reservation.showReservation();
 				boolean choice = MenuUtil.Question.askYesNo("예약을 취소하시겠습니까?");
 				if (choice) {
 					repository.cancelReservation(findId);
-					System.out.printf(MenuUtil.DEFAULT_PREFIX + "예약이 취소되었습니다.");
+					System.out.println(MenuUtil.DEFAULT_PREFIX + "예약이 취소되었습니다.");
+					UIUtil.printSeparator('━');
 					return;
 				}
 			} else {
