@@ -1,15 +1,18 @@
 package app.zooKeeper;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import app.common.IdGeneratorUtil;
 import app.common.InputUtil;
 import app.common.ui.MenuUtil;
+import app.common.ui.TableUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
 import app.finance.FinanceManager;
 import app.repository.MemoryZooKeeperRepository;
 import app.repository.interfaces.ZooKeeperRepository;
+import app.zooKeeper.zooKeeperEnum.ZooKeeperConverter;
 
 /**
  * 사육사 관리를 담당하는 클래스입니다.
@@ -34,15 +37,16 @@ public class ZooKeeperManager {
 	 */
 	private void createDummyData() {
 		// 비관리자
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "루피", 20, 1, 1, 1, 1, 1, 1, "");
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "크롱", 22, 2, 2, 2, 1, 2, 1, "자격증, 자격증2");
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "뽀로로", 32, 1, 3, 3, 1, 7, 2, "");
+		repository.createZooKeeper(IdGeneratorUtil.generateId(), "Roophy", 20, 1, 1, 1, 1, 1, 1, "");
+		repository.createZooKeeper(IdGeneratorUtil.generateId(), "Krong", 22, 2, 2, 2, 1, 2, 1, "자격증, 자격증2");
+		repository.createZooKeeper(IdGeneratorUtil.generateId(), "Pororo", 32, 1, 3, 3, 1, 7, 2, "");
 		// 관리자
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "스펀지밥", 40, 1, 4, 4, 1, 12, 2, "자격증, 자격증2, 자격증3");
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "뚱이", 4, 1, 5, 5, 2, 14, 1, "자격증 ");
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "집게사장", 50, 1, 6, 6, 1, 25, 1,
+		repository.createZooKeeper(IdGeneratorUtil.generateId(), "SpongeBob", 40, 1, 4, 4, 1, 12, 2, "자격증, 자격증2, 자격증3");
+		repository.createZooKeeper(IdGeneratorUtil.generateId(), "Patrick Star", 4, 1, 5, 5, 2, 14, 1, "자격증 ");
+		repository.createZooKeeper(IdGeneratorUtil.generateId(), "Mr.Krabs", 50, 1, 6, 6, 1, 25, 1,
 				"자격증, 자격증2, 자격증3, 자격증4");
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "다람이", 50, 1, 3, 6, 1, 25, 1, "자격증, 자격증2, 자격증3, 자격증4");
+		repository.createZooKeeper(IdGeneratorUtil.generateId(), "Squidwark Tentacles", 50, 1, 3, 6, 1, 25, 1,
+				"자격증, 자격증2, 자격증3, 자격증4");
 	}
 
 	/**
@@ -118,33 +122,33 @@ public class ZooKeeperManager {
 					UIUtil.printSeparator('━');
 					System.out.println(MenuUtil.DEFAULT_PREFIX + "이름은 비워둘 수 없습니다.");
 					UIUtil.printSeparator('━');
-				} else if (!name.matches("^[가-힣a-zA-Z]{2,20}$")) {
+				} else if (!name.matches("^[a-zA-Z]{2,20}$")) {
 					UIUtil.printSeparator('━');
-					System.out.println(MenuUtil.DEFAULT_PREFIX + "이름은 한글 또는 영문 2~20자 입니다.");
+					System.out.println(MenuUtil.DEFAULT_PREFIX + "이름은 영문 2~20자 입니다.");
 					UIUtil.printSeparator('━');
 				} else {
 					break;
 				}
 			}
 			// 나이
-			int age = getValidateInt("나이를 입력하세요 ▶ ", "20세 ~ 65세", 20, 65);
+			int age = getValidateInt("나이를 입력하세요", "20세 ~ 65세", 20, 65);
 			// 성별
-			int genderIndex = getValidateInt("성별을 입력하세요 ▶ ", "1 : 남성 , 2 : 여성", 1, 2);
+			int genderIndex = getValidateInt("성별을 입력하세요", "1 : 남성 , 2 : 여성", 1, 2);
 			// 직책
-			int rankIndex = getValidateInt("직책을 입력하세요 ▶ ",
+			int rankIndex = getValidateInt("직책을 입력하세요",
 					"1 : 신입사육사 , 2 : 사육사 , 3 : 시니어 사육사 , 4 : 팀장 사육사 , 5 : 관리자 , 6 : 동물원장", 1, 6);
 			// 부서
-			int departmentIndex = getValidateInt("부서를 입력하세요 ▶ ",
+			int departmentIndex = getValidateInt("부서를 입력하세요",
 					"1 : 포유류부서 , 2 : 조류부서 , 3 : 파충류부서 , 4 : 어류부서 , 5 : 양서류부서 , 6 : 번식/연구 , 7 : 수의/재활 , 8 : 교육", 1, 8);
 			// 재직여부
-			int isWorkingIndex = getValidateInt("재직여부를 입력하세요 ▶ ", "1 : 재직 , 2 : 퇴사", 1, 2);
+			int isWorkingIndex = getValidateInt("재직여부를 입력하세요", "1 : 재직 , 2 : 퇴사", 1, 2);
 			// 재직여부
-			int experienceYear = getValidateInt("연차를 입력하세요 ▶ ", "1 ~ 40", 1, 40);
+			int experienceYear = getValidateInt("연차를 입력하세요", "1 ~ 40", 1, 40);
 			// 맹수조련여부
-			int canHandleDangerAnimalIndex = getValidateInt("맹수조련여부를 입력하세요 ▶ ", "1 : 가능 , 2 : 불가능", 1, 2);
+			int canHandleDangerAnimalIndex = getValidateInt("맹수조련여부를 입력하세요", "1 : 가능 , 2 : 불가능", 1, 2);
 			// 자격
 			System.out.println();
-			System.out.println(MenuUtil.DEFAULT_PREFIX + "자격증을 작성하세요. ',' 로 구분할 수 있습니다 ▶ ");
+			System.out.println(MenuUtil.DEFAULT_PREFIX + "자격증을 작성하세요. ',' 로 구분할 수 있습니다. (enter로 넘기기 가능)2 ▶ ");
 			System.out.println();
 			String desc = InputUtil.getStringInput();
 
@@ -193,11 +197,22 @@ public class ZooKeeperManager {
 	 * 시스템에 등록된 전체 사육사 정보를 순서대로 표시합니다.
 	 */
 	private void getZooKeeperList() {
-		UIUtil.printSeparator('━');
-		repository.getZooKeeperList().stream().forEach(x -> {
-			System.out.println(x);
-		});
-		UIUtil.printSeparator('━');
+		int length = repository.getZooKeeperList().size();
+		String title = "사육사 리스트";
+		String[] headers = { "ID", "Name", "Age", "Gender", "Rank", "Department", "IsWorking", "Can Assign Task" };
+		String[][] data = new String[length][8];
+		for (int i = 0; i < length; i++) {
+			ZooKeeper zooKeeper = repository.getZooKeeperList().get(i);
+			data[i][0] = zooKeeper.getId();
+			data[i][1] = zooKeeper.getName();
+			data[i][2] = zooKeeper.getAge() + "";
+			data[i][3] = ZooKeeperConverter.genderStringConverter(zooKeeper.getGender());
+			data[i][4] = ZooKeeperConverter.rankStringConverter(zooKeeper.getRank());
+			data[i][5] = ZooKeeperConverter.departmentStringConverter(zooKeeper.getDepartment());
+			data[i][6] = ZooKeeperConverter.workingStringConverter(zooKeeper.isWorking());
+			data[i][7] = ZooKeeperConverter.possibleImpossibleStringConverter(zooKeeper.isCanAssignTask());
+		}
+		TableUtil.printTable(title, headers, data);
 	}
 
 	/**
@@ -207,7 +222,22 @@ public class ZooKeeperManager {
 	private void getZooKeeperById() {
 		System.out.println(MenuUtil.DEFAULT_PREFIX + "아이디를 입력해주세요 ▶ ");
 		String id = InputUtil.getStringInput();
-		System.out.println(repository.getZooKeeperById(id));
+		ZooKeeper zk = repository.getZooKeeperById(id);
+		if (zk == null) {
+			String noDataTitle = "데이터 없음";
+			String[] noDataHeaders = { "No Data" };
+			String[] noDataValues = { "No Data" };
+			TableUtil.printSingleRowTable(noDataTitle, noDataHeaders, noDataValues);
+		} else {
+			String title = zk.getName();
+			String[] headers = { "id", "name", "rank", "department", "gender", "CanHandleDangerAnimal", "IsWorking" };
+			String[] values = { zk.getId(), zk.getName(), ZooKeeperConverter.rankStringConverter(zk.getRank()),
+					ZooKeeperConverter.departmentStringConverter(zk.getDepartment()),
+					ZooKeeperConverter.genderStringConverter(zk.getGender()),
+					ZooKeeperConverter.possibleImpossibleStringConverter(zk.isCanHandleDangerAnimal()),
+					ZooKeeperConverter.workingStringConverter(zk.isWorking()) };
+			TableUtil.printSingleRowTable(title, headers, values);
+		}
 	}
 
 	/**
@@ -217,11 +247,8 @@ public class ZooKeeperManager {
 	private void getZooKeeperByName() {
 		System.out.println(MenuUtil.DEFAULT_PREFIX + "이름을 입력해주세요 ▶ ");
 		String name = InputUtil.getStringInput();
-		UIUtil.printSeparator('━');
-		System.out.println();
-		System.out.println(repository.getZooKeeperByName(name));
-		System.out.println();
-		UIUtil.printSeparator('━');
+		String zooKeeperByName = repository.getZooKeeperByName(name);
+		System.out.println(zooKeeperByName);
 	}
 
 	/**
@@ -232,9 +259,30 @@ public class ZooKeeperManager {
 		String[] choices = { "포유류", "조류", "파충류", "어류", "양서류", "번식/연구", "수의/재활", "교육" };
 		MenuUtil.printMenu("부서를 고르세요", choices);
 		int departmentIndex = InputUtil.getIntInput();
-		UIUtil.printSeparator('━');
-		repository.getZooKeeperByDepartment(departmentIndex).forEach(System.out::println);
-		UIUtil.printSeparator('━');
+		List<ZooKeeper> zk = repository.getZooKeeperByDepartment(departmentIndex);
+		if (zk == null) {
+			String noDataTitle = "데이터 없음";
+			String[] noDataHeaders = { "No Data" };
+			String[] noDataValues = { "No Data" };
+			TableUtil.printSingleRowTable(noDataTitle, noDataHeaders, noDataValues);
+		} else {
+			String title = "사육사 리스트";
+			String[] headers = { "ID", "Name", "Age", "Gender", "Rank", "Department", "IsWorking", "Can Assign Task" };
+			String[][] data = new String[zk.size()][8];
+			for (int i = 0; i < zk.size(); i++) {
+				ZooKeeper zooKeeper = repository.getZooKeeperList().get(i);
+				data[i][0] = zooKeeper.getId();
+				data[i][1] = zooKeeper.getName();
+				data[i][2] = zooKeeper.getAge() + "";
+				data[i][3] = ZooKeeperConverter.genderStringConverter(zooKeeper.getGender());
+				data[i][4] = ZooKeeperConverter.rankStringConverter(zooKeeper.getRank());
+				data[i][5] = ZooKeeperConverter.departmentStringConverter(zooKeeper.getDepartment());
+				data[i][6] = ZooKeeperConverter.workingStringConverter(zooKeeper.isWorking());
+				data[i][7] = ZooKeeperConverter.possibleImpossibleStringConverter(zooKeeper.isCanAssignTask());
+			}
+			TableUtil.printTable(title, headers, data);
+		}
+
 	}
 
 	/**
@@ -348,11 +396,21 @@ public class ZooKeeperManager {
 	private int getValidateInt(String message, String numInfo, int min, int max) {
 		while (true) {
 			if (message != null && !message.isEmpty()) {
-				System.out.println(MenuUtil.DEFAULT_PREFIX + message);
+				System.out.println();
+				System.out.println(MenuUtil.DEFAULT_PREFIX + numInfo);
+				System.out.println();
+				System.out.println(MenuUtil.DEFAULT_PREFIX + message + " ▶ ");
+			} else {
+				System.out.println();
+				System.out.println(MenuUtil.DEFAULT_PREFIX + numInfo);
+				System.out.println();
+				System.out.println(" ▶ ");
 			}
-			System.out.println();
-			System.out.println(MenuUtil.DEFAULT_PREFIX + numInfo);
-			System.out.println(" ▶ ");
+//			if (message == null && message.isEmpty()) {
+//				System.out.println(MenuUtil.DEFAULT_PREFIX + numInfo);
+//				System.out.println();
+//				System.out.println(" ▶ ");
+//			}
 			System.out.println();
 			String input = InputUtil.getStringInput();
 			try {
@@ -360,7 +418,8 @@ public class ZooKeeperManager {
 				if (value >= min && value <= max) {
 					return value;
 				} else {
-					System.out.println(MenuUtil.DEFAULT_PREFIX + numInfo);
+					System.out.println(MenuUtil.DEFAULT_PREFIX + "주어진 범위를 다시보고 입력해 주세요.");
+					System.out.println();
 				}
 			} catch (NumberFormatException e) {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "숫자를 입력해주세요  ▶ ");

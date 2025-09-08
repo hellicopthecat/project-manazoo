@@ -84,7 +84,7 @@ public class ZooKeeperRepository {
 		return collect;
 	}
 
-	private boolean existManager(String id) {
+	public boolean existManager(String id) {
 		ZooKeeper manager = getZooKeeperById(id);
 		boolean existManager = manager.isWorking()
 				&& (manager.getRank().equals(ZooKeeperRank.DIRECTOR) || manager.getRank().equals(ZooKeeperRank.MANAGER)
@@ -96,13 +96,12 @@ public class ZooKeeperRepository {
 		// TODO Auto-generated method stub
 		try {
 			boolean isManager = existManager(keeperId);
-			if (isManager) {
-				ZooKeeper targetZooKeeper = getZooKeeperById(targetId);
-				boolean isWorking = ZooKeeperConverter.workingConverter(index);
-				targetZooKeeper.setIsWorking(isWorking);
-			} else {
+			if (!isManager) {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "당신은 퇴사자이거나 매니저가 아닙니다.");
 			}
+			ZooKeeper targetZooKeeper = getZooKeeperById(targetId);
+			boolean isWorking = ZooKeeperConverter.workingConverter(index);
+			targetZooKeeper.setIsWorking(isWorking);
 
 		} catch (NullPointerException e) {
 			System.out.println(MenuUtil.DEFAULT_PREFIX + "존재하지 않은 회원입니다.");
