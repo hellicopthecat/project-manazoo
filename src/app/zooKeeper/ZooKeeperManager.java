@@ -15,6 +15,8 @@ import app.repository.interfaces.ZooKeeperRepository;
 import app.zooKeeper.zooKeeperEnum.ZooKeeperConverter;
 
 /**
+ * ZooKeeperManager 클래스
+ * ---------------------
  * 사육사 관리를 담당하는 클래스입니다.
  * Repository 패턴을 적용하여 데이터 계층을 분리하고 타입 안전성을 확보했습니다.
  * 
@@ -22,31 +24,87 @@ import app.zooKeeper.zooKeeperEnum.ZooKeeperConverter;
  * <ul>
  *   <li>사육사 등록 및 관리</li>
  *   <li>다양한 조회 옵션 (전체, ID별, 이름별, 부서별)</li>
- *   <li>권한 기반 사육사 정보 수정</li>
+ *   <li>사육사 정보 수정</li>
  *   <li>사육사 삭제 및 급여 설정</li>
  * </ul>
  */
 
-public class ZooKeeperManager {
+public final class ZooKeeperManager {
 
+	/**
+	 * Singleton 인스턴스
+	 */
+	private static final ZooKeeperManager instance = new ZooKeeperManager();
+
+	/**
+	 * 사육사 데이터를 관리하는 Repository
+	 * MemoryZooKeeperRepository를 사용하여 메모리 기반 데이터 관리
+	 */
 	private final ZooKeeperRepository repository = new MemoryZooKeeperRepository();
 
 	/**
-	 * 테스트용 더미 데이터를 생성합니다.
-	 * 다양한 직급과 부서의 사육사들을 미리 등록하여 시스템 테스트를 위한 환경을 구성합니다.
+	 * private 생성자 - Singleton 패턴 적용
+	 * 초기 더미 데이터를 생성합니다.
 	 */
-	private void createDummyData() {
-		// 비관리자
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "Roophy", 20, 1, 1, 1, 1, 1, 1, "");
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "Krong", 22, 2, 2, 2, 1, 2, 1, "자격증, 자격증2");
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "Pororo", 32, 1, 3, 3, 1, 7, 2, "");
-		// 관리자
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "SpongeBob", 40, 1, 4, 4, 1, 12, 2, "자격증, 자격증2, 자격증3");
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "Patrick Star", 4, 1, 5, 5, 2, 14, 1, "자격증 ");
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "Mr.Krabs", 50, 1, 6, 6, 1, 25, 1,
-				"자격증, 자격증2, 자격증3, 자격증4");
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "Squidwark Tentacles", 50, 1, 3, 6, 1, 25, 1,
-				"자격증, 자격증2, 자격증3, 자격증4");
+	private ZooKeeperManager() {
+		initializeTestData();
+	}
+
+	/**
+	 * Singleton 인스턴스를 반환합니다.
+	 * 
+	 * @return ZooKeeperManager 인스턴스
+	 */
+	public static ZooKeeperManager getInstance() {
+		return instance;
+	}
+
+	/**
+	 * Repository 인스턴스를 반환합니다.
+	 * 다른 Manager에서 사육사 정보가 필요할 때 사용됩니다.
+	 * 
+	 * @return ZooKeeperRepository 인스턴스
+	 */
+	public ZooKeeperRepository getRepository() {
+		return repository;
+	}
+
+	/**
+	 * 시스템 초기화 시 필요한 테스트 데이터를 생성합니다.
+	 * 다양한 부서와 직급의 사육사들을 미리 등록하여 시스템 테스트를 위한 기본 환경을 구성합니다.
+	 * 운영 환경에서는 이 메서드를 제거하거나 설정으로 제어해야 합니다.
+	 */
+	private void initializeTestData() {
+		try {
+			// 관리자급 사육사 (높은 직급)
+			repository.createZooKeeper(IdGeneratorUtil.generateId(), "김관리", 35, 1, 5, 1, 1, 10, 1, "동물관리사,수의사");
+			repository.createZooKeeper(IdGeneratorUtil.generateId(), "박부장", 40, 2, 6, 2, 1, 15, 1, "동물관리사,안전관리사");
+
+			// 포유류 부서 사육사
+			repository.createZooKeeper(IdGeneratorUtil.generateId(), "이포유", 28, 2, 3, 1, 1, 5, 1, "동물관리사");
+
+			// 조류 부서 사육사
+			repository.createZooKeeper(IdGeneratorUtil.generateId(), "박조류", 32, 1, 4, 2, 1, 8, 1, "조류전문가,응급처치");
+
+			// 파충류 부서 사육사 (일부 휴직)
+			repository.createZooKeeper(IdGeneratorUtil.generateId(), "최파충", 26, 2, 2, 3, 2, 3, 2, "");
+
+			// 어류 부서 사육사
+			repository.createZooKeeper(IdGeneratorUtil.generateId(), "정어류", 30, 1, 3, 4, 1, 6, 1, "잠수자격증,수중작업");
+
+			// 교육 부서 사육사
+			repository.createZooKeeper(IdGeneratorUtil.generateId(), "한교육", 29, 2, 3, 8, 1, 4, 2, "교육지도사");
+
+			// 신입 사육사
+			repository.createZooKeeper(IdGeneratorUtil.generateId(), "신입수", 24, 1, 1, 1, 1, 1, 2, "동물관리사");
+
+			System.out.println("✅ 더미 사육사 데이터 8명이 성공적으로 생성되었습니다.");
+			System.out.println("   - 관리자: 2명, 중간직: 4명, 신입: 2명");
+
+		} catch (Exception e) {
+			System.err.println("❌ 더미 데이터 생성 중 오류 발생: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -66,7 +124,6 @@ public class ZooKeeperManager {
 	 * ZooKeeperManagement으로 콘솔을 실행시킬 수 있습니다.
 	 */
 	public void handleZookeeperManagement() {
-		createDummyData();
 		AtomicBoolean run = new AtomicBoolean(true);
 		while (run.get()) {
 			String[] menu = { "사육사 등록", "사육사 찾기", "사육사 수정", "사육사 삭제", "급여지출결의서작성" };
@@ -174,7 +231,6 @@ public class ZooKeeperManager {
 	 *   <li>이름으로 다중 조회</li>
 	 *   <li>부서별 다중 조회</li>
 	 * </ul>
-	 * 사육사 조회 메서드입니다.
 	 */
 	// 읽기
 	private void getZooKeeper() {
@@ -297,6 +353,18 @@ public class ZooKeeperManager {
 	 * </ul>
 	 * 사육사 수정 메서드입니다.
 	 */
+
+	/**
+	 * 사육사 정보 수정 메뉴를 표시하고 처리합니다.
+	 * 권한에 따라 제한된 정보만 수정할 수 있으며, 수정 가능한 항목을 메뉴로 제공합니다.
+	 * 
+	 * <p>수정 가능한 항목:</p>
+	 * <ul>
+	 *   <li>재직여부 (재직/퇴사)</li>
+	 *   <li>업무배정가능여부 (가능/불가능)</li>
+	 *   <li>위험동물관리여부 (가능/불가능)</li>
+	 * </ul>
+	 */
 	private void editZooKeeper() {
 		AtomicBoolean run = new AtomicBoolean(true);
 		String[] choice = { "재직여부", "업무배정가능여부", "위험군동물관리여부", "뒤로가기" };
@@ -315,21 +383,21 @@ public class ZooKeeperManager {
 	 * 사육사의 재직 여부를 수정합니다.
 	 * 권한 검증을 통해 적절한 권한을 가진 사용자만 수정할 수 있습니다.
 	 * 자기 자신은 언제나 수정 가능하며, 관리자 이상은 타인의 정보도 수정 가능합니다.
-	 * 사육사 수정(재직여부) 메서드입니다.
 	 */
 	private void editIsWorking() {
 		IdTracker ids = getIds();
 		int index = getValidateInt(null, "1. 재직, 2. 퇴사", 1, 2);
 		repository.setIsWorking(ids.getMyId(), ids.getTargetId(), index);
+		UIUtil.printSeparator('━');
 		System.out
 				.println(MenuUtil.DEFAULT_PREFIX + "************************ 재직여부가 수정되었습니다. ************************");
+		UIUtil.printSeparator('━');
 	}
 
 	/**
 	 * 사육사의 업무 배정 가능 여부를 수정합니다.
 	 * 권한 검증을 통해 적절한 권한을 가진 사용자만 수정할 수 있습니다.
 	 * 업무 할당과 관련된 중요한 설정이므로 신중하게 처리됩니다.
-	 * 사육사 수정(업무할당) 메서드입니다.
 	 */
 	private void editCanAssignTask() {
 		IdTracker ids = getIds();
@@ -343,7 +411,6 @@ public class ZooKeeperManager {
 	 * 사육사의 위험동물 관리 권한을 수정합니다.
 	 * 권한 검증을 통해 적절한 권한을 가진 사용자만 수정할 수 있습니다.
 	 * 안전과 직결된 중요한 권한이므로 엄격하게 관리됩니다.
-	 * 사육사 수정(고위험동물군관리여부) 메서드입니다.
 	 */
 	private void editPermissionDangerAnimal() {
 		IdTracker ids = getIds();
@@ -357,7 +424,6 @@ public class ZooKeeperManager {
 	 * 사육사를 시스템에서 삭제합니다.
 	 * 권한 검증을 통해 적절한 권한을 가진 사용자만 삭제할 수 있습니다.
 	 * 삭제된 사육사 정보는 복구할 수 없으므로 신중하게 처리됩니다.
-	 * 사육사 삭제 메서드입니다.
 	 */
 	private void deleteZooKeeper() {
 		IdTracker ids = getIds();
@@ -371,15 +437,13 @@ public class ZooKeeperManager {
 	 * 적절한 권한을 가진 사용자만 급여를 설정할 수 있습니다.
 	 */
 	// 급여생성
-
 	private void createSalaryService() {
 		IdTracker ids = getIds();
 		long money = FinanceManager.getInstance().useMoney();
-		boolean ok = repository.setSalary(ids.getMyId(), ids.targetId, money);
+		boolean ok = repository.setSalary(ids.getMyId(), ids.getTargetId(), money);
 		if (ok) {
 			System.out.println("************************ 급여가 생성 되었습니다. ************************");
 		}
-
 	}
 
 	// inner util methods
@@ -406,11 +470,6 @@ public class ZooKeeperManager {
 				System.out.println();
 				System.out.println(" ▶ ");
 			}
-//			if (message == null && message.isEmpty()) {
-//				System.out.println(MenuUtil.DEFAULT_PREFIX + numInfo);
-//				System.out.println();
-//				System.out.println(" ▶ ");
-//			}
 			System.out.println();
 			String input = InputUtil.getStringInput();
 			try {
@@ -477,11 +536,6 @@ public class ZooKeeperManager {
 			this.targetId = targetId;
 		}
 
-		/**
-		 * 작업 수행자 ID를 반환합니다.
-		 * 
-		 * @return 작업 수행자 ID
-		 */
 		public String getMyId() {
 			return myId;
 		}
