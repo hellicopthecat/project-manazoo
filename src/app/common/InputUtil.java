@@ -76,10 +76,10 @@ public final class InputUtil {
 				if (a >= 0) {
 					return a;
 				} else {
-					System.out.println("올바른 숫자를 입력해주세요: ");
+					System.out.println(MenuUtil.DEFAULT_PREFIX + "올바른 숫자를 입력해주세요: ");
 				}
 			} catch (NumberFormatException e) {
-				System.out.print("올바른 숫자를 입력해주세요: ");
+				System.out.print(MenuUtil.DEFAULT_PREFIX + "올바른 숫자를 입력해주세요: ");
 			}
 		}
 	}

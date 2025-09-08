@@ -30,7 +30,6 @@ public class ZooKeeper implements ZooKeeperBasicBehavior {
 	public ZooKeeper(String id, String name, int age, Gender gender, ZooKeeperRank rank, Department department,
 			boolean isWorking, int experieneceYear, boolean canHandleDangerAnimal, boolean canAssignTask,
 			List<String> licenses) {
-
 		this.id = id;
 		this.name = name;
 		this.age = age;
