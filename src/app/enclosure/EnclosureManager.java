@@ -482,9 +482,18 @@ public class EnclosureManager {
      * </ul>
      */
     private void editEnclosure() {
-        viewEnclosures();
-
         if (repository.count() == 0) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "수정할 수 있는 사육장이 없습니다.");
+            return;
+        }
+        
+        System.out.println("\n사육장 수정을 위해 먼저 사육장 목록을 확인하세요.");
+        viewEnclosures();
+        
+        // viewEnclosures()에서 사용자가 뒤로가기를 선택했을 수 있으므로 수정 진행 여부를 명시적으로 확인
+        boolean wantToEdit = MenuUtil.Question.askSimpleConfirm("사육장 수정을 진행하시겠습니까?");
+        if (!wantToEdit) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "수정을 취소하고 이전 메뉴로 돌아갑니다.");
             return;
         }
         
