@@ -199,8 +199,8 @@ public final class FinanceManager {
 			TableUtil.printSingleRowTable(noDataTitle, noDataHeaders, noDataValues);
 		} else {
 			String title = in ? "수입 리스트" : "지출 리스트";
-			String[] headers = { "ID", "Name", "Age", "Gender", "Rank", "Department", "IsWorking", "Can Assign Task" };
-			String[][] data = new String[inex.size()][8];
+			String[] headers = { "ID", "Type", "Event", "Amount", "Description" };
+			String[][] data = new String[inex.size()][5];
 			for (int i = 0; i < inex.size(); i++) {
 				IncomeExpend income = inex.get(i);
 				data[i][0] = income.getId();
