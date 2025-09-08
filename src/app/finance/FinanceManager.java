@@ -1,12 +1,14 @@
 package app.finance;
 
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import app.common.IdGeneratorUtil;
 import app.common.InputUtil;
 import app.common.ui.MenuUtil;
+import app.common.ui.TableUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
 import app.incomeExpend.EventType;
@@ -27,10 +29,10 @@ import app.repository.memory.MemoryIncomeExpendRepository;
  */
 public final class FinanceManager {
 	private static final FinanceManager instance = new FinanceManager();
-	
+
 	// Repository를 통한 데이터 관리
 	private final IncomeExpendRepository incomeExpendRepository;
-	
+
 	// 자본 (초기값:1억)
 	private Long capital = 1000000000l; // 자본
 
@@ -54,20 +56,20 @@ public final class FinanceManager {
 	// Constructor
 	private FinanceManager() {
 		this.incomeExpendRepository = new MemoryIncomeExpendRepository();
-		
+
 		// 초기 데이터 설정
-		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 30000000l, "아쿠아쇼 수익금", IncomeExpendType.INCOME,
-				EventType.AQUASHOW));
-		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 4000000l, "아기 코끼리 일주일 식비", IncomeExpendType.EXPEND,
-				EventType.FOOD));
-		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 50000040l, "시설비", IncomeExpendType.EXPEND,
-				EventType.EMPLOYEE_EXTRA));
-		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 400112000l, "일주일 입장료", IncomeExpendType.INCOME,
-				EventType.FEE));
-		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 9002100l, "수도세", IncomeExpendType.EXPEND,
-				EventType.AQUASHOW));
-		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 3053000l, "직원월급", IncomeExpendType.EXPEND,
-				EventType.EMPLOYEE_MONTH));
+		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 30000000l, "Aqua Show",
+				IncomeExpendType.INCOME, EventType.AQUASHOW));
+		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 4000000l, "Baby Elephants Food Cost",
+				IncomeExpendType.EXPEND, EventType.FOOD));
+		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 50000040l, "Repaire Fee",
+				IncomeExpendType.EXPEND, EventType.EMPLOYEE_EXTRA));
+		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 400112000l, "Week per Fee",
+				IncomeExpendType.INCOME, EventType.FEE));
+		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 9002100l, "Water Used",
+				IncomeExpendType.EXPEND, EventType.AQUASHOW));
+		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 3053000l, "Employees Salary",
+				IncomeExpendType.EXPEND, EventType.EMPLOYEE_MONTH));
 		Long incomeReduce = incomeExpendRepository.getTotalIncomes();
 		Long expendReduce = incomeExpendRepository.getTotalExpends();
 		setCapital(incomeReduce - expendReduce);
@@ -159,19 +161,16 @@ public final class FinanceManager {
 	private void getAssetData() {
 		AtomicBoolean run = new AtomicBoolean(true);
 		while (run.get()) {
-			UIUtil.printSeparator('━');
-			System.out.println();
-			System.out.println(MenuUtil.DEFAULT_PREFIX
-					+ "1: 한줄 재무 보고서 출력, 2: 자본금 조회, 3: 순이익 조회, 4:총 수입금액, 5: 총 지출금액, 6: 수입 전체 조회, 7: 지출 전체 조회, 0: 뒤로가기");
-			System.out.println();
-			System.out.println(MenuUtil.DEFAULT_PREFIX + "메뉴를 고르세요 ▶");
+			String[] menu = { "한줄 재무 보고서 출력", "자본금 조회", "순이익 조회", "총 수입금액", "총 지출금액", "수입 전체 조회", "지출 전체 조회" };
+			String[] s_menu = { "뒤로가기" };
+			MenuUtil.generateMenuWithTextTitle("재 정 정 보", menu, s_menu);
 			int index = InputUtil.getIntInput();
 			switch (index) {
-			case 1 -> System.out.println(generateReport());
-			case 2 -> System.out.println(getCapital());
-			case 3 -> System.out.println(getNetProfit());
-			case 4 -> System.out.println(getTotalIncomesString());
-			case 5 -> System.out.println(getTotalExpendsString());
+			case 1 -> generateReport();
+			case 2 -> getCapitalTable();
+			case 3 -> getNetProfitTable();
+			case 4 -> getTotalIncomesStringTable();
+			case 5 -> getTotalExpendsStringTable();
 			case 6 -> getIncomesList();
 			case 7 -> getExpendList();
 			case 0 -> goBack(run);
@@ -181,20 +180,51 @@ public final class FinanceManager {
 	}
 
 	// Getter & Setter
-	// 수입 내역 리스트 반환
-	// private List<IncomeExpend> getIncomes() {
-	// return incomes;
-	// }
-	private void getIncomesList() {
-		incomeExpendRepository.getIncomeList().stream().forEach(t -> System.out.println(t));
+	/**
+	 * 리스트를 표로 전환해주는 메서드 입니다.
+	 * 
+	 * inex는 incomeExpend의 리스트를 받아옵니다.
+	 * in은 boolean으로 true면 수입 false면 지출입니다.
+	 * 
+	 * @param inex
+	 * @param in
+	 */
+	private void inexTable(List<IncomeExpend> inex, boolean in) {
+		if (inex == null) {
+			String noDataTitle = "데이터 없음";
+			String[] noDataHeaders = { "No Data" };
+			String[] noDataValues = { "No Data" };
+			TableUtil.printSingleRowTable(noDataTitle, noDataHeaders, noDataValues);
+		} else {
+			String title = in ? "수입 리스트" : "지출 리스트";
+			String[] headers = { "ID", "Name", "Age", "Gender", "Rank", "Department", "IsWorking", "Can Assign Task" };
+			String[][] data = new String[inex.size()][8];
+			for (int i = 0; i < inex.size(); i++) {
+				IncomeExpend income = inex.get(i);
+				data[i][0] = income.getId();
+				data[i][1] = IEConverter.IETypeStringConverter(income.IEType);
+				data[i][2] = IEConverter.eventTypeStringConverter(income.eventType);
+				data[i][3] = income.money + "";
+				data[i][4] = income.desc;
+			}
+			TableUtil.printTable(title, headers, data);
+		}
 	}
 
-	// 지출 내역 리스트 반환
-	// private List<IncomeExpend> getExpends() {
-	// return expends;
-	// }
+	/**
+	 * 수입 내역 리스트
+	 */
+	private void getIncomesList() {
+		List<IncomeExpend> il = incomeExpendRepository.getIncomeList();
+		inexTable(il, true);
+	}
+
+	/**
+	 * 지출 내역 리스트 
+	 */
 	private void getExpendList() {
-		incomeExpendRepository.getExpendList().stream().forEach(t -> System.out.println(t));
+		List<IncomeExpend> el = incomeExpendRepository.getExpendList();
+		inexTable(el, false);
 	}
 
 	/**
@@ -204,7 +234,11 @@ public final class FinanceManager {
 	 */
 	private String formattingMoney(long money) {
 		NumberFormat formatter = NumberFormat.getNumberInstance(Locale.KOREA);
-		return formatter.format(money) + " 원 ";
+		return "₩ " + formatter.format(money);
+	}
+
+	private void singleMoneyTable(String title, String[] header, String[] data) {
+		TableUtil.printSingleRowTable(title, header, data);
 	}
 
 	/**
@@ -216,6 +250,10 @@ public final class FinanceManager {
 		return formattingMoney(capital);
 	}
 
+	private void getCapitalTable() {
+		singleMoneyTable("Total Capital", new String[] { "Total Capital" }, new String[] { getCapital() });
+	}
+
 	/**
 	 * 순이익 계산
 	 * 
@@ -224,6 +262,10 @@ public final class FinanceManager {
 	private String getNetProfit() {
 		Long result = getTotalIncomes() - getTotalExpends();
 		return formattingMoney(result);
+	}
+
+	private void getNetProfitTable() {
+		singleMoneyTable("NetProfit", new String[] { "Net Profit" }, new String[] { getNetProfit() });
 	}
 
 	/**
@@ -244,6 +286,10 @@ public final class FinanceManager {
 		return formattingMoney(getTotalIncomes());
 	}
 
+	private void getTotalIncomesStringTable() {
+		singleMoneyTable("Total Incomes", new String[] { "Total Incomes" }, new String[] { getTotalIncomesString() });
+	}
+
 	/**
 	 * 총지출 계산
 	 * 
@@ -262,15 +308,21 @@ public final class FinanceManager {
 		return formattingMoney(incomeExpendRepository.getTotalExpends());
 	}
 
+	private void getTotalExpendsStringTable() {
+		singleMoneyTable("Total Expends", new String[] { "Total Expends" }, new String[] { getTotalExpendsString() });
+	}
+
 	/**
 	 * 재무 보고서 생성
 	 * 
 	 * @return 문자열 형태의 요약 보고서
 	 */
 
-	private String generateReport() {
-		return String.format(MenuUtil.DEFAULT_PREFIX + "[총 자산 : %s , 총 수입 : %s , 총 지출 : %s , 순이익 : %s]", getCapital(),
-				getTotalIncomesString(), getTotalExpendsString(), getNetProfit());
+	private void generateReport() {
+		String title = "Asset Report";
+		String[] dataHeaders = { "Total Asset", "Total Income", "Total Expend", "NetProfit" };
+		String[] dataValues = { getCapital(), getTotalIncomesString(), getTotalExpendsString(), getNetProfit() };
+		TableUtil.printSingleRowTable(title, dataHeaders, dataValues);
 	}
 
 	/**
@@ -291,10 +343,9 @@ public final class FinanceManager {
 	private void editAssetData() {
 		AtomicBoolean run = new AtomicBoolean(true);
 		while (run.get()) {
-			UIUtil.printSeparator('━');
-			System.out.println(MenuUtil.DEFAULT_PREFIX + "1: 자본금 수정, 0: 뒤로가기");
-			System.out.println();
-			System.out.println(MenuUtil.DEFAULT_PREFIX + "메뉴를 고르세요 ▶");
+			String[] menu = { "자본금 수정" };
+			String[] s_menu = { "뒤로가기" };
+			MenuUtil.generateMenuWithTextTitle("자 본 금 수 정", menu, s_menu);
 			int index = InputUtil.getIntInput();
 			switch (index) {
 			case 1 -> editSalary();
@@ -316,7 +367,7 @@ public final class FinanceManager {
 		Long money = Long.parseLong(InputUtil.getStringInput());
 		setCapital(money);
 		System.out.println();
-		System.out.println(MenuUtil.DEFAULT_PREFIX + "금액이 수정되었습니다. 현재 회사의 자산은 " + capital + " 원 입니다.");
+		System.out.println(MenuUtil.DEFAULT_PREFIX + "금액이 수정되었습니다. 현재 회사의 자산은 " + getCapital() + " 입니다.");
 	}
 	// util methods
 
@@ -336,6 +387,8 @@ public final class FinanceManager {
 	}
 
 	private void wrongIndex() {
+		System.out.println();
 		System.out.println(MenuUtil.DEFAULT_PREFIX + "잘못된 번호를 입력하셨습니다.");
+		System.out.println();
 	}
 }
