@@ -19,3 +19,8 @@ desktop.ini
 
 # MacOS
 *.iml
+
+# 데이터베이스 설정 파일 (보안상 중요)
+config/database.properties
+config/database-*.properties
+!config/database.properties.template
