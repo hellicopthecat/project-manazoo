@@ -22,8 +22,8 @@ public class ZooKeeperConverter {
 	 */
 	public static String genderStringConverter(Gender g) {
 		String convert = switch (g) {
-		case MALE -> "남성";
-		case FEMALE -> "여성";
+		case MALE -> "MALE";
+		case FEMALE -> "FEMALE";
 		};
 		return convert;
 	}
@@ -43,8 +43,6 @@ public class ZooKeeperConverter {
 		case 6 -> ZooKeeperRank.DIRECTOR;
 		default ->
 			throw new IllegalArgumentException("1 : 신입사육사 , 2 : 사육사 , 3 : 시니어 사육사 , 4 : 팀장 사육사 , 5 : 관리자 , 6 : 동물원장"); // refactor
-																														// 이후
-																														// 수정예
 		};
 		return convert;
 	}
@@ -56,12 +54,12 @@ public class ZooKeeperConverter {
 	 */
 	public static String rankStringConverter(ZooKeeperRank keeper) {
 		String convert = switch (keeper) {
-		case JUNIOR_KEEPER -> "신입사육사";
-		case KEEPER -> "일반사육사";
-		case SENIOR_KEEPER -> "시니어 사육사";
-		case HEAD_KEEPER -> "팀장 사육사";
-		case MANAGER -> "관리자";
-		case DIRECTOR -> "동물원장";
+		case JUNIOR_KEEPER -> "JUNIOR KEEPER";
+		case KEEPER -> "KEEPER";
+		case SENIOR_KEEPER -> "SENIOR KEEPER";
+		case HEAD_KEEPER -> "HEAD KEEPER";
+		case MANAGER -> "MANAGER";
+		case DIRECTOR -> "DIRECTOR";
 		};
 		return convert;
 	}
@@ -94,14 +92,14 @@ public class ZooKeeperConverter {
 	 */
 	public static String departmentStringConverter(Department d) {
 		String convert = switch (d) {
-		case MAMMAL -> "포유류부서";
-		case BIRD -> "조류부서";
-		case REPTILE -> "파충류부서";
-		case FISH -> "어류부서";
-		case MIXED -> "양서류부서";
-		case BREEDING_RESEARCH -> "번식/연구";
-		case VETERINARY_REHAB -> "수의/재활";
-		case EDUCATION -> "교육";
+		case MAMMAL -> "MAMMAL";
+		case BIRD -> "BIRD";
+		case REPTILE -> "REPTILE";
+		case FISH -> "FISH";
+		case MIXED -> "MIXED";
+		case BREEDING_RESEARCH -> "BREEDING_RESEARCH";
+		case VETERINARY_REHAB -> "VETERINARY_REHAB";
+		case EDUCATION -> "EDUCATION";
 		};
 		return convert;
 	}
@@ -115,7 +113,7 @@ public class ZooKeeperConverter {
 		boolean convert = switch (index) {
 		case 1 -> true;
 		case 2 -> false;
-		default -> throw new IllegalArgumentException("1 : 재직중 , 2 : 퇴사");// refactor 이후 수정예
+		default -> throw new IllegalArgumentException("1 : 재직중 , 2 : 퇴사");
 		};
 		return convert;
 	}
@@ -127,9 +125,9 @@ public class ZooKeeperConverter {
 	 */
 	public static String workingStringConverter(boolean isWorking) {
 		if (isWorking) {
-			return "재직중";
+			return "Working";
 		} else {
-			return "퇴사";
+			return "Not Working";
 		}
 	}
 
@@ -142,7 +140,7 @@ public class ZooKeeperConverter {
 		boolean convert = switch (index) {
 		case 1 -> true;
 		case 2 -> false;
-		default -> throw new IllegalArgumentException("1 : 가능 , 2 : 불가능");// refactor 이후 수정예
+		default -> throw new IllegalArgumentException("1 : 가능 , 2 : 불가능");
 		};
 		return convert;
 	}
@@ -154,9 +152,9 @@ public class ZooKeeperConverter {
 	 */
 	public static String possibleImpossibleStringConverter(boolean ok) {
 		if (ok) {
-			return "가능";
+			return "Possible";
 		} else {
-			return "불가능";
+			return "Impossible";
 		}
 	}
 
