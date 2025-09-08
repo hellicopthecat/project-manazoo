@@ -342,7 +342,7 @@ public final class ZooKeeperManager {
 			String[] headers = { "ID", "Name", "Age", "Gender", "Rank", "Department", "IsWorking", "Can Assign Task" };
 			String[][] data = new String[zk.size()][8];
 			for (int i = 0; i < zk.size(); i++) {
-				ZooKeeper zooKeeper = repository.getZooKeeperList().get(i);
+				ZooKeeper zooKeeper = zk.get(i);
 				data[i][0] = zooKeeper.getId();
 				data[i][1] = zooKeeper.getName();
 				data[i][2] = zooKeeper.getAge() + "";
