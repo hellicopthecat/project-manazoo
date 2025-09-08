@@ -1211,6 +1211,10 @@ public class EnclosureManager {
      */
     private void displayKeeperAssignmentResult(String enclosureId) {
         Optional<Enclosure> enclosureOpt = repository.findById(enclosureId);
+        if (enclosureOpt.isEmpty()) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "해당 ID의 사육장을 찾을 수 없습니다: " + enclosureId);
+            return;
+        }
         Enclosure enclosure = enclosureOpt.get();
         
         Map<String, Object> caretakers = enclosure.getAllCaretakers();
