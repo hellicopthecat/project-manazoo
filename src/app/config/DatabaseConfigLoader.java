@@ -71,15 +71,15 @@ public class DatabaseConfigLoader {
     }
     
     public String getDatabaseName() {
-        return properties.getProperty("db.name");
+        return properties.getProperty("db.name", "manazoo");
     }
     
     public String getUsername() {
-        return properties.getProperty("db.username");
+        return properties.getProperty("db.username", "root");
     }
     
     public String getPassword() {
-        return properties.getProperty("db.password");
+        return properties.getProperty("db.password", "1111");
     }
     
     public String getServerTimezone() {
@@ -95,11 +95,11 @@ public class DatabaseConfigLoader {
     }
     
     public boolean isShowSql() {
-        return Boolean.parseBoolean(properties.getProperty("db.showSql", "false"));
+        return Boolean.parseBoolean(properties.getProperty("db.showSql", "true"));
     }
     
     public boolean isAutoReconnect() {
-        return Boolean.parseBoolean(properties.getProperty("db.autoReconnect", "false"));
+        return Boolean.parseBoolean(properties.getProperty("db.autoReconnect", "true"));
     }
     
     /**
