@@ -221,7 +221,7 @@ public final class ZooKeeperManager {
 			int canHandleDangerAnimalIndex = getValidateInt("맹수조련여부를 입력하세요", "1 : 가능 , 2 : 불가능", 1, 2);
 			// 자격
 			System.out.println();
-			System.out.println(MenuUtil.DEFAULT_PREFIX + "자격증을 작성하세요. ',' 로 구분할 수 있습니다. (enter로 넘기기 가능)2 ▶ ");
+			System.out.println(MenuUtil.DEFAULT_PREFIX + "자격증을 작성하세요. ',' 로 구분할 수 있습니다. (enter로 넘기기 가능) ▶ ");
 			System.out.println();
 			String desc = InputUtil.getStringInput();
 
