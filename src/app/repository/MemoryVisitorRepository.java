@@ -13,6 +13,7 @@ import app.repository.interfaces.VisitorRepository;
 /**
  * 메모리 기반 방문객 예약 Repository 구현체입니다.
  * 예약 데이터를 Map에 저장하여 빠른 조회와 조작을 제공합니다.
+ * Singleton 패턴을 적용하여 애플리케이션 전체에서 단일 데이터 저장소를 사용합니다.
  * 
  * <p>주요 특징:</p>
  * <ul>
@@ -20,6 +21,7 @@ import app.repository.interfaces.VisitorRepository;
  *   <li>예약 관리 기능</li>
  *   <li>타입 안전성 확보</li>
  *   <li>기존 VisitorManager와의 완전 호환</li>
+ *   <li>Singleton 패턴으로 데이터 일관성 보장</li>
  * </ul>
  * 
  * <p>이 구현체는 VisitorManager의 기존 기능을 Repository 패턴으로 재구현하여
@@ -40,10 +42,28 @@ public class MemoryVisitorRepository implements VisitorRepository {
     private final Map<String, Reservation> reservations;
     
     /**
-     * 생성자 - 빈 저장소로 초기화합니다.
+     * private 생성자 - Singleton 패턴 적용
      */
-    public MemoryVisitorRepository() {
+    private MemoryVisitorRepository() {
         this.reservations = new HashMap<>();
+    }
+    
+    /**
+     * Initialization-on-demand holder pattern을 사용한 Thread-safe Singleton
+     * JVM의 클래스 로딩 메커니즘을 활용하여 동기화 오버헤드 없이 lazy loading 구현
+     */
+    private static class SingletonHolder {
+        private static final MemoryVisitorRepository INSTANCE = new MemoryVisitorRepository();
+    }
+    
+    /**
+     * Singleton 인스턴스를 반환합니다.
+     * Holder Pattern을 사용하여 최적의 성능과 Thread Safety를 보장합니다.
+     * 
+     * @return MemoryVisitorRepository 인스턴스
+     */
+    public static MemoryVisitorRepository getInstance() {
+        return SingletonHolder.INSTANCE;
     }
     
     // =================================================================

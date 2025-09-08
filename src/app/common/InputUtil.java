@@ -2,6 +2,8 @@ package app.common;
 
 import java.util.Scanner;
 
+import app.common.ui.MenuUtil;
+
 /**
  * 사용자 입력을 안전하게 처리하는 유틸리티 클래스입니다. 다양한 타입의 입력에 대해 검증과 예외 처리를 제공합니다.
  *
@@ -49,7 +51,7 @@ public final class InputUtil {
 			try {
 				return Integer.parseInt(scanner.nextLine());
 			} catch (NumberFormatException e) {
-				System.out.print("올바른 숫자를 입력해주세요: ");
+				System.out.print(MenuUtil.DEFAULT_PREFIX + "정수를 입력하세요 ▶ ");
 			}
 		}
 	}

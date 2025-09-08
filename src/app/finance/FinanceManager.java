@@ -55,7 +55,9 @@ public final class FinanceManager {
 
 	// Constructor
 	private FinanceManager() {
-		this.incomeExpendRepository = new MemoryIncomeExpendRepository();
+
+		this.incomeExpendRepository = MemoryIncomeExpendRepository.getInstance();
+		
 
 		// 초기 데이터 설정
 		incomeExpendRepository.save(new IncomeExpend(IdGeneratorUtil.generateId(), 30000000l, "Aqua Show",

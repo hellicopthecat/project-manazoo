@@ -17,7 +17,11 @@ import app.repository.MemoryAnimalRepository;
 import app.repository.interfaces.AnimalRepository;
 
 public class AnimalManager {
-	private final AnimalRepository repository = new MemoryAnimalRepository();
+	/**
+	 * 동물 데이터를 관리하는 Repository입니다.
+	 * Singleton Repository를 사용하여 데이터 일관성을 보장합니다.
+	 */
+	private final AnimalRepository repository = MemoryAnimalRepository.getInstance();
 
 	String id;
 	String name;

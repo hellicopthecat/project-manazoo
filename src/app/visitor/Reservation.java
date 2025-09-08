@@ -1,7 +1,9 @@
 package app.visitor;
 
+import app.common.ui.TableUtil;
+
 public class Reservation {
-	private String id; // 예약 번호 
+	private String id; // 예약 번호
 	private String name;
 	private String phone;
 	private String date;
@@ -9,8 +11,7 @@ public class Reservation {
 	private int childCount;
 	private int totalPrice;
 
-	public Reservation(String id, String name, String phone,
-			String date, int adultCount, int childCount,
+	public Reservation(String id, String name, String phone, String date, int adultCount, int childCount,
 			int totalPrice) {
 		this.id = id;
 		this.name = name;
@@ -79,10 +80,16 @@ public class Reservation {
 
 	@Override
 	public String toString() {
-		return String.format(
-				"예약번호: %s\n이름: %s\n전화: %s\n날짜: %s\n성인: %d명, 어린이: %d명\n총 금액: %d원",
-				id, name, phone, date, adultCount, childCount,
-				totalPrice);
+		return String.format("예약번호: %s\n이름: %s\n전화: %s\n날짜: %s\n성인: %d명, 어린이: %d명\n총 금액: %d원", id, name, phone, date,
+				adultCount, childCount, totalPrice);
+	}
+
+	public void showReservation() {
+		String[] headers = { "Booking Number", "Name", "Phone", "Visit Date", "Adult", "Child", "Total amount" };
+		String[][] data = { { id, name, phone, date, Integer.toString(adultCount), Integer.toString(childCount),
+				Integer.toString(totalPrice) } };
+
+		TableUtil.printTable(" ", headers, data);
 	}
 
 }

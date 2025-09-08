@@ -30,139 +30,155 @@ import app.zooKeeper.zooKeeperEnum.ZooKeeperConverter;
  */
 
 public final class ZooKeeperManager {
+    
+    /**
+     * Singleton 인스턴스
+     */
+    private static final ZooKeeperManager instance = new ZooKeeperManager();
+    
+    /**
+     * 사육사 데이터를 관리하는 Repository
+     * Singleton Repository를 사용하여 데이터 일관성을 보장합니다.
+     */
+    private final ZooKeeperRepository repository = MemoryZooKeeperRepository.getInstance();
 
-	/**
-	 * Singleton 인스턴스
-	 */
-	private static final ZooKeeperManager instance = new ZooKeeperManager();
+    /**
+     * private 생성자 - Singleton 패턴 적용
+     * 초기 더미 데이터를 생성합니다.
+     */
+    private ZooKeeperManager() {
+        initializeTestData();
+    }
 
-	/**
-	 * 사육사 데이터를 관리하는 Repository
-	 * MemoryZooKeeperRepository를 사용하여 메모리 기반 데이터 관리
-	 */
-	private final ZooKeeperRepository repository = new MemoryZooKeeperRepository();
+    /**
+     * Singleton 인스턴스를 반환합니다.
+     * 
+     * @return ZooKeeperManager 인스턴스
+     */
+    public static ZooKeeperManager getInstance() {
+        return instance;
+    }
 
-	/**
-	 * private 생성자 - Singleton 패턴 적용
-	 * 초기 더미 데이터를 생성합니다.
-	 */
-	private ZooKeeperManager() {
-		initializeTestData();
-	}
+    /**
+     * Repository 인스턴스를 반환합니다.
+     * 다른 Manager에서 사육사 정보가 필요할 때 사용됩니다.
+     * 
+     * @return ZooKeeperRepository 인스턴스
+     */
+    public ZooKeeperRepository getRepository() {
+        return repository;
+    }
 
-	/**
-	 * Singleton 인스턴스를 반환합니다.
-	 * 
-	 * @return ZooKeeperManager 인스턴스
-	 */
-	public static ZooKeeperManager getInstance() {
-		return instance;
-	}
+    /**
+     * 시스템 초기화 시 필요한 테스트 데이터를 생성합니다.
+     * 다양한 부서와 직급의 사육사들을 미리 등록하여 시스템 테스트를 위한 기본 환경을 구성합니다.
+     * 운영 환경에서는 이 메서드를 제거하거나 설정으로 제어해야 합니다.
+     */
+    private void initializeTestData() {
+        try {
+            // 관리자급 사육사 (높은 직급)
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "김관리", 35, 1, 5, 1, 1, 10, 1, "동물관리사,수의사");
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "박부장", 40, 2, 6, 2, 1, 15, 1, "동물관리사,안전관리사");
+            
+            // 포유류 부서 사육사
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "이포유", 28, 2, 3, 1, 1, 5, 1, "동물관리사");
+            
+            // 조류 부서 사육사  
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "박조류", 32, 1, 4, 2, 1, 8, 1, "조류전문가,응급처치");
+            
+            // 파충류 부서 사육사 (일부 휴직)
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "최파충", 26, 2, 2, 3, 2, 3, 2, "");
+            
+            // 어류 부서 사육사
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "정어류", 30, 1, 3, 4, 1, 6, 1, "잠수자격증,수중작업");
+            
+            // 교육 부서 사육사  
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "한교육", 29, 2, 3, 8, 1, 4, 2, "교육지도사");
+            
+            // 신입 사육사
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "신입수", 24, 1, 1, 1, 1, 1, 2, "동물관리사");
+            
+            System.out.println("✅ 더미 사육사 데이터 8명이 성공적으로 생성되었습니다.");
+            System.out.println("   - 관리자: 2명, 중간직: 4명, 신입: 2명");
+            
+        } catch (Exception e) {
+            System.err.println("❌ 더미 데이터 생성 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
-	/**
-	 * Repository 인스턴스를 반환합니다.
-	 * 다른 Manager에서 사육사 정보가 필요할 때 사용됩니다.
-	 * 
-	 * @return ZooKeeperRepository 인스턴스
-	 */
-	public ZooKeeperRepository getRepository() {
-		return repository;
-	}
+    // inner util methods
+    /**
+     * 입력값의 범위를 검증하여 유효한 정수를 반환합니다.
+     * 사용자가 올바른 범위의 값을 입력할 때까지 반복하여 입력을 받습니다.
+     * 
+     * @param message 입력 요청 메시지 (null 가능)
+     * @param numInfo 입력 범위 안내 메시지
+     * @param min 최솟값 (포함)
+     * @param max 최댓값 (포함)
+     * @return 검증된 정수값
+     */
 
-	/**
-	 * 시스템 초기화 시 필요한 테스트 데이터를 생성합니다.
-	 * 다양한 부서와 직급의 사육사들을 미리 등록하여 시스템 테스트를 위한 기본 환경을 구성합니다.
-	 * 운영 환경에서는 이 메서드를 제거하거나 설정으로 제어해야 합니다.
-	 */
-	private void initializeTestData() {
-		try {
-			// 관리자급 사육사 (높은 직급)
-			repository.createZooKeeper(IdGeneratorUtil.generateId(), "김관리", 35, 1, 5, 1, 1, 10, 1, "동물관리사,수의사");
-			repository.createZooKeeper(IdGeneratorUtil.generateId(), "박부장", 40, 2, 6, 2, 1, 15, 1, "동물관리사,안전관리사");
+    // =================================================================
+    // 기존 UI 메서드들 (호환성 유지)
+    // =================================================================
 
-			// 포유류 부서 사육사
-			repository.createZooKeeper(IdGeneratorUtil.generateId(), "이포유", 28, 2, 3, 1, 1, 5, 1, "동물관리사");
+    /**
+     * 사육사 관리 메인 메뉴를 처리합니다.
+     * 사육사 등록, 조회, 수정, 삭제, 급여 설정 기능을 제공합니다.
+     * 
+     * <p>제공하는 메뉴:</p>
+     * <ul>
+     *   <li>사육사 등록</li>
+     *   <li>사육사 찾기 (전체, ID별, 이름별, 부서별)</li>
+     *   <li>사육사 수정 (재직여부, 업무배정여부, 위험동물관리여부)</li>
+     *   <li>사육사 삭제</li>
+     *   <li>급여지출결의서 작성</li>
+     * </ul>
+     */
+    /*
+     * ZooKeeperManagement으로 콘솔을 실행시킬 수 있습니다.
+     */
+    public void handleZookeeperManagement() {
+        AtomicBoolean run = new AtomicBoolean(true);
+        while (run.get()) {
+            String[] menu = { "사육사 등록", "사육사 찾기", "사육사 수정", "사육사 삭제", "급여지출결의서작성" };
+            String[] s_menu = { "뒤로가기" };
+            UIUtil.printSeparator('━');
+            TextArtUtil.printZookeeperMenuTitle();
+            UIUtil.printSeparator('━');
+            MenuUtil.generateMenuWithTextTitle("사 육 사 관 리", menu, s_menu);
+            int index = InputUtil.getIntInput();
+            switch (index) {
+            case 1 -> registerZooKeeper();
+            case 2 -> getZooKeeper();
+            case 3 -> editZooKeeper();
+            case 4 -> deleteZooKeeper();
+            case 5 -> createSalaryService();
+            case 0 -> goBack(run);
+            default -> wrongIndex();
+            }
+        }
+    }
 
-			// 조류 부서 사육사
-			repository.createZooKeeper(IdGeneratorUtil.generateId(), "박조류", 32, 1, 4, 2, 1, 8, 1, "조류전문가,응급처치");
-
-			// 파충류 부서 사육사 (일부 휴직)
-			repository.createZooKeeper(IdGeneratorUtil.generateId(), "최파충", 26, 2, 2, 3, 2, 3, 2, "");
-
-			// 어류 부서 사육사
-			repository.createZooKeeper(IdGeneratorUtil.generateId(), "정어류", 30, 1, 3, 4, 1, 6, 1, "잠수자격증,수중작업");
-
-			// 교육 부서 사육사
-			repository.createZooKeeper(IdGeneratorUtil.generateId(), "한교육", 29, 2, 3, 8, 1, 4, 2, "교육지도사");
-
-			// 신입 사육사
-			repository.createZooKeeper(IdGeneratorUtil.generateId(), "신입수", 24, 1, 1, 1, 1, 1, 2, "동물관리사");
-
-			System.out.println("✅ 더미 사육사 데이터 8명이 성공적으로 생성되었습니다.");
-			System.out.println("   - 관리자: 2명, 중간직: 4명, 신입: 2명");
-
-		} catch (Exception e) {
-			System.err.println("❌ 더미 데이터 생성 중 오류 발생: " + e.getMessage());
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * 사육사 관리 메인 메뉴를 처리합니다.
-	 * 사육사 등록, 조회, 수정, 삭제, 급여 설정 기능을 제공합니다.
-	 * 
-	 * <p>제공하는 메뉴:</p>
-	 * <ul>
-	 *   <li>사육사 등록</li>
-	 *   <li>사육사 찾기 (전체, ID별, 이름별, 부서별)</li>
-	 *   <li>사육사 수정 (재직여부, 업무배정여부, 위험동물관리여부)</li>
-	 *   <li>사육사 삭제</li>
-	 *   <li>급여지출결의서 작성</li>
-	 * </ul>
-	 */
-	/*
-	 * ZooKeeperManagement으로 콘솔을 실행시킬 수 있습니다.
-	 */
-	public void handleZookeeperManagement() {
-		AtomicBoolean run = new AtomicBoolean(true);
-		while (run.get()) {
-			String[] menu = { "사육사 등록", "사육사 찾기", "사육사 수정", "사육사 삭제", "급여지출결의서작성" };
-			String[] s_menu = { "뒤로가기" };
-			UIUtil.printSeparator('━');
-			TextArtUtil.printZookeeperMenuTitle();
-			UIUtil.printSeparator('━');
-			MenuUtil.generateMenuWithTextTitle("사 육 사 관 리", menu, s_menu);
-			int index = InputUtil.getIntInput();
-			switch (index) {
-			case 1 -> registerZooKeeper();
-			case 2 -> getZooKeeper();
-			case 3 -> editZooKeeper();
-			case 4 -> deleteZooKeeper();
-			case 5 -> createSalaryService();
-			case 0 -> goBack(run);
-			default -> wrongIndex();
-			}
-		}
-	}
-
-	/**
-	 * 새로운 사육사를 등록합니다.
-	 * 사용자로부터 사육사의 상세 정보를 입력받아 시스템에 저장합니다.
-	 * 
-	 * <p>입력받는 정보:</p>
-	 * <ul>
-	 *   <li>이름 (한글/영문 2-20자)</li>
-	 *   <li>나이 (20-65세)</li>
-	 *   <li>성별 (남성/여성)</li>
-	 *   <li>직급 (신입사육사~동물원장)</li>
-	 *   <li>부서 (포유류~교육)</li>
-	 *   <li>재직 여부</li>
-	 *   <li>경력 연수 (1-40년)</li>
-	 *   <li>위험동물 관리 가능 여부</li>
-	 *   <li>자격증 정보 (쉼표로 구분)</li>
-	 * </ul>
-	 */
-	private void registerZooKeeper() {
+    /**
+     * 새로운 사육사를 등록합니다.
+     * 사용자로부터 사육사의 상세 정보를 입력받아 시스템에 저장합니다.
+     * 
+     * <p>입력받는 정보:</p>
+     * <ul>
+     *   <li>이름 (한글/영문 2-20자)</li>
+     *   <li>나이 (20-65세)</li>
+     *   <li>성별 (남성/여성)</li>
+     *   <li>직급 (신입사육사~동물원장)</li>
+     *   <li>부서 (포유류~교육)</li>
+     *   <li>재직 여부</li>
+     *   <li>경력 연수 (1-40년)</li>
+     *   <li>위험동물 관리 가능 여부</li>
+     *   <li>자격증 정보 (쉼표로 구분)</li>
+     * </ul>
+     */
+    private void registerZooKeeper() {
 		while (true) {
 			// 이름
 			String name;
@@ -574,4 +590,22 @@ public final class ZooKeeperManager {
 		}
 		return new IdTracker(myId, targetId);
 	}
+
+    /**
+     * 현재 재직 중인 사육사 목록을 반환합니다.
+     * 
+     * @return 재직 중인 사육사 리스트
+     */
+    public List<ZooKeeper> getWorkingKeepers() {
+        return repository.getWorkingKeepers();
+    }
+
+    /**
+     * 재직 중인 사육사가 존재하는지 확인합니다.
+     * 
+     * @return 재직 중인 사육사 존재 여부
+     */
+    public boolean hasWorkingKeepers() {
+        return repository.hasWorkingKeepers();
+    }
 }
