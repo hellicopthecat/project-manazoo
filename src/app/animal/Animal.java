@@ -76,12 +76,15 @@ public class Animal {
 
 	@Override
 	public String toString() {
+		return String.format("%s : %s / %s / %d / %s / %s / %s", id, name, species, age, gender, healthStatus,
+				enclosureId);
 
+	}
+
+	public void showAnimal() {
 		String[] headers = { "Animal ID", "Name", "Species", "Age", "Gender", "HealthStatus", "EnclosureId" };
 		String[][] data = { { id, name, species, Integer.toString(age), gender, healthStatus, enclosureId } };
 		TableUtil.printTable(" ", headers, data);
-
-		return "";
 	}
 
 }

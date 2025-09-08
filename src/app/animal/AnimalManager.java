@@ -76,12 +76,9 @@ public class AnimalManager {
 		age = MenuUtil.Question.askNumberInputInt("동물의 나이를 입력하세요.");
 		inputAnimalGender("동물의 성별을 입력하세요.");
 		inputAnimalHealth("동물의 건강상태를 입력하세요.");
+		enclosureId = MenuUtil.Question.askTextInput("동물의 EnclosureID를 입력하세요.");
 
-		// < 케이지 ID 입력 >
-		System.out.println("케이지 ID : ");
-		enclosureId = InputUtil.getStringInput();
-
-		String[] headers = { "Name", "Species", "Age", "Gender", "HealthStatus", "EnclosureId" };
+		String[] headers = { "Name", "Species", "Age", "Gender", "HealthStatus", "EnclosureID" };
 		String[][] data = { { name, species, Integer.toString(age), gender, healthStatus, enclosureId } };
 		TableUtil.printTable("입력하신 정보는 아래와 같습니다.", headers, data);
 
@@ -90,7 +87,7 @@ public class AnimalManager {
 			Animal animal = repository.createAnimal(id, name, species, age, gender, healthStatus, enclosureId);
 			syncWithSingleton();
 			System.out.printf(MenuUtil.DEFAULT_PREFIX + "동물 등록 성공!");
-			System.out.println(animal);
+			animal.showAnimal();
 		}
 	}
 
@@ -189,7 +186,7 @@ public class AnimalManager {
 	}
 
 	public void viewAllAnimals() {
-		String[] headers = { "Animal ID", "Name", "Species", "Age", "Gender", "HealthStatus", "EnclosureId" };
+		String[] headers = { "Animal ID", "Name", "Species", "Age", "Gender", "HealthStatus", "EnclosureID" };
 		List<Animal> allAnimals = repository.findAll();
 		String[][] data = new String[allAnimals.size()][];
 
@@ -210,7 +207,8 @@ public class AnimalManager {
 			String findId = MenuUtil.Question.askTextInput(question);
 			Animal animal = repository.getAnimalById(findId);
 			if (animal != null) {
-				System.out.println(animal);
+				System.out.print(MenuUtil.DEFAULT_PREFIX + "동물 정보");
+				animal.showAnimal();
 				return;
 			} else {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "ID를 다시 입력해 주세요. ");
@@ -230,7 +228,8 @@ public class AnimalManager {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "해당 이름의 동물이 없습니다.");
 				System.out.println();
 			} else {
-				findAnimal.forEach(System.out::println);
+				System.out.print(MenuUtil.DEFAULT_PREFIX + "동물 정보");
+				findAnimal.forEach(a -> a.showAnimal());
 				return;
 			}
 		}
@@ -253,7 +252,7 @@ public class AnimalManager {
 		default -> System.out.println();
 		}
 
-		String[] headers = { "Animal ID", "Name", "Species", "Age", "Gender", "HealthStatus", "EnclosureId" };
+		String[] headers = { "Animal ID", "Name", "Species", "Age", "Gender", "HealthStatus", "EnclosureID" };
 		List<Animal> findAnimals = repository.getAnimalsBySpecies(inSpecies);
 		String[][] data = new String[findAnimals.size()][];
 
@@ -273,7 +272,7 @@ public class AnimalManager {
 		UIUtil.printSeparator('━');
 		TextArtUtil.printEditMenuTitle();
 		UIUtil.printSeparator('━');
-		
+
 		if (repository.count() == 0) {
 			System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 동물이 없습니다.");
 			return;
@@ -286,7 +285,7 @@ public class AnimalManager {
 			findId = MenuUtil.Question.askTextInput("수정할 동물 ID를 입력하세요.");
 			animal = repository.getAnimalById(findId);
 			if (animal != null) {
-				System.out.println(animal);
+				animal.showAnimal();
 				break;
 			} else {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "ID를 다시 입력해 주세요. ");
@@ -295,7 +294,7 @@ public class AnimalManager {
 		}
 
 		// < 원하는 정보 선택 >
-		String[] choices = { "나이", "건강상태", "EnclosureId" };
+		String[] choices = { "나이", "건강상태", "EnclosureID" };
 		int choice = MenuUtil.Question.askSingleChoice("수정할 정보를 입력하세요.", choices);
 
 		// < 정보 수정 >
@@ -311,8 +310,8 @@ public class AnimalManager {
 	public void editAnimalAge(Animal animal) {
 		int changeAge = MenuUtil.Question.askNumberInputInt("수정할 나이를 입력하세요.");
 		animal.setAge(changeAge);
-		System.out.println(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
-		System.out.println(animal);
+		System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
+		animal.showAnimal();
 	}
 
 	public void editAnimalHealth(Animal animal) {
@@ -327,12 +326,15 @@ public class AnimalManager {
 			changeHealth = "Poor";
 		}
 		animal.setHealthStatus(changeHealth);
-		System.out.println(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
-		System.out.println(animal);
+		System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
+		animal.showAnimal();
 	}
 
 	public void editAnimalEnclosureID(Animal animal) {
-
+		String changeEnclosureId = MenuUtil.Question.askTextInput("수정할 EnclosureID를 입력하세요.");
+		animal.setEnclosureId(changeEnclosureId);
+		System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
+		animal.showAnimal();
 	}
 
 	// << 4. 동물 삭제 >>
@@ -340,7 +342,7 @@ public class AnimalManager {
 		UIUtil.printSeparator('━');
 		TextArtUtil.printRemoveMenuTitle();
 		UIUtil.printSeparator('━');
-		
+
 		if (repository.count() == 0) {
 			System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 동물이 없습니다.");
 			return;
@@ -351,15 +353,20 @@ public class AnimalManager {
 			findId = MenuUtil.Question.askTextInput("삭제할 동물 ID를 입력하세요.");
 			animal = repository.getAnimalById(findId);
 			if (animal != null) {
-				System.out.println(animal);
-				break;
+				animal.showAnimal();
+				boolean choice = MenuUtil.Question.askYesNo("동물을 삭제하시겠습니까?");
+				if (choice) {
+					repository.removeAnimal(findId);
+					System.out.println(MenuUtil.DEFAULT_PREFIX + "동물이 삭제되었습니다.");
+					UIUtil.printSeparator('━');
+					return;
+				}
 			} else {
-				System.out.println(MenuUtil.DEFAULT_PREFIX + "ID를 다시 입력해 주세요. ");
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "ID를 다시 입력하세요. ");
 				System.out.println();
 			}
 		}
-		repository.removeAnimal(findId);
-		System.out.println(MenuUtil.DEFAULT_PREFIX + "동물이 삭제되었습니다.");
+
 	}
 
 	// =================================================================

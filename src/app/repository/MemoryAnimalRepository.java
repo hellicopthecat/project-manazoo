@@ -139,9 +139,7 @@ public class MemoryAnimalRepository implements AnimalRepository {
 		if (name == null || name.trim().isEmpty()) {
 			return false;
 		}
-		List<Animal> collect = animals.values().stream().filter(animal -> name.equals(animal.getName()))
-				.collect(Collectors.toList());
-		return !collect.isEmpty();
+		return animals.values().stream().anyMatch(animal -> name.equals(animal.getName()));
 	}
 
 	/**
