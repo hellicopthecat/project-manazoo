@@ -11,10 +11,34 @@ import java.util.stream.Collectors;
 /**
  * 메모리 기반 EnclosureRepository 구현체입니다.
  * 데이터를 Map에 저장하여 빠른 조회와 조작을 제공합니다.
+ * Holder Pattern을 사용한 Singleton으로 성능과 Thread Safety를 보장합니다.
  */
 public class MemoryEnclosureRepository implements EnclosureRepository {
     
     private final Map<String, Enclosure> enclosures = new HashMap<>();
+    
+    /**
+     * private 생성자 - Singleton 패턴 적용
+     */
+    private MemoryEnclosureRepository() {}
+    
+    /**
+     * Initialization-on-demand holder pattern을 사용한 Thread-safe Singleton
+     * JVM의 클래스 로딩 메커니즘을 활용하여 동기화 오버헤드 없이 lazy loading 구현
+     */
+    private static class SingletonHolder {
+        private static final MemoryEnclosureRepository INSTANCE = new MemoryEnclosureRepository();
+    }
+    
+    /**
+     * Singleton 인스턴스를 반환합니다.
+     * Holder Pattern을 사용하여 최적의 성능과 Thread Safety를 보장합니다.
+     * 
+     * @return MemoryEnclosureRepository 인스턴스
+     */
+    public static MemoryEnclosureRepository getInstance() {
+        return SingletonHolder.INSTANCE;
+    }
     
     /**
      * 인클로저를 저장합니다.

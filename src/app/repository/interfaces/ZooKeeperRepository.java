@@ -14,6 +14,7 @@ import java.util.List;
  *   <li>부서별, 이름별 조회</li>
  *   <li>권한 기반 수정 및 삭제</li>
  *   <li>급여 관리</li>
+ *   <li>배치 관리용 Working Data 제공</li>
  * </ul>
  */
 public interface ZooKeeperRepository extends Repository<ZooKeeper, String> {
@@ -118,4 +119,18 @@ public interface ZooKeeperRepository extends Repository<ZooKeeper, String> {
      * @return 설정 성공 여부
      */
     boolean setSalary(String myId, String targetId, long money);
+
+    /**
+     * 현재 재직 중인 사육사 목록을 반환합니다.
+     * 
+     * @return 재직 중인 사육사 리스트
+     */
+    List<ZooKeeper> getWorkingKeepers();
+
+    /**
+     * 재직 중인 사육사가 존재하는지 확인합니다.
+     * 
+     * @return 재직 중인 사육사 존재 여부
+     */
+    boolean hasWorkingKeepers();
 }

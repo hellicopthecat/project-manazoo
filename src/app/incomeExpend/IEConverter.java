@@ -31,14 +31,14 @@ public class IEConverter {
 	 */
 	public static String eventTypeStringConverter(EventType eventType) {
 		String convert = switch (eventType) {
-		case FEE -> "입장료";
-		case EMPLOYEE_MONTH -> "월급";
-		case EMPLOYEE_EXTRA -> "수당";
-		case ENCLOSURE -> "사육장 시설";
-		case SAFARI -> "사파리";
-		case AQUASHOW -> "아쿠아쇼";
-		case EXPERIENCE -> "체험";
-		case FOOD -> "식비";
+		case FEE -> "Fee";
+		case EMPLOYEE_MONTH -> "Salary";
+		case EMPLOYEE_EXTRA -> "Extra";
+		case ENCLOSURE -> "Enclosure";
+		case SAFARI -> "Safari";
+		case AQUASHOW -> "Aquashow";
+		case EXPERIENCE -> "Experience";
+		case FOOD -> "Food";
 		default -> null;
 		};
 		return convert;
@@ -67,8 +67,8 @@ public class IEConverter {
 	 */
 	public static String IETypeStringConverter(IncomeExpendType spendType) {
 		String convert = switch (spendType) {
-		case INCOME -> "수입";
-		case EXPEND -> "지출";
+		case INCOME -> "Income";
+		case EXPEND -> "Expend";
 		default -> null;
 		};
 		return convert;

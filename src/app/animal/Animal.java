@@ -1,5 +1,7 @@
 package app.animal;
 
+import app.common.ui.TableUtil;
+
 public class Animal {
 	private String id;
 	private String name;
@@ -8,11 +10,9 @@ public class Animal {
 	private String gender;
 	private String healthStatus;
 	private String enclosureId; // 케이지 아이디
-	private String zkId; // 사육사 아이디
 
-	public Animal(String id, String name, String species, int age,
-			String gender, String healthStatus, String enclosureId,
-			String zkId) {
+	public Animal(String id, String name, String species, int age, String gender, String healthStatus,
+			String enclosureId) {
 		this.id = id;
 		this.name = name;
 		this.species = species;
@@ -20,7 +20,6 @@ public class Animal {
 		this.gender = gender;
 		this.healthStatus = healthStatus;
 		this.enclosureId = enclosureId;
-		this.zkId = zkId;
 	}
 
 	public String getId() {
@@ -51,10 +50,6 @@ public class Animal {
 		return enclosureId;
 	}
 
-	public String getZkId() {
-		return zkId;
-	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -79,14 +74,17 @@ public class Animal {
 		this.enclosureId = enclosureId;
 	}
 
-	public void setCareId(String zkId) {
-		this.zkId = zkId;
-	}
-
 	@Override
 	public String toString() {
-		return String.format("%s : %s / %s / %d / %s / %s / %s / %s", id, name,
-				species, age, gender, healthStatus, enclosureId, zkId);
+		return String.format("%s : %s / %s / %d / %s / %s / %s", id, name, species, age, gender, healthStatus,
+				enclosureId);
+
+	}
+
+	public void showAnimal() {
+		String[] headers = { "Animal ID", "Name", "Species", "Age", "Gender", "HealthStatus", "EnclosureId" };
+		String[][] data = { { id, name, species, Integer.toString(age), gender, healthStatus, enclosureId } };
+		TableUtil.printTable(" ", headers, data);
 	}
 
 }
