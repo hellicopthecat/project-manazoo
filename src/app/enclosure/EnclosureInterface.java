@@ -9,13 +9,6 @@ import java.util.Map;
 public interface EnclosureInterface {
 
     /**
-     * 사육장 저장소를 반환합니다.
-     *
-     * @return 사육장 저장소
-     */
-    EnclosureRepository getRepository();
-
-    /**
      * 사육장 고유 식별자를 반환합니다.
      *
      * @return 사육장 ID

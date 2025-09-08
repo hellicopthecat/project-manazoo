@@ -51,7 +51,7 @@ public final class InputUtil {
 			try {
 				return Integer.parseInt(scanner.nextLine());
 			} catch (NumberFormatException e) {
-				System.out.print(MenuUtil.DEFAULT_PREFIX + "올바른 숫자를 입력해주세요: ");
+				System.out.print(MenuUtil.DEFAULT_PREFIX + "정수를 입력하세요 ▶ ");
 			}
 		}
 	}

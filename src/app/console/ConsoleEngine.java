@@ -106,13 +106,13 @@ public class ConsoleEngine {
 		manager.handleEnclosureManagement();
 	}
 
-	/**
-	 * 직원 관리 기능을 처리합니다.
-	 */
-	private static void handleStaffManagement() {
-		ZooKeeperManager manager = new ZooKeeperManager();
-		manager.handleZookeeperManagement();
-	}
+    /**
+     * 직원 관리 기능을 처리합니다.
+     */
+    private static void handleStaffManagement() {
+        ZooKeeperManager manager = ZooKeeperManager.getInstance();
+        manager.handleZookeeperManagement();
+    }
 
 	/**
 	 * 재정 관리 기능을 처리합니다.
@@ -126,9 +126,10 @@ public class ConsoleEngine {
 	 */
 	private static void handleVisitorMode() {
 		System.out.println(MenuUtil.DEFAULT_PREFIX + "관람객 모드로 접속합니다...");
+		UIUtil.printSeparator('━');
 		TextArtUtil.printWelcomeMessage();
 		VisitorManager manager = new VisitorManager();
-		manager.run();
+		manager.handleVisitorManagement();
 	}
 
 	/**

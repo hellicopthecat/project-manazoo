@@ -1,17 +1,22 @@
 package app.zooKeeper;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import app.common.IdGeneratorUtil;
 import app.common.InputUtil;
 import app.common.ui.MenuUtil;
+import app.common.ui.TableUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
 import app.finance.FinanceManager;
 import app.repository.MemoryZooKeeperRepository;
 import app.repository.interfaces.ZooKeeperRepository;
+import app.zooKeeper.zooKeeperEnum.ZooKeeperConverter;
 
 /**
+ * ZooKeeperManager 클래스
+ * ---------------------
  * 사육사 관리를 담당하는 클래스입니다.
  * Repository 패턴을 적용하여 데이터 계층을 분리하고 타입 안전성을 확보했습니다.
  * 
@@ -19,88 +24,161 @@ import app.repository.interfaces.ZooKeeperRepository;
  * <ul>
  *   <li>사육사 등록 및 관리</li>
  *   <li>다양한 조회 옵션 (전체, ID별, 이름별, 부서별)</li>
- *   <li>권한 기반 사육사 정보 수정</li>
+ *   <li>사육사 정보 수정</li>
  *   <li>사육사 삭제 및 급여 설정</li>
  * </ul>
  */
-public class ZooKeeperManager {
 
-	private final ZooKeeperRepository repository = new MemoryZooKeeperRepository();
+public final class ZooKeeperManager {
+    
+    /**
+     * Singleton 인스턴스
+     */
+    private static final ZooKeeperManager instance = new ZooKeeperManager();
+    
+    /**
+     * 사육사 데이터를 관리하는 Repository
+     * Singleton Repository를 사용하여 데이터 일관성을 보장합니다.
+     */
+    private final ZooKeeperRepository repository = MemoryZooKeeperRepository.getInstance();
 
-	/**
-	 * 테스트용 더미 데이터를 생성합니다.
-	 * 다양한 직급과 부서의 사육사들을 미리 등록하여 시스템 테스트를 위한 환경을 구성합니다.
-	 */
-	private void createDummyData() {
-		// 비관리자
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "루피", 20, 1, 1, 1, 1, 1, 1, "");
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "크롱", 22, 2, 2, 2, 1, 2, 1, "자격증, 자격증2");
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "뽀로로", 32, 1, 3, 3, 1, 7, 2, "");
-		// 관리자
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "스펀지밥", 40, 1, 4, 4, 1, 12, 2, "자격증, 자격증2, 자격증3");
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "뚱이", 4, 1, 5, 5, 2, 14, 1, "자격증 ");
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "집게사장", 50, 1, 6, 6, 1, 25, 1,
-				"자격증, 자격증2, 자격증3, 자격증4");
-		repository.createZooKeeper(IdGeneratorUtil.generateId(), "다람이", 50, 1, 3, 6, 1, 25, 1, "자격증, 자격증2, 자격증3, 자격증4");
-	}
+    /**
+     * private 생성자 - Singleton 패턴 적용
+     * 초기 더미 데이터를 생성합니다.
+     */
+    private ZooKeeperManager() {
+        initializeTestData();
+    }
 
-	/**
-	 * 사육사 관리 메인 메뉴를 처리합니다.
-	 * 사육사 등록, 조회, 수정, 삭제, 급여 설정 기능을 제공합니다.
-	 * 
-	 * <p>제공하는 메뉴:</p>
-	 * <ul>
-	 *   <li>사육사 등록</li>
-	 *   <li>사육사 찾기 (전체, ID별, 이름별, 부서별)</li>
-	 *   <li>사육사 수정 (재직여부, 업무배정여부, 위험동물관리여부)</li>
-	 *   <li>사육사 삭제</li>
-	 *   <li>급여지출결의서 작성</li>
-	 * </ul>
-	 */
-	/*
-	 * ZooKeeperManagement으로 콘솔을 실행시킬 수 있습니다.
-	 */
-	public void handleZookeeperManagement() {
-		createDummyData();
-		AtomicBoolean run = new AtomicBoolean(true);
-		while (run.get()) {
-			String[] menu = { "사육사 등록", "사육사 찾기", "사육사 수정", "사육사 삭제", "급여지출결의서작성" };
-			String[] s_menu = { "뒤로가기" };
-			UIUtil.printSeparator('━');
-			TextArtUtil.printZookeeperMenuTitle();
-			UIUtil.printSeparator('━');
-			MenuUtil.generateMenuWithTextTitle("사 육 사 관 리", menu, s_menu);
-			int index = InputUtil.getIntInput();
-			switch (index) {
-			case 1 -> registerZooKeeper();
-			case 2 -> getZooKeeper();
-			case 3 -> editZooKeeper();
-			case 4 -> deleteZooKeeper();
-			case 5 -> createSalaryService();
-			case 0 -> goBack(run);
-			default -> wrongIndex();
-			}
-		}
-	}
+    /**
+     * Singleton 인스턴스를 반환합니다.
+     * 
+     * @return ZooKeeperManager 인스턴스
+     */
+    public static ZooKeeperManager getInstance() {
+        return instance;
+    }
 
-	/**
-	 * 새로운 사육사를 등록합니다.
-	 * 사용자로부터 사육사의 상세 정보를 입력받아 시스템에 저장합니다.
-	 * 
-	 * <p>입력받는 정보:</p>
-	 * <ul>
-	 *   <li>이름 (한글/영문 2-20자)</li>
-	 *   <li>나이 (20-65세)</li>
-	 *   <li>성별 (남성/여성)</li>
-	 *   <li>직급 (신입사육사~동물원장)</li>
-	 *   <li>부서 (포유류~교육)</li>
-	 *   <li>재직 여부</li>
-	 *   <li>경력 연수 (1-40년)</li>
-	 *   <li>위험동물 관리 가능 여부</li>
-	 *   <li>자격증 정보 (쉼표로 구분)</li>
-	 * </ul>
-	 */
-	private void registerZooKeeper() {
+    /**
+     * Repository 인스턴스를 반환합니다.
+     * 다른 Manager에서 사육사 정보가 필요할 때 사용됩니다.
+     * 
+     * @return ZooKeeperRepository 인스턴스
+     */
+    public ZooKeeperRepository getRepository() {
+        return repository;
+    }
+
+    /**
+     * 시스템 초기화 시 필요한 테스트 데이터를 생성합니다.
+     * 다양한 부서와 직급의 사육사들을 미리 등록하여 시스템 테스트를 위한 기본 환경을 구성합니다.
+     * 운영 환경에서는 이 메서드를 제거하거나 설정으로 제어해야 합니다.
+     */
+    private void initializeTestData() {
+        try {
+            // 관리자급 사육사 (높은 직급)
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "김관리", 35, 1, 5, 1, 1, 10, 1, "동물관리사,수의사");
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "박부장", 40, 2, 6, 2, 1, 15, 1, "동물관리사,안전관리사");
+            
+            // 포유류 부서 사육사
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "이포유", 28, 2, 3, 1, 1, 5, 1, "동물관리사");
+            
+            // 조류 부서 사육사  
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "박조류", 32, 1, 4, 2, 1, 8, 1, "조류전문가,응급처치");
+            
+            // 파충류 부서 사육사 (일부 휴직)
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "최파충", 26, 2, 2, 3, 2, 3, 2, "");
+            
+            // 어류 부서 사육사
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "정어류", 30, 1, 3, 4, 1, 6, 1, "잠수자격증,수중작업");
+            
+            // 교육 부서 사육사  
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "한교육", 29, 2, 3, 8, 1, 4, 2, "교육지도사");
+            
+            // 신입 사육사
+            repository.createZooKeeper(IdGeneratorUtil.generateId(), "신입수", 24, 1, 1, 1, 1, 1, 2, "동물관리사");
+            
+            System.out.println("✅ 더미 사육사 데이터 8명이 성공적으로 생성되었습니다.");
+            System.out.println("   - 관리자: 2명, 중간직: 4명, 신입: 2명");
+            
+        } catch (Exception e) {
+            System.err.println("❌ 더미 데이터 생성 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // inner util methods
+    /**
+     * 입력값의 범위를 검증하여 유효한 정수를 반환합니다.
+     * 사용자가 올바른 범위의 값을 입력할 때까지 반복하여 입력을 받습니다.
+     * 
+     * @param message 입력 요청 메시지 (null 가능)
+     * @param numInfo 입력 범위 안내 메시지
+     * @param min 최솟값 (포함)
+     * @param max 최댓값 (포함)
+     * @return 검증된 정수값
+     */
+
+    // =================================================================
+    // 기존 UI 메서드들 (호환성 유지)
+    // =================================================================
+
+    /**
+     * 사육사 관리 메인 메뉴를 처리합니다.
+     * 사육사 등록, 조회, 수정, 삭제, 급여 설정 기능을 제공합니다.
+     * 
+     * <p>제공하는 메뉴:</p>
+     * <ul>
+     *   <li>사육사 등록</li>
+     *   <li>사육사 찾기 (전체, ID별, 이름별, 부서별)</li>
+     *   <li>사육사 수정 (재직여부, 업무배정여부, 위험동물관리여부)</li>
+     *   <li>사육사 삭제</li>
+     *   <li>급여지출결의서 작성</li>
+     * </ul>
+     */
+    /*
+     * ZooKeeperManagement으로 콘솔을 실행시킬 수 있습니다.
+     */
+    public void handleZookeeperManagement() {
+        AtomicBoolean run = new AtomicBoolean(true);
+        while (run.get()) {
+            String[] menu = { "사육사 등록", "사육사 찾기", "사육사 수정", "사육사 삭제", "급여지출결의서작성" };
+            String[] s_menu = { "뒤로가기" };
+            UIUtil.printSeparator('━');
+            TextArtUtil.printZookeeperMenuTitle();
+            UIUtil.printSeparator('━');
+            MenuUtil.generateMenuWithTextTitle("사 육 사 관 리", menu, s_menu);
+            int index = InputUtil.getIntInput();
+            switch (index) {
+            case 1 -> registerZooKeeper();
+            case 2 -> getZooKeeper();
+            case 3 -> editZooKeeper();
+            case 4 -> deleteZooKeeper();
+            case 5 -> createSalaryService();
+            case 0 -> goBack(run);
+            default -> wrongIndex();
+            }
+        }
+    }
+
+    /**
+     * 새로운 사육사를 등록합니다.
+     * 사용자로부터 사육사의 상세 정보를 입력받아 시스템에 저장합니다.
+     * 
+     * <p>입력받는 정보:</p>
+     * <ul>
+     *   <li>이름 (한글/영문 2-20자)</li>
+     *   <li>나이 (20-65세)</li>
+     *   <li>성별 (남성/여성)</li>
+     *   <li>직급 (신입사육사~동물원장)</li>
+     *   <li>부서 (포유류~교육)</li>
+     *   <li>재직 여부</li>
+     *   <li>경력 연수 (1-40년)</li>
+     *   <li>위험동물 관리 가능 여부</li>
+     *   <li>자격증 정보 (쉼표로 구분)</li>
+     * </ul>
+     */
+    private void registerZooKeeper() {
 		while (true) {
 			// 이름
 			String name;
@@ -117,33 +195,33 @@ public class ZooKeeperManager {
 					UIUtil.printSeparator('━');
 					System.out.println(MenuUtil.DEFAULT_PREFIX + "이름은 비워둘 수 없습니다.");
 					UIUtil.printSeparator('━');
-				} else if (!name.matches("^[가-힣a-zA-Z]{2,20}$")) {
+				} else if (!name.matches("^[a-zA-Z]{2,20}$")) {
 					UIUtil.printSeparator('━');
-					System.out.println(MenuUtil.DEFAULT_PREFIX + "이름은 한글 또는 영문 2~20자 입니다.");
+					System.out.println(MenuUtil.DEFAULT_PREFIX + "이름은 영문 2~20자 입니다.");
 					UIUtil.printSeparator('━');
 				} else {
 					break;
 				}
 			}
 			// 나이
-			int age = getValidateInt("나이를 입력하세요 ▶ ", "20세 ~ 65세", 20, 65);
+			int age = getValidateInt("나이를 입력하세요", "20세 ~ 65세", 20, 65);
 			// 성별
-			int genderIndex = getValidateInt("성별을 입력하세요 ▶ ", "1 : 남성 , 2 : 여성", 1, 2);
+			int genderIndex = getValidateInt("성별을 입력하세요", "1 : 남성 , 2 : 여성", 1, 2);
 			// 직책
-			int rankIndex = getValidateInt("직책을 입력하세요 ▶ ",
+			int rankIndex = getValidateInt("직책을 입력하세요",
 					"1 : 신입사육사 , 2 : 사육사 , 3 : 시니어 사육사 , 4 : 팀장 사육사 , 5 : 관리자 , 6 : 동물원장", 1, 6);
 			// 부서
-			int departmentIndex = getValidateInt("부서를 입력하세요 ▶ ",
+			int departmentIndex = getValidateInt("부서를 입력하세요",
 					"1 : 포유류부서 , 2 : 조류부서 , 3 : 파충류부서 , 4 : 어류부서 , 5 : 양서류부서 , 6 : 번식/연구 , 7 : 수의/재활 , 8 : 교육", 1, 8);
 			// 재직여부
-			int isWorkingIndex = getValidateInt("재직여부를 입력하세요 ▶ ", "1 : 재직 , 2 : 퇴사", 1, 2);
+			int isWorkingIndex = getValidateInt("재직여부를 입력하세요", "1 : 재직 , 2 : 퇴사", 1, 2);
 			// 재직여부
-			int experienceYear = getValidateInt("연차를 입력하세요 ▶ ", "1 ~ 40", 1, 40);
+			int experienceYear = getValidateInt("연차를 입력하세요", "1 ~ 40", 1, 40);
 			// 맹수조련여부
-			int canHandleDangerAnimalIndex = getValidateInt("맹수조련여부를 입력하세요 ▶ ", "1 : 가능 , 2 : 불가능", 1, 2);
+			int canHandleDangerAnimalIndex = getValidateInt("맹수조련여부를 입력하세요", "1 : 가능 , 2 : 불가능", 1, 2);
 			// 자격
 			System.out.println();
-			System.out.println(MenuUtil.DEFAULT_PREFIX + "자격증을 작성하세요. ',' 로 구분할 수 있습니다 ▶ ");
+			System.out.println(MenuUtil.DEFAULT_PREFIX + "자격증을 작성하세요. ',' 로 구분할 수 있습니다. (enter로 넘기기 가능) ▶ ");
 			System.out.println();
 			String desc = InputUtil.getStringInput();
 
@@ -173,14 +251,8 @@ public class ZooKeeperManager {
 	// 읽기
 	private void getZooKeeper() {
 		AtomicBoolean run = new AtomicBoolean(true);
-		UIUtil.printSeparator('━');
-		System.out.println("사육사 조회");
-		System.out.println();
-		System.out.println(
-				MenuUtil.DEFAULT_PREFIX + "1. 전체리스트 조회, 2. ID로 찾기(개인), 3. 이름으로 찾기(다수), 4. 부서로 찾기(다수), 0. 뒤로가기");
-		System.out.println();
-		UIUtil.printSeparator('━');
-		System.out.println(MenuUtil.DEFAULT_PREFIX + "어떤 방식으로 찾으시겠습니까?  ▶ ");
+		String[] choices = { "전체리스트 조회", "ID로 찾기(개인)", "이름으로 찾기(다수)", "부서로 찾기(다수)", "뒤로가기" };
+		MenuUtil.printMenu("사육사 조회", choices);
 		int index = InputUtil.getIntInput();
 		switch (index) {
 		case 1 -> getZooKeeperList();
@@ -197,11 +269,22 @@ public class ZooKeeperManager {
 	 * 시스템에 등록된 전체 사육사 정보를 순서대로 표시합니다.
 	 */
 	private void getZooKeeperList() {
-		UIUtil.printSeparator('━');
-		repository.getZooKeeperList().stream().forEach(x -> {
-			System.out.println(x);
-		});
-		UIUtil.printSeparator('━');
+		int length = repository.getZooKeeperList().size();
+		String title = "사육사 리스트";
+		String[] headers = { "ID", "Name", "Age", "Gender", "Rank", "Department", "IsWorking", "Can Assign Task" };
+		String[][] data = new String[length][8];
+		for (int i = 0; i < length; i++) {
+			ZooKeeper zooKeeper = repository.getZooKeeperList().get(i);
+			data[i][0] = zooKeeper.getId();
+			data[i][1] = zooKeeper.getName();
+			data[i][2] = zooKeeper.getAge() + "";
+			data[i][3] = ZooKeeperConverter.genderStringConverter(zooKeeper.getGender());
+			data[i][4] = ZooKeeperConverter.rankStringConverter(zooKeeper.getRank());
+			data[i][5] = ZooKeeperConverter.departmentStringConverter(zooKeeper.getDepartment());
+			data[i][6] = ZooKeeperConverter.workingStringConverter(zooKeeper.isWorking());
+			data[i][7] = ZooKeeperConverter.possibleImpossibleStringConverter(zooKeeper.isCanAssignTask());
+		}
+		TableUtil.printTable(title, headers, data);
 	}
 
 	/**
@@ -211,7 +294,22 @@ public class ZooKeeperManager {
 	private void getZooKeeperById() {
 		System.out.println(MenuUtil.DEFAULT_PREFIX + "아이디를 입력해주세요 ▶ ");
 		String id = InputUtil.getStringInput();
-		System.out.println(repository.getZooKeeperById(id));
+		ZooKeeper zk = repository.getZooKeeperById(id);
+		if (zk == null) {
+			String noDataTitle = "데이터 없음";
+			String[] noDataHeaders = { "No Data" };
+			String[] noDataValues = { "No Data" };
+			TableUtil.printSingleRowTable(noDataTitle, noDataHeaders, noDataValues);
+		} else {
+			String title = zk.getName();
+			String[] headers = { "id", "name", "rank", "department", "gender", "CanHandleDangerAnimal", "IsWorking" };
+			String[] values = { zk.getId(), zk.getName(), ZooKeeperConverter.rankStringConverter(zk.getRank()),
+					ZooKeeperConverter.departmentStringConverter(zk.getDepartment()),
+					ZooKeeperConverter.genderStringConverter(zk.getGender()),
+					ZooKeeperConverter.possibleImpossibleStringConverter(zk.isCanHandleDangerAnimal()),
+					ZooKeeperConverter.workingStringConverter(zk.isWorking()) };
+			TableUtil.printSingleRowTable(title, headers, values);
+		}
 	}
 
 	/**
@@ -221,11 +319,8 @@ public class ZooKeeperManager {
 	private void getZooKeeperByName() {
 		System.out.println(MenuUtil.DEFAULT_PREFIX + "이름을 입력해주세요 ▶ ");
 		String name = InputUtil.getStringInput();
-		UIUtil.printSeparator('━');
-		System.out.println();
-		System.out.println(repository.getZooKeeperByName(name));
-		System.out.println();
-		UIUtil.printSeparator('━');
+		String zooKeeperByName = repository.getZooKeeperByName(name);
+		System.out.println(zooKeeperByName);
 	}
 
 	/**
@@ -233,15 +328,47 @@ public class ZooKeeperManager {
 	 * 사용자가 선택한 부서에 소속된 모든 사육사의 정보를 표시합니다.
 	 */
 	private void getZooKeeperByDepartment() {
-		System.out.println(MenuUtil.DEFAULT_PREFIX
-				+ "1 : 포유류 , 2 : 조류 , 3 : 파충류 , 4 : 어류 , 5 : 양서류 , 6 : 번식/연구 , 7 : 수의/재활 , 8 : 교육");
-		System.out.println();
-		System.out.println(MenuUtil.DEFAULT_PREFIX + "부서를 고르세요 ▶ ");
+		String[] choices = { "포유류", "조류", "파충류", "어류", "양서류", "번식/연구", "수의/재활", "교육" };
+		MenuUtil.printMenu("부서를 고르세요", choices);
 		int departmentIndex = InputUtil.getIntInput();
-		UIUtil.printSeparator('━');
-		repository.getZooKeeperByDepartment(departmentIndex).forEach(System.out::println);
-		UIUtil.printSeparator('━');
+		List<ZooKeeper> zk = repository.getZooKeeperByDepartment(departmentIndex);
+		if (zk == null) {
+			String noDataTitle = "데이터 없음";
+			String[] noDataHeaders = { "No Data" };
+			String[] noDataValues = { "No Data" };
+			TableUtil.printSingleRowTable(noDataTitle, noDataHeaders, noDataValues);
+		} else {
+			String title = "사육사 리스트";
+			String[] headers = { "ID", "Name", "Age", "Gender", "Rank", "Department", "IsWorking", "Can Assign Task" };
+			String[][] data = new String[zk.size()][8];
+			for (int i = 0; i < zk.size(); i++) {
+				ZooKeeper zooKeeper = zk.get(i);
+				data[i][0] = zooKeeper.getId();
+				data[i][1] = zooKeeper.getName();
+				data[i][2] = zooKeeper.getAge() + "";
+				data[i][3] = ZooKeeperConverter.genderStringConverter(zooKeeper.getGender());
+				data[i][4] = ZooKeeperConverter.rankStringConverter(zooKeeper.getRank());
+				data[i][5] = ZooKeeperConverter.departmentStringConverter(zooKeeper.getDepartment());
+				data[i][6] = ZooKeeperConverter.workingStringConverter(zooKeeper.isWorking());
+				data[i][7] = ZooKeeperConverter.possibleImpossibleStringConverter(zooKeeper.isCanAssignTask());
+			}
+			TableUtil.printTable(title, headers, data);
+		}
+
 	}
+
+	/**
+	 * 사육사 정보 수정 메뉴를 표시하고 처리합니다.
+	 * 권한에 따라 제한된 정보만 수정할 수 있으며, 수정 가능한 항목을 메뉴로 제공합니다.
+	 * 
+	 * <p>수정 가능한 항목:</p>
+	 * <ul>
+	 *   <li>재직여부 (재직/퇴사)</li>
+	 *   <li>업무배정가능여부 (가능/불가능)</li>
+	 *   <li>위험동물관리여부 (가능/불가능)</li>
+	 * </ul>
+	 * 사육사 수정 메서드입니다.
+	 */
 
 	/**
 	 * 사육사 정보 수정 메뉴를 표시하고 처리합니다.
@@ -256,11 +383,8 @@ public class ZooKeeperManager {
 	 */
 	private void editZooKeeper() {
 		AtomicBoolean run = new AtomicBoolean(true);
-		System.out.println(MenuUtil.DEFAULT_PREFIX + "무엇을 수정하시겠습니까?");
-		System.out.println();
-		System.out.println(MenuUtil.DEFAULT_PREFIX + "1. 재직여부, 2. 업무배정가능여부, 3. 위험군동물관리여부, 0. 뒤로가기");
-		System.out.println();
-		System.out.println(MenuUtil.DEFAULT_PREFIX + "메뉴를 고르세요 ▶ ");
+		String[] choice = { "재직여부", "업무배정가능여부", "위험군동물관리여부", "뒤로가기" };
+		MenuUtil.printMenu("무엇을 수정하시겠습니까?", choice);
 		int index = InputUtil.getIntInput();
 		switch (index) {
 		case 1 -> editIsWorking();
@@ -329,15 +453,13 @@ public class ZooKeeperManager {
 	 * 적절한 권한을 가진 사용자만 급여를 설정할 수 있습니다.
 	 */
 	// 급여생성
-
 	private void createSalaryService() {
 		IdTracker ids = getIds();
 		long money = FinanceManager.getInstance().useMoney();
-		boolean ok = repository.setSalary(ids.getMyId(), ids.targetId, money);
+		boolean ok = repository.setSalary(ids.getMyId(), ids.getTargetId(), money);
 		if (ok) {
 			System.out.println("************************ 급여가 생성 되었습니다. ************************");
 		}
-
 	}
 
 	// inner util methods
@@ -354,11 +476,16 @@ public class ZooKeeperManager {
 	private int getValidateInt(String message, String numInfo, int min, int max) {
 		while (true) {
 			if (message != null && !message.isEmpty()) {
-				System.out.println(MenuUtil.DEFAULT_PREFIX + message);
+				System.out.println();
+				System.out.println(MenuUtil.DEFAULT_PREFIX + numInfo);
+				System.out.println();
+				System.out.println(MenuUtil.DEFAULT_PREFIX + message + " ▶ ");
+			} else {
+				System.out.println();
+				System.out.println(MenuUtil.DEFAULT_PREFIX + numInfo);
+				System.out.println();
+				System.out.println(" ▶ ");
 			}
-			System.out.println();
-			System.out.println(MenuUtil.DEFAULT_PREFIX + numInfo);
-			System.out.println(" ▶ ");
 			System.out.println();
 			String input = InputUtil.getStringInput();
 			try {
@@ -366,7 +493,8 @@ public class ZooKeeperManager {
 				if (value >= min && value <= max) {
 					return value;
 				} else {
-					System.out.println(MenuUtil.DEFAULT_PREFIX + numInfo);
+					System.out.println(MenuUtil.DEFAULT_PREFIX + "주어진 범위를 다시보고 입력해 주세요.");
+					System.out.println();
 				}
 			} catch (NumberFormatException e) {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "숫자를 입력해주세요  ▶ ");
@@ -424,11 +552,6 @@ public class ZooKeeperManager {
 			this.targetId = targetId;
 		}
 
-		/**
-		 * 작업 수행자 ID를 반환합니다.
-		 * 
-		 * @return 작업 수행자 ID
-		 */
 		public String getMyId() {
 			return myId;
 		}
@@ -467,4 +590,22 @@ public class ZooKeeperManager {
 		}
 		return new IdTracker(myId, targetId);
 	}
+
+    /**
+     * 현재 재직 중인 사육사 목록을 반환합니다.
+     * 
+     * @return 재직 중인 사육사 리스트
+     */
+    public List<ZooKeeper> getWorkingKeepers() {
+        return repository.getWorkingKeepers();
+    }
+
+    /**
+     * 재직 중인 사육사가 존재하는지 확인합니다.
+     * 
+     * @return 재직 중인 사육사 존재 여부
+     */
+    public boolean hasWorkingKeepers() {
+        return repository.hasWorkingKeepers();
+    }
 }
