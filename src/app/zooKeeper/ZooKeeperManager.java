@@ -35,9 +35,9 @@ public final class ZooKeeperManager {
     
     /**
      * 사육사 데이터를 관리하는 Repository
-     * MemoryZooKeeperRepository를 사용하여 메모리 기반 데이터 관리
+     * Singleton Repository를 사용하여 데이터 일관성을 보장합니다.
      */
-    private final ZooKeeperRepository repository = new MemoryZooKeeperRepository();
+    private final ZooKeeperRepository repository = MemoryZooKeeperRepository.getInstance();
 
     /**
      * private 생성자 - Singleton 패턴 적용

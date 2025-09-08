@@ -33,9 +33,9 @@ public class EnclosureManager {
 
     /**
      * 사육장 데이터를 관리하는 Repository입니다.
-     * 메모리 기반 구현체를 사용하여 CRUD 연산을 수행합니다.
+     * Singleton Repository를 사용하여 데이터 일관성을 보장합니다.
      */
-    private final EnclosureRepository repository = new MemoryEnclosureRepository();
+    private final EnclosureRepository repository = MemoryEnclosureRepository.getInstance();
 
     /**
      * 사용자로부터 LocationType을 선택받는 헬퍼 메서드입니다.
