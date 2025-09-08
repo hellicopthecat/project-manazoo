@@ -1092,36 +1092,19 @@ public class EnclosureManager {
     }
 
     /**
-     * ZooKeeper 객체로부터 해당하는 ID를 찾습니다.
+     * ZooKeeper 객체로부터 해당하는 ID를 반환합니다.
+     * toString() 파싱 대신 직접적인 getter 메서드를 사용합니다.
      * 
      * @param keeper ID를 찾을 ZooKeeper 객체
-     * @return 찾은 사육사 ID, 없으면 "Unknown"
+     * @return 사육사 ID
      */
     private String findKeeperIdFromManager(ZooKeeper keeper) {
         try {
-            // ZooKeeperManager의 전체 목록에서 해당 객체와 일치하는 ID 찾기
-            List<ZooKeeper> allKeepers = ZooKeeperManager.getInstance()
-                                                        .getRepository()
-                                                        .getZooKeeperList();
-            
-            for (ZooKeeper k : allKeepers) {
-                if (k == keeper || (k.getName().equals(keeper.getName()) && 
-                                   k.getDepartment() == keeper.getDepartment())) {
-                    // toString()에서 ID 추출
-                    String toString = k.toString();
-                    if (toString.contains("id : ")) {
-                        int start = toString.indexOf("id : ") + 5;
-                        int end = toString.indexOf(" |", start);
-                        if (end > start) {
-                            return toString.substring(start, end);
-                        }
-                    }
-                }
-            }
+            return keeper.getId();  // 직접적이고 안전한 방식
         } catch (Exception e) {
             // 오류 발생 시 기본값 반환
+            return "Unknown";
         }
-        return "Unknown";
     }
 
     /**
