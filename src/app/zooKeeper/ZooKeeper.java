@@ -45,7 +45,7 @@ public class ZooKeeper implements ZooKeeperBasicBehavior {
 	}
 
 	// methods
-	protected String getId() {
+	public String getId() {
 		return id;
 	}
 

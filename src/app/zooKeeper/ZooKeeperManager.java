@@ -1,5 +1,6 @@
 package app.zooKeeper;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import app.common.IdGeneratorUtil;
@@ -529,4 +530,22 @@ public final class ZooKeeperManager {
 		}
 		return new IdTracker(myId, targetId);
 	}
+
+    /**
+     * 현재 재직 중인 사육사 목록을 반환합니다.
+     * 
+     * @return 재직 중인 사육사 리스트
+     */
+    public List<ZooKeeper> getWorkingKeepers() {
+        return repository.getWorkingKeepers();
+    }
+
+    /**
+     * 재직 중인 사육사가 존재하는지 확인합니다.
+     * 
+     * @return 재직 중인 사육사 존재 여부
+     */
+    public boolean hasWorkingKeepers() {
+        return repository.hasWorkingKeepers();
+    }
 }
