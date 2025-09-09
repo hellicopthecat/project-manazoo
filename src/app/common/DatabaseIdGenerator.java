@@ -1,11 +1,21 @@
 package app.common;
 
 import java.sql.*;
+
+import app.common.exception.IdGenerationException;
 import app.config.DatabaseConnection;
 
 /**
  * 데이터베이스 기반 ID 생성 유틸리티 클래스입니다.
  * 호출자 클래스를 자동 감지하여 적절한 접두사로 고유한 ID를 생성합니다.
+ * 
+ * <p><strong>필요한 데이터베이스 테이블:</strong>
+ * <pre>{@code
+ * CREATE TABLE id_generator (
+ *     prefix VARCHAR(10) PRIMARY KEY,
+ *     last_number INT NOT NULL
+ * );
+ * }</pre>
  * 
  * <p>지원되는 Manager 클래스:
  * <ul>
@@ -26,7 +36,7 @@ public final class DatabaseIdGenerator {
 
     /**
      * ID 타입을 정의하는 열거형입니다.
-     * 각 타입별로 고유한 접두사를 가집니다.
+     * 각 타입별로 고유한 접두사를 가지며, id_generator 테이블의 prefix 컬럼과 매핑됩니다.
      */
     public enum IdType {
         /** 사육장 타입 (접두사: E) */
@@ -65,29 +75,60 @@ public final class DatabaseIdGenerator {
      * 스택 트레이스를 분석하여 호출자 클래스를 기반으로 ID 타입을 자동 결정합니다.
      * 
      * @return 결정된 ID 타입
-     * @throws IllegalStateException 지원되지 않는 클래스에서 호출된 경우
+     * @throws IdGenerationException 지원되지 않는 클래스에서 호출된 경우
      */
-    private static IdType determineIdType() {
+    private static IdType determineIdType() throws IdGenerationException {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
         for (StackTraceElement element : stackTrace) {
-            String className = element.getClassName();
-
-            if (className.contains("EnclosureManager")) {
+            String fullClassName = element.getClassName();
+            
+            // 패키지 경로를 제거하고 클래스명만 추출
+            String simpleClassName = getSimpleClassName(fullClassName);
+            
+            // 정확한 클래스명 매칭
+            if ("EnclosureManager".equals(simpleClassName)) {
                 return IdType.ENCLOSURE;
-            } else if (className.contains("AnimalManager")) {
+            } else if ("AnimalManager".equals(simpleClassName)) {
                 return IdType.ANIMAL;
-            } else if (className.contains("ZooKeeperManager")) {
+            } else if ("ZooKeeperManager".equals(simpleClassName)) {
                 return IdType.ZOOKEEPER;
-            } else if (className.contains("FinanceManager")) {
+            } else if ("FinanceManager".equals(simpleClassName)) {
                 return IdType.FINANCE;
-            } else if (className.contains("VisitorManager")) {
+            } else if ("VisitorManager".equals(simpleClassName)) {
                 return IdType.VISITOR;
             }
         }
 
-        throw new IllegalStateException("ID 생성 요청이 지원되지 않는 클래스에서 호출되었습니다. "
-                + "EnclosureManager, AnimalManager, ZooKeeperManager, FinanceManager, VisitorManager에서만 호출 가능합니다.");
+        // 지원되지 않는 클래스에서 호출된 경우
+        String callerInfo = getCallerDebugInfo(stackTrace);
+        throw new IdGenerationException(
+            "ID 생성 요청이 지원되지 않는 클래스에서 호출되었습니다. " +
+            "지원 클래스: EnclosureManager, AnimalManager, ZooKeeperManager, FinanceManager, VisitorManager. " +
+            "호출 위치: " + callerInfo
+        );
+    }
+
+    /**
+     * 패키지 경로를 제거하고 단순 클래스명만 반환합니다.
+     */
+    private static String getSimpleClassName(String fullClassName) {
+        int lastDotIndex = fullClassName.lastIndexOf('.');
+        return lastDotIndex >= 0 ? fullClassName.substring(lastDotIndex + 1) : fullClassName;
+    }
+
+    /**
+     * 디버깅을 위한 호출자 정보를 생성합니다.
+     */
+    private static String getCallerDebugInfo(StackTraceElement[] stackTrace) {
+        if (stackTrace.length > 3) {
+            StackTraceElement caller = stackTrace[3]; // generateId() 호출자
+            return String.format("%s.%s():%d", 
+                getSimpleClassName(caller.getClassName()), 
+                caller.getMethodName(), 
+                caller.getLineNumber());
+        }
+        return "알 수 없는 호출자";
     }
 
     // ==================== 핵심 ID 생성 메서드 ====================
@@ -97,21 +138,11 @@ public final class DatabaseIdGenerator {
      * 
      * <p>스택 트레이스를 분석하여 호출한 Manager 클래스를 확인하고, 
      * 해당 타입에 맞는 ID를 데이터베이스 기반으로 안전하게 생성합니다.
-     * 
-     * <p>생성 규칙:
-     * <ul>
-     *   <li>EnclosureManager → E-0001, E-0002, ...</li>
-     *   <li>AnimalManager → A-0001, A-0002, ...</li>
-     *   <li>ZooKeeperManager → K-0001, K-0002, ...</li>
-     *   <li>FinanceManager → F-0001, F-0002, ...</li>
-     *   <li>VisitorManager → V-0001, V-0002, ...</li>
-     * </ul>
      *
      * @return 생성된 고유 ID (예: "E-0001")
-     * @throws IllegalStateException 지원되지 않는 클래스에서 호출된 경우
-     * @throws RuntimeException 데이터베이스 오류 발생 시
+     * @throws IdGenerationException 지원되지 않는 클래스에서 호출된 경우 또는 데이터베이스 오류 발생 시
      */
-    public static String generateId() {
+    public static String generateId() throws IdGenerationException {
         // 1. 호출자 클래스를 자동으로 감지하여 ID 타입 결정
         IdType idType = determineIdType();
         String prefix = idType.getPrefix();
@@ -123,11 +154,11 @@ public final class DatabaseIdGenerator {
     /**
      * 지정된 접두사로 고유한 ID를 데이터베이스 기반으로 생성합니다.
      * 
-     * @param prefix ID 접두사 (예: "A", "E", "K")
+     * @param prefix ID 접두사
      * @return 생성된 고유 ID (예: "A-0001")
-     * @throws RuntimeException 데이터베이스 오류 발생 시
+     * @throws IdGenerationException 데이터베이스 오류 발생 시
      */
-    private static String generateIdWithPrefix(String prefix) {
+    private static String generateIdWithPrefix(String prefix) throws IdGenerationException {
         try (Connection connection = DatabaseConnection.getConnection()) {
             connection.setAutoCommit(false);
 
@@ -161,14 +192,15 @@ public final class DatabaseIdGenerator {
                 return formatId(prefix, newNumber);
 
             } catch (SQLException e) {
+                // 오류 발생 시 롤백
                 connection.rollback();
-                throw new RuntimeException("ID 생성 중 데이터베이스 오류 발생 (접두사: " + prefix + "): " + e.getMessage(), e);
+                throw new IdGenerationException("ID 생성 중 데이터베이스 오류 발생 (접두사: " + prefix + ")", e);
             } finally {
                 connection.setAutoCommit(true);
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("데이터베이스 연결 실패: " + e.getMessage(), e);
+            throw new IdGenerationException("데이터베이스 연결 실패", e);
         }
     }
 
@@ -176,11 +208,6 @@ public final class DatabaseIdGenerator {
 
     /**
      * 새로운 접두사를 id_generator 테이블에 삽입합니다.
-     * 
-     * @param connection 데이터베이스 연결
-     * @param prefix 접두사
-     * @param initialNumber 초기 번호
-     * @throws SQLException 데이터베이스 오류 발생 시
      */
     private static void insertNewPrefix(Connection connection, String prefix, int initialNumber) 
             throws SQLException {
@@ -199,11 +226,6 @@ public final class DatabaseIdGenerator {
 
     /**
      * 지정된 접두사의 마지막 번호를 업데이트합니다.
-     * 
-     * @param connection 데이터베이스 연결
-     * @param prefix 접두사
-     * @param newNumber 새로운 번호
-     * @throws SQLException 데이터베이스 오류 발생 시
      */
     private static void updateLastNumber(Connection connection, String prefix, int newNumber) 
             throws SQLException {
@@ -223,9 +245,9 @@ public final class DatabaseIdGenerator {
     /**
      * 접두사와 번호를 결합하여 포맷된 ID를 생성합니다.
      * 
-     * @param prefix 접두사
-     * @param number 번호
-     * @return 포맷된 ID (예: "A-0001")
+     * @param prefix ID 접두사
+     * @param number 번호 (1부터 시작)
+     * @return 포맷된 ID 문자열 (예: A-0001)
      */
     private static String formatId(String prefix, int number) {
         return String.format("%s-%04d", prefix, number);
