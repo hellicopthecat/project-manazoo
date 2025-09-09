@@ -601,7 +601,6 @@ public class JdbcEnclosureRepository implements EnclosureRepository {
         logger.debug("사육사 배정 시작: 사육장 ID=%s, 사육사 수=%d", 
                     enclosure.getId(), enclosure.getAllCaretakers().size());
 
-        // 표준 SQL을 사용한 중복 방지 로직
         String checkSql = "SELECT 1 FROM enclosure_caretakers WHERE enclosure_id = ? AND keeper_id = ?";
         String insertSql = "INSERT INTO enclosure_caretakers (enclosure_id, keeper_id) VALUES (?, ?)";
 
