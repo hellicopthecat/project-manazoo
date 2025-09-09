@@ -23,7 +23,6 @@ public class ZooKeeper implements ZooKeeperBasicBehavior {
 	private boolean canHandleDangerAnimal;
 	private boolean canAssignTask;
 	private List<String> licenses = new ArrayList<>();
-	// public List<Enclosures> enclosures;
 	private long salary = 0l;
 
 	// constructor
