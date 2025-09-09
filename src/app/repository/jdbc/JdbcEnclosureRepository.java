@@ -589,20 +589,53 @@ public class JdbcEnclosureRepository implements EnclosureRepository {
         }
     }
 
+    /**
+     * 사육사들을 사육장에 배정합니다 (enclosure_caretakers 테이블).
+     * 표준 SQL을 사용하여 중복 배정을 방지합니다.
+     */
     private void saveEnclosureCaretakers(Connection connection, Enclosure enclosure) throws SQLException {
         if (enclosure.getAllCaretakers() == null || enclosure.getAllCaretakers().isEmpty()) {
             return;
         }
 
-        String sql = "INSERT IGNORE INTO enclosure_caretakers (enclosure_id, keeper_id) VALUES (?, ?)";
+        logger.debug("사육사 배정 시작: 사육장 ID=%s, 사육사 수=%d", 
+                    enclosure.getId(), enclosure.getAllCaretakers().size());
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        // 표준 SQL을 사용한 중복 방지 로직
+        String checkSql = "SELECT 1 FROM enclosure_caretakers WHERE enclosure_id = ? AND keeper_id = ?";
+        String insertSql = "INSERT INTO enclosure_caretakers (enclosure_id, keeper_id) VALUES (?, ?)";
+
+        try (PreparedStatement checkStmt = connection.prepareStatement(checkSql);
+             PreparedStatement insertStmt = connection.prepareStatement(insertSql)) {
+
             for (String keeperId : enclosure.getAllCaretakers().keySet()) {
-                stmt.setString(1, enclosure.getId());
-                stmt.setString(2, keeperId);
-                stmt.addBatch();
+                // 중복 여부 확인
+                checkStmt.setString(1, enclosure.getId());
+                checkStmt.setString(2, keeperId);
+                
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (!rs.next()) { // 중복되지 않은 경우에만 삽입
+                        insertStmt.setString(1, enclosure.getId());
+                        insertStmt.setString(2, keeperId);
+                        insertStmt.addBatch();
+                        
+                        logger.debug("사육사 배정 추가: 사육장=%s, 사육사=%s", 
+                                    enclosure.getId(), keeperId);
+                    } else {
+                        logger.debug("이미 배정된 사육사 건너뜀: 사육장=%s, 사육사=%s", 
+                                    enclosure.getId(), keeperId);
+                    }
+                }
             }
-            stmt.executeBatch();
+            
+            // 배치 실행
+            int[] results = insertStmt.executeBatch();
+            int insertedCount = 0;
+            for (int result : results) {
+                if (result > 0) insertedCount++;
+            }
+            
+            logger.debug("사육사 배정 완료: %d명 새로 배정됨", insertedCount);
         }
     }
 
