@@ -1,5 +1,7 @@
 package app.animal;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,13 +14,13 @@ import app.common.ui.MenuUtil;
 import app.common.ui.TableUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
-import app.repository.memory.MemoryAnimalRepository;
+import app.repository.JdbcAnimalRepository;
 import app.repository.interfaces.AnimalRepository;
+import app.repository.memory.MemoryAnimalRepository;
 
 public class AnimalManager {
 	/**
-	 * 동물 데이터를 관리하는 Repository입니다.
-	 * Singleton Repository를 사용하여 데이터 일관성을 보장합니다.
+	 * 동물 데이터를 관리하는 Repository입니다. Singleton Repository를 사용하여 데이터 일관성을 보장합니다.
 	 */
 	private final AnimalRepository repository = MemoryAnimalRepository.getInstance();
 
@@ -44,17 +46,18 @@ public class AnimalManager {
 		// Repository 패턴에서는 자동으로 동기화됨
 	}
 
-	public void handleAnimalManagement() {
+	public void handleAnimalManagement(Connection connection) throws SQLException {
 		while (true) {
 			displayAnimalMenu();
 			int choice = InputUtil.getIntInput();
 			switch (choice) {
-			case 1 -> registerAnimal();
-			case 2 -> viewAnimals();
-			case 3 -> editAnimal();
-			case 4 -> removeAnimal();
+			case 1 -> registerAnimal(connection);
+			case 2 -> viewAnimals(connection);
+			case 3 -> editAnimal(connection);
+			case 4 -> removeAnimal(connection);
 			case 0 -> {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "이전 메뉴로 돌아갑니다.");
+				UIUtil.printSeparator('━');
 				return;
 			}
 			default -> System.out.println(MenuUtil.DEFAULT_PREFIX + "잘못된 선택입니다.");
@@ -69,17 +72,17 @@ public class AnimalManager {
 		MenuUtil.generateMenuWithSpecialOptions(TextArtUtil::printAnimalMenuTitle, option, specialOptions);
 	}
 
-	public void registerAnimal() {
+	public void registerAnimal(Connection connection) throws SQLException {
 		UIUtil.printSeparator('━');
 		TextArtUtil.printRegisterMenuTitle();
 		UIUtil.printSeparator('━');
 
 		id = IdGeneratorUtil.generateId();
-		inputAnimalName("동물의 이름을 입력하세요.");
-		inputAnimalSpecies("동물의 종을 입력하세요.");
+		name = inputAnimalName("동물의 이름을 입력하세요.");
+		species = inputAnimalSpecies("동물의 종을 입력하세요.");
 		age = MenuUtil.Question.askNumberInputInt("동물의 나이를 입력하세요.");
-		inputAnimalGender("동물의 성별을 입력하세요.");
-		inputAnimalHealth("동물의 건강상태를 입력하세요.");
+		gender = inputAnimalGender("동물의 성별을 입력하세요.");
+		healthStatus = inputAnimalHealth("동물의 건강상태를 입력하세요.");
 		enclosureId = MenuUtil.Question.askTextInput("동물의 EnclosureID를 입력하세요.");
 
 		String[] headers = { "Name", "Species", "Age", "Gender", "HealthStatus", "EnclosureID" };
@@ -88,20 +91,16 @@ public class AnimalManager {
 
 		boolean choice = MenuUtil.Question.askYesNo("등록하시겠습니까?");
 		if (choice) {
-			Animal animal = repository.createAnimal(id, name, species, age, gender, healthStatus, enclosureId);
-			syncWithSingleton();
-			System.out.printf(MenuUtil.DEFAULT_PREFIX + "동물 등록 성공!");
-			animal.showAnimal();
+			JdbcAnimalRepository.createAnimal(connection, id, name, species, age, gender, healthStatus, enclosureId);
 		}
 	}
 
-	public void inputAnimalName(String question) {
+	public String inputAnimalName(String question) {
 		while (true) {
 			String inName = MenuUtil.Question.askTextInput(question);
 			List<Animal> findAnimal = repository.getAnimalsByName(inName);
 			if (findAnimal.isEmpty()) {
-				name = inName;
-				break;
+				return inName;
 			} else {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "동일한 이름이 있습니다.");
 				System.out.println();
@@ -109,47 +108,67 @@ public class AnimalManager {
 		}
 	}
 
-	public void inputAnimalSpecies(String question) {
+	public String inputAnimalSpecies(String question) {
 		String[] speciesChoices = { "Lion", "Tiger", "Bear", "Elephant", "Wolf", "Eagle", "Owl", "Snake" };
 		int inSpecies = MenuUtil.Question.askSingleChoice(question, speciesChoices);
 		switch (inSpecies) {
-		case 1 -> species = "Lion";
-		case 2 -> species = "Tiger";
-		case 3 -> species = "Bear";
-		case 4 -> species = "Elephant";
-		case 5 -> species = "Wolf";
-		case 6 -> species = "Eagle";
-		case 7 -> species = "Owl";
-		case 8 -> species = "Snake";
+		case 1 -> {
+			return "Lion";
+		}
+		case 2 -> {
+			return "Tiger";
+		}
+		case 3 -> {
+			return "Bear";
+		}
+		case 4 -> {
+			return "Elephant";
+		}
+		case 5 -> {
+			return "Wolf";
+		}
+		case 6 -> {
+			return "Eagle";
+		}
+		case 7 -> {
+			return "Owl";
+		}
+		case 8 -> {
+			return "Snake";
+		}
 		default -> System.out.println();
 		}
+		return null;
 	}
 
-	public void inputAnimalGender(String question) {
+	public String inputAnimalGender(String question) {
 		String[] genderChoices = { "Male", "Female" };
 		int inGender = MenuUtil.Question.askSingleChoice(question, genderChoices);
 		if (inGender == 1) {
-			gender = "Male";
+			return "Male";
 		} else if (inGender == 2) {
-			gender = "Female";
+			return "Female";
 		}
+		return null;
 	}
 
-	public void inputAnimalHealth(String question) {
+	public String inputAnimalHealth(String question) {
 		String[] healthChoices = { "Good", "Fair", "Poor" };
 		int inHealth = MenuUtil.Question.askSingleChoice(question, healthChoices);
 		if (inHealth == 1) {
-			healthStatus = "Good";
+			return "Good";
 		} else if (inHealth == 2) {
-			healthStatus = "Fair";
+			return "Fair";
 		} else if (inHealth == 3) {
-			healthStatus = "Poor";
+			return "Poor";
 		}
+		return null;
 	}
 
 	// << 2. 동물 조회 >>
-	public void viewAnimals() {
-		if (repository.count() == 0) {
+	public void viewAnimals(Connection connection) throws SQLException {
+		if (JdbcAnimalRepository.count(connection) == 0) {
+			UIUtil.printSeparator('━');
 			System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 동물이 없습니다.");
 			return;
 		}
@@ -159,19 +178,19 @@ public class AnimalManager {
 			switch (choice) {
 			case 1 -> {
 				UIUtil.printSeparator('━');
-				viewAllAnimals();
+				viewAllAnimals(connection);
 			}
 			case 2 -> {
 				UIUtil.printSeparator('━');
-				searchAnimalId("검색할 동물 ID를 입력하세요.");
+				searchAnimalId(connection, "검색할 동물 ID를 입력하세요.");
 			}
 			case 3 -> {
 				UIUtil.printSeparator('━');
-				searchAnimalName("검색할 동물 이름을 입력하세요.");
+				searchAnimalName(connection, "검색할 동물 이름을 입력하세요.");
 			}
 			case 4 -> {
 				UIUtil.printSeparator('━');
-				searchAnimalSpecies("검색할 동물의 종을 입력하세요.");
+				searchAnimalSpecies(connection, "검색할 동물의 종을 입력하세요.");
 			}
 			case 0 -> {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "이전 메뉴로 돌아갑니다.");
@@ -189,9 +208,9 @@ public class AnimalManager {
 		MenuUtil.generateMenuWithSpecialOptions(TextArtUtil::printViewMenuTitle, option, specialOptions);
 	}
 
-	public void viewAllAnimals() {
+	public void viewAllAnimals(Connection connection) throws SQLException {
 		String[] headers = { "Animal ID", "Name", "Species", "Age", "Gender", "HealthStatus", "EnclosureID" };
-		List<Animal> allAnimals = repository.findAll();
+		List<Animal> allAnimals = JdbcAnimalRepository.getAnimalList(connection);
 		String[][] data = new String[allAnimals.size()][];
 
 		for (int i = 0; i < allAnimals.size(); i++) {
@@ -201,32 +220,32 @@ public class AnimalManager {
 					String.valueOf(animal.getAge()), animal.getGender(), animal.getHealthStatus(),
 					animal.getEnclosureId() };
 		}
-		String title = String.format("동물 목록 (총 %d마리)", repository.count());
+		String title = String.format("동물 목록 (총 %d마리)", data.length);
 		TableUtil.printTable(title, headers, data);
 	}
 
 	// << 2-3. 동물 ID로 검색 >>
-	public void searchAnimalId(String question) {
+	public void searchAnimalId(Connection connection, String question) throws SQLException {
 		while (true) {
 			String findId = MenuUtil.Question.askTextInput(question);
-			Animal animal = repository.getAnimalById(findId);
+			Animal animal = JdbcAnimalRepository.getAnimalById(connection, findId);
 			if (animal != null) {
 				System.out.print(MenuUtil.DEFAULT_PREFIX + "동물 정보");
 				animal.showAnimal();
 				return;
 			} else {
-				System.out.println(MenuUtil.DEFAULT_PREFIX + "ID를 다시 입력해 주세요. ");
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "해당 ID의 동물이 없습니다.");
 				System.out.println();
 			}
 		}
 	}
 
 	// << 2-4. 동물 이름으로 검색 >>
-	public void searchAnimalName(String question) {
+	public void searchAnimalName(Connection connection, String question) throws SQLException {
 		while (true) {
 			String findName = MenuUtil.Question.askTextInput(question);
 
-			List<Animal> findAnimal = repository.getAnimalsByName(findName);
+			List<Animal> findAnimal = JdbcAnimalRepository.getAnimalsByName(connection, findName);
 
 			if (findAnimal.isEmpty()) {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "해당 이름의 동물이 없습니다.");
@@ -240,7 +259,7 @@ public class AnimalManager {
 	}
 
 	// << 2-5. 동물 종으로 검색 >>
-	public void searchAnimalSpecies(String question) {
+	public void searchAnimalSpecies(Connection connection, String question) throws SQLException {
 		String[] speciesChoices = { "Lion", "Tiger", "Bear", "Elephant", "Wolf", "Eagle", "Owl", "Snake" };
 		int inSpeciesNum = MenuUtil.Question.askSingleChoice(question, speciesChoices);
 		String inSpecies = "";
@@ -257,7 +276,11 @@ public class AnimalManager {
 		}
 
 		String[] headers = { "Animal ID", "Name", "Species", "Age", "Gender", "HealthStatus", "EnclosureID" };
-		List<Animal> findAnimals = repository.getAnimalsBySpecies(inSpecies);
+		List<Animal> findAnimals = JdbcAnimalRepository.getAnimalsBySpecies(connection, inSpecies);
+		if (findAnimals.isEmpty()) {
+			System.out.println(MenuUtil.DEFAULT_PREFIX + "해당 종의 동물이 없습니다.");
+			return;
+		}
 		String[][] data = new String[findAnimals.size()][];
 
 		for (int i = 0; i < findAnimals.size(); i++) {
@@ -272,12 +295,12 @@ public class AnimalManager {
 	}
 
 	// << 3. 동물 수정 >>
-	public void editAnimal() {
+	public void editAnimal(Connection connection) throws SQLException {
 		UIUtil.printSeparator('━');
 		TextArtUtil.printEditMenuTitle();
 		UIUtil.printSeparator('━');
 
-		if (repository.count() == 0) {
+		if (JdbcAnimalRepository.count(connection) == 0) {
 			System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 동물이 없습니다.");
 			return;
 		}
@@ -287,7 +310,7 @@ public class AnimalManager {
 		Animal animal = null;
 		while (true) {
 			findId = MenuUtil.Question.askTextInput("수정할 동물 ID를 입력하세요.");
-			animal = repository.getAnimalById(findId);
+			animal = JdbcAnimalRepository.getAnimalById(connection, findId);
 			if (animal != null) {
 				animal.showAnimal();
 				break;
@@ -298,27 +321,26 @@ public class AnimalManager {
 		}
 
 		// < 원하는 정보 선택 >
-		String[] choices = { "나이", "건강상태", "EnclosureID" };
+		String[] choices = { "Age", "HealthStatus", "EnclosureID" };
 		int choice = MenuUtil.Question.askSingleChoice("수정할 정보를 입력하세요.", choices);
 
 		// < 정보 수정 >
 		switch (choice) {
-		case 1 -> editAnimalAge(animal);
-		case 2 -> editAnimalHealth(animal);
-		case 3 -> editAnimalEnclosureID(animal);
+		case 1 -> editAnimalAge(connection, animal);
+		case 2 -> editAnimalHealth(connection, animal);
+		case 3 -> editAnimalEnclosureID(connection, animal);
 		default -> System.out.println();
 		}
-
 	}
 
-	public void editAnimalAge(Animal animal) {
+	public void editAnimalAge(Connection connection, Animal animal) throws SQLException {
 		int changeAge = MenuUtil.Question.askNumberInputInt("수정할 나이를 입력하세요.");
-		animal.setAge(changeAge);
+		JdbcAnimalRepository.updateAnimal(connection, animal, changeAge);
 		System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
 		animal.showAnimal();
 	}
 
-	public void editAnimalHealth(Animal animal) {
+	public void editAnimalHealth(Connection connection, Animal animal) throws SQLException {
 		String changeHealth = "";
 		String[] healthChoices = { "Good", "Fair", "Poor" };
 		int inHealth = MenuUtil.Question.askSingleChoice("수정할 건강상태를 입력하세요.", healthChoices);
@@ -329,12 +351,13 @@ public class AnimalManager {
 		} else if (inHealth == 3) {
 			changeHealth = "Poor";
 		}
-		animal.setHealthStatus(changeHealth);
+		JdbcAnimalRepository.updateAnimal(connection, animal, changeHealth);
 		System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
 		animal.showAnimal();
 	}
 
-	public void editAnimalEnclosureID(Animal animal) {
+	// ???
+	public void editAnimalEnclosureID(Connection connection, Animal animal) {
 		String changeEnclosureId = MenuUtil.Question.askTextInput("수정할 EnclosureID를 입력하세요.");
 		animal.setEnclosureId(changeEnclosureId);
 		System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
@@ -342,12 +365,12 @@ public class AnimalManager {
 	}
 
 	// << 4. 동물 삭제 >>
-	public void removeAnimal() {
+	public void removeAnimal(Connection connection) throws SQLException {
 		UIUtil.printSeparator('━');
 		TextArtUtil.printRemoveMenuTitle();
 		UIUtil.printSeparator('━');
 
-		if (repository.count() == 0) {
+		if (JdbcAnimalRepository.count(connection) == 0) {
 			System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 동물이 없습니다.");
 			return;
 		}
@@ -355,14 +378,13 @@ public class AnimalManager {
 		Animal animal = null;
 		while (true) {
 			findId = MenuUtil.Question.askTextInput("삭제할 동물 ID를 입력하세요.");
-			animal = repository.getAnimalById(findId);
+			animal = JdbcAnimalRepository.getAnimalById(connection, findId);
 			if (animal != null) {
 				animal.showAnimal();
 				boolean choice = MenuUtil.Question.askYesNo("동물을 삭제하시겠습니까?");
 				if (choice) {
-					repository.removeAnimal(findId);
+					JdbcAnimalRepository.removeAnimal(connection, findId);
 					System.out.println(MenuUtil.DEFAULT_PREFIX + "동물이 삭제되었습니다.");
-					UIUtil.printSeparator('━');
 					return;
 				}
 			} else {

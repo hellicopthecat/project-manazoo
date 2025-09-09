@@ -1,5 +1,7 @@
 package app;
 
+import java.sql.SQLException;
+
 import app.console.ConsoleEngine;
 
 /**
@@ -14,7 +16,7 @@ import app.console.ConsoleEngine;
  */
 public class Main {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws SQLException {
 		ConsoleEngine.start();
 
 	}

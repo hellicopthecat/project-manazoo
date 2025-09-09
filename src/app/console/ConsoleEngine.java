@@ -1,10 +1,14 @@
 package app.console;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import app.animal.AnimalManager;
 import app.common.InputUtil;
 import app.common.ui.MenuUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
+import app.config.DatabaseConnection;
 import app.enclosure.EnclosureManager;
 import app.finance.FinanceManager;
 import app.visitor.VisitorManager;
@@ -16,26 +20,37 @@ import app.zooKeeper.ZooKeeperManager;
 public class ConsoleEngine {
 	/**
 	 * 애플리케이션을 시작합니다. 로딩 애니메이션 후 메인 메뉴로 진입합니다.
+	 * 
+	 * @throws SQLException
 	 */
-	public static void start() {
+	public static void start() throws SQLException {
 		TextArtUtil.printLoadingAnimation();
-		showAccessMenu();
+		Connection connection = DatabaseConnection.getConnection();
+		showAccessMenu(connection);
 	}
 
 	/**
 	 * 접속 방식 선택 메뉴를 표시하고 처리합니다. 관리자 모드와 관람객 모드 중 선택할 수 있습니다.
+	 * 
+	 * @throws SQLException
 	 */
-	private static void showAccessMenu() {
+	private static void showAccessMenu(Connection connection) throws SQLException {
 		while (true) {
 			MenuUtil.printAccessMenu();
 			int userChoice = InputUtil.getIntInput();
 
 			switch (userChoice) {
 			case 1 -> {
-				handleAdminMode();
+				handleAdminMode(connection);
 			}
 			case 2 -> {
 				handleVisitorMode();
+			}
+			case 0 -> {
+				UIUtil.printSeparator('━');
+				DatabaseConnection.closeConnection(connection);
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "프로그램을 종료합니다.");
+				return;
 			}
 			default -> {
 				showInvalidAccessChoice();
@@ -46,19 +61,23 @@ public class ConsoleEngine {
 
 	/**
 	 * 관리자 모드를 처리합니다. 동물 관리, 사육장 관리, 직원 관리 메뉴를 제공합니다.
+	 * 
+	 * @throws SQLException
 	 */
-	private static void handleAdminMode() {
+	private static void handleAdminMode(Connection connection) throws SQLException {
 		System.out.println(MenuUtil.DEFAULT_PREFIX + "관리자 모드로 접속합니다...");
 		UIUtil.printSeparator('━');
 		TextArtUtil.printWelcomeMessage();
 
-		showAdminMenu();
+		showAdminMenu(connection);
 	}
 
 	/**
 	 * 관리자 메뉴를 표시하고 처리합니다.
+	 * 
+	 * @throws SQLException
 	 */
-	private static void showAdminMenu() {
+	private static void showAdminMenu(Connection connection) throws SQLException {
 
 		while (true) {
 			String[] option = { "동물 관리", "사육장 관리", "직원 관리", "재정 관리" };
@@ -68,7 +87,7 @@ public class ConsoleEngine {
 
 			switch (choice) {
 			case 1 -> {
-				handleAnimalManagement();
+				handleAnimalManagement(connection);
 			}
 			case 2 -> {
 				handleEnclosureManagement();
@@ -92,10 +111,12 @@ public class ConsoleEngine {
 
 	/**
 	 * 동물 관리 기능을 처리합니다.
+	 * 
+	 * @throws SQLException
 	 */
-	private static void handleAnimalManagement() {
+	private static void handleAnimalManagement(Connection connection) throws SQLException {
 		AnimalManager manager = new AnimalManager();
-		manager.handleAnimalManagement();
+		manager.handleAnimalManagement(connection);
 	}
 
 	/**
@@ -106,13 +127,13 @@ public class ConsoleEngine {
 		manager.handleEnclosureManagement();
 	}
 
-    /**
-     * 직원 관리 기능을 처리합니다.
-     */
-    private static void handleStaffManagement() {
-        ZooKeeperManager manager = ZooKeeperManager.getInstance();
-        manager.handleZookeeperManagement();
-    }
+	/**
+	 * 직원 관리 기능을 처리합니다.
+	 */
+	private static void handleStaffManagement() {
+		ZooKeeperManager manager = ZooKeeperManager.getInstance();
+		manager.handleZookeeperManagement();
+	}
 
 	/**
 	 * 재정 관리 기능을 처리합니다.
