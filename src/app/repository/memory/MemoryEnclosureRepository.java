@@ -4,6 +4,8 @@ import app.enclosure.Enclosure;
 import app.enclosure.EnvironmentType;
 import app.enclosure.LocationType;
 import app.repository.interfaces.EnclosureRepository;
+import app.animal.Animal;
+import app.zooKeeper.ZooKeeper;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,6 +14,8 @@ import java.util.stream.Collectors;
  * 메모리 기반 EnclosureRepository 구현체입니다.
  * 데이터를 Map에 저장하여 빠른 조회와 조작을 제공합니다.
  * Holder Pattern을 사용한 Singleton으로 성능과 Thread Safety를 보장합니다.
+ * 
+ * <p>현재 Enclosure 클래스의 내부 Map을 활용하는 방식을 사용합니다.</p>
  */
 public class MemoryEnclosureRepository implements EnclosureRepository {
     
@@ -194,5 +198,79 @@ public class MemoryEnclosureRepository implements EnclosureRepository {
                 .filter(enclosure -> enclosure.getEnvironmentType() == environmentType 
                                   && enclosure.getLocationType() == locationType)
                 .collect(Collectors.toList());
+    }
+    
+    // =================================================================
+    // 동물 및 사육사 관리를 위한 새로운 메서드들
+    // =================================================================
+    
+    @Override
+    public Map<String, Animal> getEnclosureInhabitants(String enclosureId) {
+        Optional<Enclosure> enclosureOpt = findById(enclosureId);
+        if (enclosureOpt.isEmpty()) {
+            return new HashMap<>();
+        }
+        
+        Enclosure enclosure = enclosureOpt.get();
+        Map<String, Object> rawInhabitants = enclosure.getAllInhabitants();
+        Map<String, Animal> animals = new HashMap<>();
+        
+        for (Map.Entry<String, Object> entry : rawInhabitants.entrySet()) {
+            String animalId = entry.getKey();
+            Object animalObj = entry.getValue();
+            
+            if (animalObj instanceof Animal) {
+                animals.put(animalId, (Animal) animalObj);
+            }
+        }
+        
+        return animals;
+    }
+    
+    @Override
+    public Map<String, ZooKeeper> getEnclosureCaretakers(String enclosureId) {
+        Optional<Enclosure> enclosureOpt = findById(enclosureId);
+        if (enclosureOpt.isEmpty()) {
+            return new HashMap<>();
+        }
+        
+        Enclosure enclosure = enclosureOpt.get();
+        Map<String, Object> rawCaretakers = enclosure.getAllCaretakers();
+        Map<String, ZooKeeper> keepers = new HashMap<>();
+        
+        for (Map.Entry<String, Object> entry : rawCaretakers.entrySet()) {
+            String keeperId = entry.getKey();
+            Object keeperObj = entry.getValue();
+            
+            if (keeperObj instanceof ZooKeeper) {
+                keepers.put(keeperId, (ZooKeeper) keeperObj);
+            }
+        }
+        
+        return keepers;
+    }
+    
+    @Override
+    public boolean addAnimalToEnclosure(String enclosureId, String animalId, Animal animal) {
+        Optional<Enclosure> enclosureOpt = findById(enclosureId);
+        if (enclosureOpt.isEmpty()) {
+            return false;
+        }
+        
+        Enclosure enclosure = enclosureOpt.get();
+        enclosure.addInhabitant(animalId, animal);
+        return true;
+    }
+    
+    @Override
+    public boolean assignKeeperToEnclosure(String enclosureId, String keeperId, ZooKeeper keeper) {
+        Optional<Enclosure> enclosureOpt = findById(enclosureId);
+        if (enclosureOpt.isEmpty()) {
+            return false;
+        }
+        
+        Enclosure enclosure = enclosureOpt.get();
+        enclosure.assignCaretaker(keeperId, keeper);
+        return true;
     }
 }

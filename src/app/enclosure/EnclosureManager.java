@@ -349,54 +349,34 @@ public class EnclosureManager {
 
     /**
      * 사육장에 거주하는 동물들의 상세 목록을 테이블 형태로 표시합니다.
-     * 
-     * <p>표시 정보:</p>
-     * <ul>
-     *   <li>동물 ID</li>
-     *   <li>동물 이름</li>
-     *   <li>종류</li>
-     *   <li>나이</li>
-     *   <li>입사일</li>
-     * </ul>
+     * Repository를 통해 실제 동물 데이터를 조회합니다.
      * 
      * @param enclosure 조회할 사육장 객체
      */
     private void displayEnclosureInhabitants(Enclosure enclosure) {
-        Map<String, Object> inhabitants = enclosure.getAllInhabitants();
+        Map<String, Animal> inhabitants = repository.getEnclosureInhabitants(enclosure.getId());
         
         if (inhabitants.isEmpty()) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "이 사육장에는 현재 거주하는 동물이 없습니다.");
             return;
         }
         
-        String[] headers = {"Animal ID", "Name", "Species", "Age", "Admission Date"};
+        String[] headers = {"Animal ID", "Name", "Species", "Age", "Gender", "Health Status"};
         String[][] data = new String[inhabitants.size()][];
         int index = 0;
         
-        String currentDate = java.time.LocalDate.now().toString();
-        
-        for (Map.Entry<String, Object> entry : inhabitants.entrySet()) {
+        for (Map.Entry<String, Animal> entry : inhabitants.entrySet()) {
             String animalId = entry.getKey();
-            Object animalObj = entry.getValue();
+            Animal animal = entry.getValue();
             
-            if (animalObj instanceof Animal) {
-                Animal animal = (Animal) animalObj;
-                data[index] = new String[]{
-                    truncateString(animalId, 15),
-                    truncateString(animal.getName(), 15),
-                    truncateString(animal.getSpecies(), 15),
-                    truncateString(String.valueOf(animal.getAge()), 15),
-                    truncateString(currentDate, 15)
-                };
-            } else {
-                data[index] = new String[]{
-                    truncateString(animalId, 15),
-                    truncateString("Unknown", 15),
-                    truncateString("Unknown", 15),
-                    truncateString("0", 15),
-                    truncateString(currentDate, 15)
-                };
-            }
+            data[index] = new String[]{
+                truncateString(animalId, 15),
+                truncateString(animal.getName(), 15),
+                truncateString(animal.getSpecies(), 15),
+                truncateString(String.valueOf(animal.getAge()), 15),
+                truncateString(animal.getGender(), 15),
+                truncateString(animal.getHealthStatus(), 15)
+            };
             index++;
         }
         
@@ -408,57 +388,33 @@ public class EnclosureManager {
 
     /**
      * 사육장에 배정된 사육사들의 상세 목록을 테이블 형태로 표시합니다.
-     * 
-     * <p>표시 정보:</p>
-     * <ul>
-     *   <li>사육사 ID</li>
-     *   <li>사육사 이름</li>
-     *   <li>부서</li>
-     *   <li>직급</li>
-     *   <li>위험동물 처리 가능 여부</li>
-     *   <li>배정일</li>
-     * </ul>
+     * Repository를 통해 실제 사육사 데이터를 조회합니다.
      * 
      * @param enclosure 조회할 사육장 객체
      */
     private void displayEnclosureCaretakers(Enclosure enclosure) {
-        Map<String, Object> caretakers = enclosure.getAllCaretakers();
+        Map<String, ZooKeeper> caretakers = repository.getEnclosureCaretakers(enclosure.getId());
         
         if (caretakers.isEmpty()) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "이 사육장에는 현재 배정된 사육사가 없습니다.");
             return;
         }
         
-        String[] headers = {"Keeper ID", "Name", "Department", "Rank", "Danger Animal", "Assignment Date"};
+        String[] headers = {"Keeper ID", "Name", "Department", "Rank", "Danger Animal"};
         String[][] data = new String[caretakers.size()][];
         int index = 0;
         
-        String currentDate = java.time.LocalDate.now().toString();
-        
-        for (Map.Entry<String, Object> entry : caretakers.entrySet()) {
+        for (Map.Entry<String, ZooKeeper> entry : caretakers.entrySet()) {
             String keeperId = entry.getKey();
-            Object keeperObj = entry.getValue();
+            ZooKeeper keeper = entry.getValue();
             
-            if (keeperObj instanceof ZooKeeper) {
-                ZooKeeper keeper = (ZooKeeper) keeperObj;
-                data[index] = new String[]{
-                    truncateString(keeperId, 15),
-                    truncateString(keeper.getName(), 15),
-                    truncateString(keeper.getDepartment().toString(), 15),
-                    truncateString(keeper.getRank().toString(), 15),
-                    keeper.isCanHandleDangerAnimal() ? "가능" : "불가능",
-                    truncateString(currentDate, 15)
-                };
-            } else {
-                data[index] = new String[]{
-                    truncateString(keeperId, 15),
-                    truncateString("Unknown", 15),
-                    truncateString("Unknown", 15),
-                    truncateString("Unknown", 15),
-                    truncateString("Unknown", 15),
-                    truncateString(currentDate, 15)
-                };
-            }
+            data[index] = new String[]{
+                truncateString(keeperId, 15),
+                truncateString(keeper.getName(), 15),
+                truncateString(keeper.getDepartment().toString(), 15),
+                truncateString(keeper.getRank().toString(), 15),
+                keeper.isCanHandleDangerAnimal() ? "가능" : "불가능"
+            };
             index++;
         }
         
@@ -882,9 +838,8 @@ public class EnclosureManager {
      * 
      * <p>처리 과정:</p>
      * <ol>
-     *   <li>사육장 객체 조회</li>
      *   <li>AnimalManager에서 동물 이동 처리</li>
-     *   <li>사육장에 동물 추가</li>
+     *   <li>Repository를 통해 동물을 사육장에 추가</li>
      * </ol>
      * 
      * @param enclosureId 대상 사육장 ID
@@ -893,20 +848,13 @@ public class EnclosureManager {
      */
     private boolean executeAnimalAdmission(String enclosureId, String animalId) {
         try {
-            Optional<Enclosure> enclosureOpt = repository.findById(enclosureId);
-            if (enclosureOpt.isEmpty()) {
-                return false;
-            }
-            Enclosure enclosure = enclosureOpt.get();
-            
             Animal animal = AnimalManager.getInstance().removeAvailableAnimal(animalId, enclosureId);
             if (animal == null) {
                 return false;
             }
             
-            enclosure.addInhabitant(animalId, animal);
+            return repository.addAnimalToEnclosure(enclosureId, animalId, animal);
             
-            return true;
         } catch (Exception e) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "처리 중 예외가 발생했습니다: " + e.getMessage());
             return false;
@@ -954,56 +902,38 @@ public class EnclosureManager {
      * 동물 입사 처리 결과를 테이블 형태로 출력합니다.
      * 처리된 사육장의 현재 동물 현황을 보여줍니다.
      * 
-     * <p>표시 항목:</p>
-     * <ul>
-     *   <li>Animal ID (최대 15글자)</li>
-     *   <li>Name (최대 15글자)</li>
-     *   <li>Species (최대 15글자)</li>
-     *   <li>Age (최대 15글자)</li>
-     *   <li>Admission Date (최대 15글자)</li>
-     * </ul>
-     * 
      * @param enclosureId 입사가 처리된 사육장 ID
      */
     private void displayAdmissionResult(String enclosureId) {
         Optional<Enclosure> enclosureOpt = repository.findById(enclosureId);
+        if (enclosureOpt.isEmpty()) {
+            System.out.println(MenuUtil.DEFAULT_PREFIX + "사육장을 찾을 수 없습니다.");
+            return;
+        }
         Enclosure enclosure = enclosureOpt.get();
         
-        Map<String, Object> inhabitants = enclosure.getAllInhabitants();
+        Map<String, Animal> inhabitants = repository.getEnclosureInhabitants(enclosureId);
         
         if (inhabitants.isEmpty()) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "사육장에 동물이 없습니다.");
             return;
         }
         
-        String[] headers = {"Animal ID", "Name", "Species", "Age", "Admission Date"};
+        String[] headers = {"Animal ID", "Name", "Species", "Age", "Health Status"};
         String[][] data = new String[inhabitants.size()][];
         int index = 0;
         
-        String currentDate = java.time.LocalDate.now().toString();
-        
-        for (Map.Entry<String, Object> entry : inhabitants.entrySet()) {
+        for (Map.Entry<String, Animal> entry : inhabitants.entrySet()) {
             String animalId = entry.getKey();
-            Object animalObj = entry.getValue();
+            Animal animal = entry.getValue();
             
-            if (animalObj instanceof Animal) {
-                Animal animal = (Animal) animalObj;
-                data[index] = new String[]{
-                    truncateString(animalId, 15),
-                    truncateString(animal.getName(), 15),
-                    truncateString(animal.getSpecies(), 15),
-                    truncateString(String.valueOf(animal.getAge()), 15),
-                    truncateString(currentDate, 15)
-                };
-            } else {
-                data[index] = new String[]{
-                    truncateString(animalId, 15),
-                    truncateString("Unknown", 15),
-                    truncateString("Unknown", 15),
-                    truncateString("0", 15),
-                    truncateString(currentDate, 15)
-                };
-            }
+            data[index] = new String[]{
+                truncateString(animalId, 15),
+                truncateString(animal.getName(), 15),
+                truncateString(animal.getSpecies(), 15),
+                truncateString(String.valueOf(animal.getAge()), 15),
+                truncateString(animal.getHealthStatus(), 15)
+            };
             index++;
         }
         
@@ -1232,10 +1162,9 @@ public class EnclosureManager {
      * 
      * <p>처리 과정:</p>
      * <ol>
-     *   <li>사육장 객체 조회</li>
      *   <li>ZooKeeperManager에서 사육사 정보 조회</li>
      *   <li>중복 배정 확인 및 사용자 의사 확인</li>
-     *   <li>사육장에 사육사 배정 (이동 없이 참조 추가만)</li>
+     *   <li>Repository를 통해 사육사를 사육장에 배정</li>
      * </ol>
      * 
      * @param enclosureId 대상 사육장 ID
@@ -1244,12 +1173,6 @@ public class EnclosureManager {
      */
     private boolean executeKeeperAssignment(String enclosureId, String keeperId) {
         try {
-            Optional<Enclosure> enclosureOpt = repository.findById(enclosureId);
-            if (enclosureOpt.isEmpty()) {
-                return false;
-            }
-            Enclosure enclosure = enclosureOpt.get();
-            
             ZooKeeper keeper = ZooKeeperManager.getInstance()
                                               .getRepository()
                                               .getZooKeeperById(keeperId);
@@ -1257,10 +1180,14 @@ public class EnclosureManager {
                 return false;
             }
             
-            // 중복 배정 확인
-            if (enclosure.hasCaretaker(keeperId)) {
+            // 중복 배정 확인 (Repository에서 현재 배정된 사육사 조회)
+            Map<String, ZooKeeper> currentCaretakers = repository.getEnclosureCaretakers(enclosureId);
+            if (currentCaretakers.containsKey(keeperId)) {
+                Optional<Enclosure> enclosureOpt = repository.findById(enclosureId);
+                String enclosureName = enclosureOpt.map(Enclosure::getName).orElse("Unknown");
+                
                 System.out.printf(MenuUtil.DEFAULT_PREFIX + "이미 %s 사육장에 배정된 사육사입니다: %s\n", 
-                                 enclosure.getName(), keeper.getName());
+                                 enclosureName, keeper.getName());
                 
                 boolean forceAssign = MenuUtil.Question.askSimpleConfirm("그래도 배정하시겠습니까?");
                 if (!forceAssign) {
@@ -1269,9 +1196,8 @@ public class EnclosureManager {
                 }
             }
             
-            enclosure.assignCaretaker(keeperId, keeper);
+            return repository.assignKeeperToEnclosure(enclosureId, keeperId, keeper);
             
-            return true;
         } catch (Exception e) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "처리 중 예외가 발생했습니다: " + e.getMessage());
             return false;
@@ -1292,41 +1218,28 @@ public class EnclosureManager {
         }
         Enclosure enclosure = enclosureOpt.get();
         
-        Map<String, Object> caretakers = enclosure.getAllCaretakers();
+        Map<String, ZooKeeper> caretakers = repository.getEnclosureCaretakers(enclosureId);
         
         if (caretakers.isEmpty()) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "사육장에 배정된 사육사가 없습니다.");
             return;
         }
         
-        String[] headers = {"Keeper ID", "Name", "Department", "Rank", "Assignment Date"};
+        String[] headers = {"Keeper ID", "Name", "Department", "Rank", "Danger Animal"};
         String[][] data = new String[caretakers.size()][];
         int index = 0;
         
-        String currentDate = java.time.LocalDate.now().toString();
-        
-        for (Map.Entry<String, Object> entry : caretakers.entrySet()) {
+        for (Map.Entry<String, ZooKeeper> entry : caretakers.entrySet()) {
             String keeperId = entry.getKey();
-            Object keeperObj = entry.getValue();
+            ZooKeeper keeper = entry.getValue();
             
-            if (keeperObj instanceof ZooKeeper) {
-                ZooKeeper keeper = (ZooKeeper) keeperObj;
-                data[index] = new String[]{
-                    truncateString(keeperId, 15),
-                    truncateString(keeper.getName(), 15),
-                    truncateString(keeper.getDepartment().toString(), 15),
-                    truncateString(keeper.getRank().toString(), 15),
-                    truncateString(currentDate, 15)
-                };
-            } else {
-                data[index] = new String[]{
-                    truncateString(keeperId, 15),
-                    truncateString("Unknown", 15),
-                    truncateString("Unknown", 15),
-                    truncateString("Unknown", 15),
-                    truncateString(currentDate, 15)
-                };
-            }
+            data[index] = new String[]{
+                truncateString(keeperId, 15),
+                truncateString(keeper.getName(), 15),
+                truncateString(keeper.getDepartment().toString(), 15),
+                truncateString(keeper.getRank().toString(), 15),
+                keeper.isCanHandleDangerAnimal() ? "가능" : "불가능"
+            };
             index++;
         }
         
