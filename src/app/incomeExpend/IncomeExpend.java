@@ -27,7 +27,6 @@ public class IncomeExpend {
 	 * @param eventType 구체적인 이벤트 구분
 	 */
 	public IncomeExpend(String id, Long money, String desc, IncomeExpendType IEType, EventType eventType) {
-		super();
 		this.id = id;
 		this.money = money;
 		this.IEType = IEType;
