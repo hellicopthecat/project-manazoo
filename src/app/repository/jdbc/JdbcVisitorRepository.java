@@ -85,7 +85,7 @@ public class JdbcVisitorRepository implements VisitorRepository {
         
         String sql = """
             INSERT INTO reservations (id, name, phone_number, visit_date, 
-                                    number_of_visitors, number_of_adults, number_of_childs) 
+                                    number_of_visitors, number_of_adults, number_of_children) 
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """;
         
@@ -127,7 +127,7 @@ public class JdbcVisitorRepository implements VisitorRepository {
         }
         
         String sql = """
-            SELECT id, name, phone_number, visit_date, number_of_adults, number_of_childs
+            SELECT id, name, phone_number, visit_date, number_of_adults, number_of_children
             FROM reservations 
             WHERE id = ?
             """;
@@ -163,7 +163,7 @@ public class JdbcVisitorRepository implements VisitorRepository {
         List<Reservation> reservations = new ArrayList<>();
         
         String sql = """
-            SELECT id, name, phone_number, visit_date, number_of_adults, number_of_childs
+            SELECT id, name, phone_number, visit_date, number_of_adults, number_of_children
             FROM reservations 
             ORDER BY created_at DESC
             """;
@@ -205,7 +205,7 @@ public class JdbcVisitorRepository implements VisitorRepository {
         String sql = """
             UPDATE reservations 
             SET name = ?, phone_number = ?, visit_date = ?, 
-                number_of_visitors = ?, number_of_adults = ?, number_of_childs = ?,
+                number_of_visitors = ?, number_of_adults = ?, number_of_children = ?,
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
             """;
@@ -480,6 +480,14 @@ public class JdbcVisitorRepository implements VisitorRepository {
     // =================================================================
     // 헬퍼 메서드
     // =================================================================
+
+    /**
+     * 가격 상수 정의 클래스
+     */
+    private static class VisitorConstants {
+        public static final int ADULT_PRICE = 13000;
+        public static final int CHILD_PRICE = 5000;
+    }
     
     /**
      * ResultSet을 Reservation 객체로 매핑합니다.
@@ -494,13 +502,11 @@ public class JdbcVisitorRepository implements VisitorRepository {
         String phone = rs.getString("phone_number");
         String date = rs.getDate("visit_date").toString();
         int adultCount = rs.getInt("number_of_adults");
-        int childCount = rs.getInt("number_of_childs");
-        
-        // totalPrice는 실시간 계산 (VisitorManager의 상수값 사용)
-        final int ADULT_PRICE = 13000;
-        final int CHILD_PRICE = 5000;
-        int totalPrice = adultCount * ADULT_PRICE + childCount * CHILD_PRICE;
+        int childCount = rs.getInt("number_of_children");
+        int totalPrice = adultCount * VisitorConstants.ADULT_PRICE + childCount * VisitorConstants.CHILD_PRICE;
         
         return new Reservation(id, name, phone, date, adultCount, childCount, totalPrice);
     }
+    
+
 }
