@@ -12,7 +12,6 @@ CREATE TABLE enclosures (
     temperature DECIMAL(5, 1),
     location_type ENUM('INDOOR', 'OUTDOOR') NOT NULL,
     environment_type ENUM('LAND', 'AQUATIC', 'MIXED') NOT NULL,
-    max_capacity INT NOT NULL DEFAULT 10,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -73,16 +72,6 @@ CREATE TABLE income_expends (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE SET NULL
-);
-
--- 사육장-동물 관계 테이블 (inhabitants Map 구현)
-CREATE TABLE enclosure_animals (
-    enclosure_id VARCHAR(50) NOT NULL,
-    animal_id VARCHAR(50) NOT NULL,
-    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (enclosure_id, animal_id),
-    FOREIGN KEY (enclosure_id) REFERENCES enclosures(id) ON DELETE CASCADE,
-    FOREIGN KEY (animal_id) REFERENCES animals(id) ON DELETE CASCADE
 );
 
 -- 사육장-사육사 관계 테이블 (caretakers Map 구현)
