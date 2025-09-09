@@ -1,6 +1,5 @@
 package app.console;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
 import app.animal.AnimalManager;
@@ -8,7 +7,6 @@ import app.common.InputUtil;
 import app.common.ui.MenuUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
-import app.config.DatabaseConnection;
 import app.enclosure.EnclosureManager;
 import app.finance.FinanceManager;
 import app.visitor.VisitorManager;
@@ -23,10 +21,9 @@ public class ConsoleEngine {
 	 * 
 	 * @throws SQLException
 	 */
-	public static void start() throws SQLException {
+	public static void start() {
 		TextArtUtil.printLoadingAnimation();
-		Connection connection = DatabaseConnection.getConnection();
-		showAccessMenu(connection);
+		showAccessMenu();
 	}
 
 	/**
@@ -34,21 +31,20 @@ public class ConsoleEngine {
 	 * 
 	 * @throws SQLException
 	 */
-	private static void showAccessMenu(Connection connection) throws SQLException {
+	private static void showAccessMenu() {
 		while (true) {
 			MenuUtil.printAccessMenu();
 			int userChoice = InputUtil.getIntInput();
 
 			switch (userChoice) {
 			case 1 -> {
-				handleAdminMode(connection);
+				handleAdminMode();
 			}
 			case 2 -> {
 				handleVisitorMode();
 			}
 			case 0 -> {
 				UIUtil.printSeparator('━');
-				DatabaseConnection.closeConnection(connection);
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "프로그램을 종료합니다.");
 				return;
 			}
@@ -64,12 +60,12 @@ public class ConsoleEngine {
 	 * 
 	 * @throws SQLException
 	 */
-	private static void handleAdminMode(Connection connection) throws SQLException {
+	private static void handleAdminMode() {
 		System.out.println(MenuUtil.DEFAULT_PREFIX + "관리자 모드로 접속합니다...");
 		UIUtil.printSeparator('━');
 		TextArtUtil.printWelcomeMessage();
 
-		showAdminMenu(connection);
+		showAdminMenu();
 	}
 
 	/**
@@ -77,7 +73,7 @@ public class ConsoleEngine {
 	 * 
 	 * @throws SQLException
 	 */
-	private static void showAdminMenu(Connection connection) throws SQLException {
+	private static void showAdminMenu() {
 
 		while (true) {
 			String[] option = { "동물 관리", "사육장 관리", "직원 관리", "재정 관리" };
@@ -87,7 +83,7 @@ public class ConsoleEngine {
 
 			switch (choice) {
 			case 1 -> {
-				handleAnimalManagement(connection);
+				handleAnimalManagement();
 			}
 			case 2 -> {
 				handleEnclosureManagement();
@@ -114,9 +110,9 @@ public class ConsoleEngine {
 	 * 
 	 * @throws SQLException
 	 */
-	private static void handleAnimalManagement(Connection connection) throws SQLException {
+	private static void handleAnimalManagement() {
 		AnimalManager manager = new AnimalManager();
-		manager.handleAnimalManagement(connection);
+		manager.handleAnimalManagement();
 	}
 
 	/**
