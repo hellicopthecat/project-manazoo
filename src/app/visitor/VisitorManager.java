@@ -6,7 +6,7 @@ import app.common.ui.MenuUtil;
 import app.common.ui.TableUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
-import app.repository.MemoryVisitorRepository;
+import app.repository.memory.MemoryVisitorRepository;
 import app.repository.interfaces.VisitorRepository;
 
 public class VisitorManager {

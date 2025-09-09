@@ -1,4 +1,4 @@
-package app.repository;
+package app.repository.memory;
 
 import app.enclosure.Enclosure;
 import app.enclosure.EnvironmentType;

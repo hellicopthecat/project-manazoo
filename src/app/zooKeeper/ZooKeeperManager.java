@@ -10,7 +10,7 @@ import app.common.ui.TableUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
 import app.finance.FinanceManager;
-import app.repository.MemoryZooKeeperRepository;
+import app.repository.memory.MemoryZooKeeperRepository;
 import app.repository.interfaces.ZooKeeperRepository;
 import app.zooKeeper.zooKeeperEnum.ZooKeeperConverter;
 
