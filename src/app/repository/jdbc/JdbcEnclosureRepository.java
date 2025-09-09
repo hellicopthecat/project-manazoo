@@ -6,8 +6,14 @@ import app.enclosure.Enclosure;
 import app.enclosure.EnvironmentType;
 import app.enclosure.LocationType;
 import app.repository.interfaces.EnclosureRepository;
+import app.animal.Animal;
+import app.zooKeeper.ZooKeeper;
+import app.zooKeeper.zooKeeperEnum.Department;
+import app.zooKeeper.zooKeeperEnum.Gender;
+import app.zooKeeper.zooKeeperEnum.ZooKeeperRank;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -713,5 +719,156 @@ public class JdbcEnclosureRepository implements EnclosureRepository {
         EnvironmentType environmentType = EnvironmentType.valueOf(rs.getString("environment_type"));
 
         return new Enclosure(id, name, areaSize, temperature, locationType, environmentType);
+    }
+    
+    // =================================================================
+    // 동물 및 사육사 관리를 위한 새로운 메서드들
+    // =================================================================
+    
+    @Override
+    public Map<String, Animal> getEnclosureInhabitants(String enclosureId) {
+        Map<String, Animal> inhabitants = new HashMap<>();
+        String sql = """
+            SELECT a.id, a.name, a.species, a.age, a.gender, a.health_status
+            FROM animals a
+            WHERE a.enclosure_id = ?
+            """;
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, enclosureId);
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                String animalId = rs.getString("id");
+                String name = rs.getString("name");
+                String species = rs.getString("species");
+                int age = rs.getInt("age");
+                String gender = rs.getString("gender");
+                String healthStatus = rs.getString("health_status");
+                
+                Animal animal = new Animal(animalId, name, species, age, gender, healthStatus, enclosureId);
+                inhabitants.put(animalId, animal);
+            }
+            
+        } catch (SQLException e) {
+            logger.error("사육장 동물 목록 조회 중 오류가 발생했습니다", e);
+        }
+        
+        return inhabitants;
+    }
+    
+    @Override
+    public Map<String, ZooKeeper> getEnclosureCaretakers(String enclosureId) {
+        Map<String, ZooKeeper> caretakers = new HashMap<>();
+        String sql = """
+            SELECT z.id, z.name, z.age, z.gender, z.rank_level, z.department, z.is_working, 
+                   z.experience_year, z.can_handle_danger_animal, z.licenses
+            FROM enclosure_caretakers ec
+            JOIN zoo_keepers z ON ec.keeper_id = z.id
+            WHERE ec.enclosure_id = ?
+            """;
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, enclosureId);
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                String keeperId = rs.getString("id");
+                String name = rs.getString("name");
+                int age = rs.getInt("age");
+                String genderStr = rs.getString("gender");
+                String rankStr = rs.getString("rank_level");
+                String departmentStr = rs.getString("department");
+                boolean isWorking = rs.getBoolean("is_working");
+                int experienceYear = rs.getInt("experience_year");
+                boolean canHandleDanger = rs.getBoolean("can_handle_danger_animal");
+                String licensesStr = rs.getString("licenses");
+                
+                // Enum 변환
+                Gender gender = Gender.valueOf(genderStr.toUpperCase());
+                ZooKeeperRank rank = ZooKeeperRank.valueOf(rankStr.toUpperCase());
+                Department department = Department.valueOf(departmentStr.toUpperCase());
+                
+                // 라이센스 리스트 변환
+                List<String> licenses = new ArrayList<>();
+                if (licensesStr != null && !licensesStr.trim().isEmpty()) {
+                    String[] licenseArray = licensesStr.split(",");
+                    for (String license : licenseArray) {
+                        licenses.add(license.trim());
+                    }
+                }
+                
+                // ZooKeeper 생성자에 맞게 수정 (can_assign_task 필드가 데이터베이스에 없으므로 기본값 사용)
+                ZooKeeper keeper = new ZooKeeper(keeperId, name, age, gender, rank, department, 
+                                               isWorking, experienceYear, canHandleDanger, true, licenses);
+                caretakers.put(keeperId, keeper);
+            }
+            
+        } catch (SQLException e) {
+            logger.error("사육장 사육사 목록 조회 중 오류가 발생했습니다", e);
+        }
+        
+        return caretakers;
+    }
+    
+    @Override
+    public boolean addAnimalToEnclosure(String enclosureId, String animalId, Animal animal) {
+        String sql = "UPDATE animals SET enclosure_id = ? WHERE id = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, enclosureId);
+            pstmt.setString(2, animalId);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            logger.debug("동물 사육장 배정: 동물 ID=%s, 사육장 ID=%s, 성공=%b", 
+                        animalId, enclosureId, rowsAffected > 0);
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            logger.error("사육장에 동물 추가 중 오류가 발생했습니다", e);
+            return false;
+        }
+    }
+    
+    @Override
+    public boolean assignKeeperToEnclosure(String enclosureId, String keeperId, ZooKeeper keeper) {
+        String checkSql = "SELECT 1 FROM enclosure_caretakers WHERE enclosure_id = ? AND keeper_id = ?";
+        String insertSql = "INSERT INTO enclosure_caretakers (enclosure_id, keeper_id, assigned_at) VALUES (?, ?, ?)";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(checkSql);
+             PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+            
+            // 중복 배정 확인
+            checkStmt.setString(1, enclosureId);
+            checkStmt.setString(2, keeperId);
+            
+            try (ResultSet rs = checkStmt.executeQuery()) {
+                if (rs.next()) {
+                    logger.debug("이미 배정된 사육사입니다: 사육장=%s, 사육사=%s", enclosureId, keeperId);
+                    return true; // 이미 배정되어 있으면 성공으로 처리
+                }
+            }
+            
+            // 새로 배정
+            insertStmt.setString(1, enclosureId);
+            insertStmt.setString(2, keeperId);
+            insertStmt.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            
+            int rowsAffected = insertStmt.executeUpdate();
+            logger.debug("사육사 사육장 배정: 사육사 ID=%s, 사육장 ID=%s, 성공=%b", 
+                        keeperId, enclosureId, rowsAffected > 0);
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            logger.error("사육장에 사육사 배정 중 오류가 발생했습니다", e);
+            return false;
+        }
     }
 }
