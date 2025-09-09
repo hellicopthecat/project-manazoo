@@ -63,14 +63,15 @@ public final class FinanceManager {
 		TextArtUtil.printFinanceMenuTitle();
 		UIUtil.printSeparator('━');
 		while (run.get()) {
-			String[] menu = { "수입/지출서 작성", "수입/지출 조회", "자본금 수정" };
+//			String[] menu = { "수입/지출서 작성", "수입/지출 조회", "자본금 수정" };
+			String[] menu = { "수입/지출서 작성", "수입/지출 조회" };
 			String[] s_menu = { "뒤로가기" };
 			MenuUtil.generateMenuWithTextTitle("재 정 관 리", menu, s_menu);
 			int index = InputUtil.getIntInput();
 			switch (index) {
 			case 1 -> useMoney();
 			case 2 -> getAssetData();
-			case 3 -> editAssetData();
+//			case 3 -> editAssetData();
 			case 0 -> goBack(run);
 			default -> wrongIndex();
 			}
@@ -126,12 +127,17 @@ public final class FinanceManager {
 				capital -= money;
 				// Repository를 통한 데이터 저장
 			}
-			jdbcIERepository.createInEx(id, money, desc, ieNum, eventNum);
-			System.out.println();
-			System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서가 작성되었습니다.");
-			System.out.println();
-			UIUtil.printSeparator('━');
-			return money;
+			int inex = jdbcIERepository.createInEx(id, money, desc, ieNum, eventNum);
+			if (inex > 0) {
+				System.out.println();
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서가 작성되었습니다.");
+				System.out.println();
+				return money;
+			} else {
+				System.out.println();
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서 작성이 실패했습니다.");
+				System.out.println();
+			}
 		}
 		// 수입일 경우
 	}
@@ -228,7 +234,7 @@ public final class FinanceManager {
 	 * @return capital String
 	 */
 	private String getCapital() {
-		return formattingMoney(capital);
+		return formattingMoney(capital + getTotalIncomes() - getTotalExpends());
 	}
 
 	private void getCapitalTable() {
@@ -310,6 +316,7 @@ public final class FinanceManager {
 		TableUtil.printSingleRowTable(title, dataHeaders, dataValues);
 	}
 
+	// finance table 생성이 되어야 해당 기능 사용가능
 	/**
 	 * 자본 수정 메서드
 	 * - 현재 자본(capital)에 파라미터 값을 누적
