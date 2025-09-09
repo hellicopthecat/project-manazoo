@@ -11,8 +11,8 @@ import app.common.ui.TableUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
 import app.finance.FinanceManager;
-import app.repository.JdbcZooKeeperRepository;
 import app.repository.interfaces.ZooKeeperRepository;
+import app.repository.jdbc.JdbcZooKeeperRepository;
 import app.repository.memory.MemoryZooKeeperRepository;
 import app.zooKeeper.zooKeeperEnum.ZooKeeperConverter;
 
@@ -233,8 +233,11 @@ public final class ZooKeeperManager {
 			// InMemory
 			// String id = IdGeneratorUtil.generateId();
 			String id = DatabaseIdGenerator.generateId();
-			repository.createZooKeeper(id, name, age, genderIndex, rankIndex, departmentIndex, isWorkingIndex,
-					experienceYear, canHandleDangerAnimalIndex, desc);
+			/*
+			 * repository.createZooKeeper(id, name, age, genderIndex, rankIndex,
+			 * departmentIndex, isWorkingIndex, experienceYear, canHandleDangerAnimalIndex,
+			 * desc);
+			 */
 			jdbcRepository.createZooKeeper(id, name, age, genderIndex, rankIndex, departmentIndex, isWorkingIndex,
 					experienceYear, canHandleDangerAnimalIndex, desc);
 			UIUtil.printSeparator('━');
@@ -277,12 +280,15 @@ public final class ZooKeeperManager {
 	 * 시스템에 등록된 전체 사육사 정보를 순서대로 표시합니다.
 	 */
 	private void getZooKeeperList() {
-		int length = repository.getZooKeeperList().size();
+//		int length = repository.getZooKeeperList().size();
+		List<ZooKeeper> zooKeeperListDB = jdbcRepository.getZooKeeperListDB();
+		int length = zooKeeperListDB.size();
 		String title = "사육사 리스트";
-		String[] headers = { "ID", "Name", "Age", "Gender", "Rank", "Department", "IsWorking", "Can Assign Task" };
+		String[] headers = { "ID", "Name", "Age", "Gender", "Rank", "Department", "IsWorking",
+				"Can Handle Danger Animal" };
 		String[][] data = new String[length][8];
 		for (int i = 0; i < length; i++) {
-			ZooKeeper zooKeeper = repository.getZooKeeperList().get(i);
+			ZooKeeper zooKeeper = zooKeeperListDB.get(i);
 			data[i][0] = zooKeeper.getId();
 			data[i][1] = zooKeeper.getName();
 			data[i][2] = zooKeeper.getAge() + "";
@@ -290,7 +296,7 @@ public final class ZooKeeperManager {
 			data[i][4] = ZooKeeperConverter.rankStringConverter(zooKeeper.getRank());
 			data[i][5] = ZooKeeperConverter.departmentStringConverter(zooKeeper.getDepartment());
 			data[i][6] = ZooKeeperConverter.workingStringConverter(zooKeeper.isWorking());
-			data[i][7] = ZooKeeperConverter.possibleImpossibleStringConverter(zooKeeper.isCanAssignTask());
+			data[i][7] = ZooKeeperConverter.possibleImpossibleStringConverter(zooKeeper.isCanHandleDangerAnimal());
 		}
 		TableUtil.printTable(title, headers, data);
 	}
@@ -302,7 +308,8 @@ public final class ZooKeeperManager {
 	private void getZooKeeperById() {
 		System.out.println(MenuUtil.DEFAULT_PREFIX + "아이디를 입력해주세요 ▶ ");
 		String id = InputUtil.getStringInput();
-		ZooKeeper zk = repository.getZooKeeperById(id);
+//		ZooKeeper zk = repository.getZooKeeperById(id);
+		ZooKeeper zk = jdbcRepository.getZooKeeperByIdDB(id);
 		if (zk == null) {
 			String noDataTitle = "데이터 없음";
 			String[] noDataHeaders = { "No Data" };
@@ -327,19 +334,7 @@ public final class ZooKeeperManager {
 	private void getZooKeeperByName() {
 		System.out.println(MenuUtil.DEFAULT_PREFIX + "이름을 입력해주세요 ▶ ");
 		String name = InputUtil.getStringInput();
-		String zooKeeperByName = repository.getZooKeeperByName(name);
-		System.out.println(zooKeeperByName);
-	}
-
-	/**
-	 * 부서별로 사육사를 조회하고 출력합니다.
-	 * 사용자가 선택한 부서에 소속된 모든 사육사의 정보를 표시합니다.
-	 */
-	private void getZooKeeperByDepartment() {
-		String[] choices = { "포유류", "조류", "파충류", "어류", "양서류", "번식/연구", "수의/재활", "교육" };
-		MenuUtil.printMenu("부서를 고르세요", choices);
-		int departmentIndex = InputUtil.getIntInput();
-		List<ZooKeeper> zk = repository.getZooKeeperByDepartment(departmentIndex);
+		List<ZooKeeper> zk = jdbcRepository.getZooKeeperByNameDB(name);
 		if (zk == null) {
 			String noDataTitle = "데이터 없음";
 			String[] noDataHeaders = { "No Data" };
@@ -347,7 +342,8 @@ public final class ZooKeeperManager {
 			TableUtil.printSingleRowTable(noDataTitle, noDataHeaders, noDataValues);
 		} else {
 			String title = "사육사 리스트";
-			String[] headers = { "ID", "Name", "Age", "Gender", "Rank", "Department", "IsWorking", "Can Assign Task" };
+			String[] headers = { "ID", "Name", "Age", "Gender", "Rank", "Department", "IsWorking",
+					"Can Handle Danger Animal" };
 			String[][] data = new String[zk.size()][8];
 			for (int i = 0; i < zk.size(); i++) {
 				ZooKeeper zooKeeper = zk.get(i);
@@ -358,7 +354,42 @@ public final class ZooKeeperManager {
 				data[i][4] = ZooKeeperConverter.rankStringConverter(zooKeeper.getRank());
 				data[i][5] = ZooKeeperConverter.departmentStringConverter(zooKeeper.getDepartment());
 				data[i][6] = ZooKeeperConverter.workingStringConverter(zooKeeper.isWorking());
-				data[i][7] = ZooKeeperConverter.possibleImpossibleStringConverter(zooKeeper.isCanAssignTask());
+				data[i][7] = ZooKeeperConverter.possibleImpossibleStringConverter(zooKeeper.isCanHandleDangerAnimal());
+			}
+			TableUtil.printTable(title, headers, data);
+		}
+	}
+
+	/**
+	 * 부서별로 사육사를 조회하고 출력합니다.
+	 * 사용자가 선택한 부서에 소속된 모든 사육사의 정보를 표시합니다.
+	 */
+	private void getZooKeeperByDepartment() {
+		String[] choices = { "포유류", "조류", "파충류", "어류", "양서류", "번식/연구", "수의/재활", "교육" };
+		MenuUtil.printMenu("부서를 고르세요", choices);
+		int departmentIndex = InputUtil.getIntInput();
+//		List<ZooKeeper> zk = repository.getZooKeeperByDepartment(departmentIndex);
+		List<ZooKeeper> zk = jdbcRepository.getZookeeperByDepartmentDB(departmentIndex);
+		if (zk == null) {
+			String noDataTitle = "데이터 없음";
+			String[] noDataHeaders = { "No Data" };
+			String[] noDataValues = { "No Data" };
+			TableUtil.printSingleRowTable(noDataTitle, noDataHeaders, noDataValues);
+		} else {
+			String title = "사육사 리스트";
+			String[] headers = { "ID", "Name", "Age", "Gender", "Rank", "Department", "IsWorking",
+					"Can Handle Danger Animal" };
+			String[][] data = new String[zk.size()][8];
+			for (int i = 0; i < zk.size(); i++) {
+				ZooKeeper zooKeeper = zk.get(i);
+				data[i][0] = zooKeeper.getId();
+				data[i][1] = zooKeeper.getName();
+				data[i][2] = zooKeeper.getAge() + "";
+				data[i][3] = ZooKeeperConverter.genderStringConverter(zooKeeper.getGender());
+				data[i][4] = ZooKeeperConverter.rankStringConverter(zooKeeper.getRank());
+				data[i][5] = ZooKeeperConverter.departmentStringConverter(zooKeeper.getDepartment());
+				data[i][6] = ZooKeeperConverter.workingStringConverter(zooKeeper.isWorking());
+				data[i][7] = ZooKeeperConverter.possibleImpossibleStringConverter(zooKeeper.isCanHandleDangerAnimal());
 			}
 			TableUtil.printTable(title, headers, data);
 		}
@@ -375,29 +406,15 @@ public final class ZooKeeperManager {
 	 *   <li>업무배정가능여부 (가능/불가능)</li>
 	 *   <li>위험동물관리여부 (가능/불가능)</li>
 	 * </ul>
-	 * 사육사 수정 메서드입니다.
-	 */
-
-	/**
-	 * 사육사 정보 수정 메뉴를 표시하고 처리합니다.
-	 * 권한에 따라 제한된 정보만 수정할 수 있으며, 수정 가능한 항목을 메뉴로 제공합니다.
-	 * 
-	 * <p>수정 가능한 항목:</p>
-	 * <ul>
-	 *   <li>재직여부 (재직/퇴사)</li>
-	 *   <li>업무배정가능여부 (가능/불가능)</li>
-	 *   <li>위험동물관리여부 (가능/불가능)</li>
-	 * </ul>
 	 */
 	private void editZooKeeper() {
 		AtomicBoolean run = new AtomicBoolean(true);
-		String[] choice = { "재직여부", "업무배정가능여부", "위험군동물관리여부", "뒤로가기" };
+		String[] choice = { "재직여부", "위험군동물관리여부", "뒤로가기" };
 		MenuUtil.printMenu("무엇을 수정하시겠습니까?", choice);
 		int index = InputUtil.getIntInput();
 		switch (index) {
 		case 1 -> editIsWorking();
-		case 2 -> editCanAssignTask();
-		case 3 -> editPermissionDangerAnimal();
+		case 2 -> editPermissionDangerAnimal();
 		case 0 -> goBack(run);
 		default -> wrongIndex();
 		}
@@ -410,12 +427,24 @@ public final class ZooKeeperManager {
 	 */
 	private void editIsWorking() {
 		IdTracker ids = getIds();
-		int index = getValidateInt(null, "1. 재직, 2. 퇴사", 1, 2);
-		repository.setIsWorking(ids.getMyId(), ids.getTargetId(), index);
-		UIUtil.printSeparator('━');
-		System.out
-				.println(MenuUtil.DEFAULT_PREFIX + "************************ 재직여부가 수정되었습니다. ************************");
-		UIUtil.printSeparator('━');
+		boolean isManager = jdbcRepository.checkManager(ids.getMyId());
+		if (isManager) {
+			int index = getValidateInt(null, "1. 재직, 2. 퇴사", 1, 2);
+			int success = jdbcRepository.editIsWorkingDB(ids.targetId, index);
+			if (success > 0) {
+				UIUtil.printSeparator('━');
+				System.out.println(
+						MenuUtil.DEFAULT_PREFIX + "************************ 재직여부가 수정되었습니다. ************************");
+				UIUtil.printSeparator('━');
+			} else {
+				UIUtil.printSeparator('━');
+				System.out.println(MenuUtil.DEFAULT_PREFIX
+						+ "************************ 재직여부가 수정에 실패했습니다. ************************");
+				UIUtil.printSeparator('━');
+			}
+		} else {
+			System.out.println("당신은 매니저 급이 아닙니다.");
+		}
 	}
 
 	/**
@@ -423,13 +452,14 @@ public final class ZooKeeperManager {
 	 * 권한 검증을 통해 적절한 권한을 가진 사용자만 수정할 수 있습니다.
 	 * 업무 할당과 관련된 중요한 설정이므로 신중하게 처리됩니다.
 	 */
-	private void editCanAssignTask() {
-		IdTracker ids = getIds();
-		int index = getValidateInt(null, "1. 가능, 2. 불가능", 1, 2);
-		repository.setCanAssignTask(ids.getMyId(), ids.getTargetId(), index);
-		System.out.println(
-				MenuUtil.DEFAULT_PREFIX + "************************ 업무배정가능여부가 수정되었습니다. ************************");
-	}
+	// private void editCanAssignTask() {
+	// IdTracker ids = getIds();
+	// int index = getValidateInt(null, "1. 가능, 2. 불가능", 1, 2);
+	// repository.setCanAssignTask(ids.getMyId(), ids.getTargetId(), index);
+	// System.out.println(
+	// MenuUtil.DEFAULT_PREFIX + "************************ 업무배정가능여부가 수정되었습니다.
+	// ************************");
+	// }
 
 	/**
 	 * 사육사의 위험동물 관리 권한을 수정합니다.
@@ -438,10 +468,25 @@ public final class ZooKeeperManager {
 	 */
 	private void editPermissionDangerAnimal() {
 		IdTracker ids = getIds();
-		int index = getValidateInt(null, "1. 가능, 2. 불가능", 1, 2);
-		repository.setPermissionDangerAnimal(ids.getMyId(), ids.getTargetId(), index);
-		System.out.println(
-				MenuUtil.DEFAULT_PREFIX + "************************ 위험동물관리여부가 수정되었습니다. ************************");
+		boolean isManager = jdbcRepository.checkManager(ids.getMyId());
+		if (isManager) {
+			int index = getValidateInt(null, "1. 가능, 2. 불가능", 1, 2);
+			int success = jdbcRepository.editPermissionDangerAnimalDB(ids.targetId, index);
+			if (success > 0) {
+				UIUtil.printSeparator('━');
+				System.out.println(MenuUtil.DEFAULT_PREFIX
+						+ "************************ 위험동물관리여부가 수정되었습니다. ************************");
+				UIUtil.printSeparator('━');
+			} else {
+				UIUtil.printSeparator('━');
+				System.out.println(MenuUtil.DEFAULT_PREFIX
+						+ "************************ 위험동물관리여부가 수정이 실패했습니다. ************************");
+				UIUtil.printSeparator('━');
+			}
+		} else {
+			System.out.println("당신은 매니저 급이 아닙니다.");
+		}
+
 	}
 
 	/**
