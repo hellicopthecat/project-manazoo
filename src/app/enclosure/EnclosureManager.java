@@ -12,7 +12,7 @@ import app.common.ui.TextArtUtil;
 import app.common.ui.TableUtil;
 import app.common.ui.UIUtil;
 import app.animal.AnimalManager;
-import app.repository.MemoryEnclosureRepository;
+import app.repository.memory.MemoryEnclosureRepository;
 import app.repository.interfaces.EnclosureRepository;
 import app.zooKeeper.ZooKeeper;
 import app.zooKeeper.ZooKeeperManager;

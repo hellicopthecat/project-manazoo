@@ -12,7 +12,7 @@ import app.common.ui.MenuUtil;
 import app.common.ui.TableUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
-import app.repository.MemoryAnimalRepository;
+import app.repository.memory.MemoryAnimalRepository;
 import app.repository.interfaces.AnimalRepository;
 
 public class AnimalManager {
