@@ -5,14 +5,14 @@ import java.util.Map;
 import java.util.Optional;
 
 import app.animal.Animal;
-import app.common.IdGeneratorUtil;
+import app.common.DatabaseIdGenerator;
 import app.common.InputUtil;
 import app.common.ui.MenuUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.TableUtil;
 import app.common.ui.UIUtil;
 import app.animal.AnimalManager;
-import app.repository.memory.MemoryEnclosureRepository;
+import app.repository.jdbc.JdbcEnclosureRepository;
 import app.repository.interfaces.EnclosureRepository;
 import app.zooKeeper.ZooKeeper;
 import app.zooKeeper.ZooKeeperManager;
@@ -21,13 +21,34 @@ import app.zooKeeper.ZooKeeperManager;
  * 동물원 사육장을 생성, 조회, 수정, 삭제 및 동물 배치 등을 전반적으로 관리하는 클래스입니다.
  * Repository 패턴을 적용하여 데이터 계층을 분리하고 타입 안전성을 확보했습니다.
  * 
- * <p>주요 기능:</p>
+ * <p><strong>주요 기능:</strong></p>
  * <ul>
- *   <li>사육장 등록 및 관리</li>
+ *   <li>사육장 등록 및 관리 (CRUD 연산)</li>
  *   <li>동물 입사 관리 (Working Data Pattern 적용)</li>
  *   <li>사육장 정보 조회 및 수정</li>
  *   <li>사육장별 거주 동물 현황 관리</li>
+ *   <li>사육사 배치 관리</li>
  * </ul>
+ * 
+ * <p><strong>설계 패턴:</strong></p>
+ * <ul>
+ *   <li><strong>Repository Pattern:</strong> 데이터 계층 분리 및 테스트 용이성</li>
+ *   <li><strong>Working Data Pattern:</strong> 원본 데이터 보호 및 안전한 데이터 조작</li>
+ *   <li><strong>Strategy Pattern:</strong> LocationType, EnvironmentType 열거형 활용</li>
+ * </ul>
+ * 
+ * <p><strong>사용자 인터페이스:</strong></p>
+ * <ul>
+ *   <li>CMD 호환 테이블 형태 출력</li>
+ *   <li>단계별 메뉴 시스템</li>
+ *   <li>재시도 로직이 포함된 사용자 입력 처리</li>
+ * </ul>
+ * 
+ * @see EnclosureRepository 데이터 계층 인터페이스
+ * @see JdbcEnclosureRepository JDBC 구현체
+ * @see AnimalManager 동물 관리 시스템
+ * @see ZooKeeperManager 사육사 관리 시스템
+ * @since 1.0
  */
 public class EnclosureManager {
 
@@ -35,7 +56,7 @@ public class EnclosureManager {
      * 사육장 데이터를 관리하는 Repository입니다.
      * Singleton Repository를 사용하여 데이터 일관성을 보장합니다.
      */
-    private final EnclosureRepository repository = MemoryEnclosureRepository.getInstance();
+    private final EnclosureRepository repository = JdbcEnclosureRepository.getInstance();
 
     /**
      * 사용자로부터 LocationType을 선택받는 헬퍼 메서드입니다.
@@ -155,30 +176,48 @@ public class EnclosureManager {
      * 새로운 사육장을 등록합니다.
      * 사용자로부터 사육장 정보를 입력받아 시스템에 저장하고 결과를 출력합니다.
      * 
-     * <p>입력받는 정보:</p>
+     * <p><strong>입력받는 정보:</strong></p>
      * <ul>
-     *   <li>사육장 이름</li>
-     *   <li>사육장 크기 (㎡)</li>
-     *   <li>사육장 온도 (°C)</li>
-     *   <li>위치 타입 (실내/야외)</li>
-     *   <li>환경 타입 (육상/수상/혼합)</li>
+     *   <li>사육장 이름 (텍스트 입력)</li>
+     *   <li>사육장 크기 (숫자 입력, 단위: ㎡)</li>
+     *   <li>사육장 온도 (숫자 입력, 단위: °C)</li>
+     *   <li>위치 타입 (선택형 메뉴: 실내/야외)</li>
+     *   <li>환경 타입 (선택형 메뉴: 육상/수상/혼합)</li>
      * </ul>
+     * 
+     * <p><strong>처리 과정:</strong></p>
+     * <ol>
+     *   <li>고유 ID 자동 생성 (DatabaseIdGenerator 사용)</li>
+     *   <li>사용자 입력값 검증</li>
+     *   <li>Enclosure 객체 생성</li>
+     *   <li>Repository를 통한 데이터베이스 저장</li>
+     *   <li>등록 결과 테이블 형태로 출력</li>
+     * </ol>
+     * 
+     * @throws RuntimeException 사육장 등록 중 오류 발생 시
      */
     private void registerEnclosure() {
         UIUtil.printSeparator('━');
-        String id = IdGeneratorUtil.generateId();
-        String name = MenuUtil.Question.askTextInput("사육장의 이름을 입력하세요.");
-        float areaSize = MenuUtil.Question.askNumberInput("사육장의 크기를 입력하세요", "m2");
-        float temperature = MenuUtil.Question.askNumberInput("사육장의 온도를 입력하세요", "C");
-
-        LocationType locationType = selectLocationType();
-        EnvironmentType environmentType = selectEnvironmentType();
-
-        Enclosure newEnclosure = new Enclosure(id, name, areaSize, temperature, locationType, environmentType);
         
-        repository.save(newEnclosure);
-        
-        printEnclosureInfo("사육장이 등록되었습니다. 등록된 사육장의 정보는 아래와 같습니다.", newEnclosure);
+        try {
+            String id = DatabaseIdGenerator.generateId();
+            
+            String name = MenuUtil.Question.askTextInput("사육장의 이름을 입력하세요.");
+            float areaSize = MenuUtil.Question.askNumberInput("사육장의 크기를 입력하세요", "m2");
+            float temperature = MenuUtil.Question.askNumberInput("사육장의 온도를 입력하세요", "C");
+
+            LocationType locationType = selectLocationType();
+            EnvironmentType environmentType = selectEnvironmentType();
+
+            Enclosure newEnclosure = new Enclosure(id, name, areaSize, temperature, locationType, environmentType);
+            
+            repository.save(newEnclosure);
+            
+            printEnclosureInfo("사육장이 등록되었습니다. 등록된 사육장의 정보는 아래와 같습니다.", newEnclosure);
+            
+        } catch (Exception e) {
+            System.err.println(MenuUtil.DEFAULT_PREFIX + "사육장 등록 중 오류가 발생했습니다: " + e.getMessage());
+        }
     }
 
     /**
@@ -213,12 +252,27 @@ public class EnclosureManager {
     }
 
     /**
-     * 모든 사육장을 테이블 형태로 조회합니다.
+     * 모든 사육장을 테이블 형태로 조회하고 출력합니다.
      * 사육장의 기본 정보와 함께 거주 동물 수, 배정된 사육사 수를 표시합니다.
+     * 
+     * <p><strong>출력 정보:</strong></p>
+     * <ul>
+     *   <li>Enclosure ID: 사육장 고유 식별자</li>
+     *   <li>Name: 사육장 이름</li>
+     *   <li>Size(m2): 사육장 크기 (소수점 1자리)</li>
+     *   <li>Temp(C): 사육장 온도 (소수점 1자리)</li>
+     *   <li>Location: 위치 타입 (INDOOR/OUTDOOR)</li>
+     *   <li>Environment: 환경 타입 (LAND/AQUATIC/MIXED)</li>
+     *   <li>Inhabitants: 현재 거주 동물 수</li>
+     *   <li>Caretakers: 배정된 사육사 수</li>
+     * </ul>
+     * 
+     * <p><strong>정렬 기준:</strong> 생성일 내림차순 (최신 등록 순)</p>
      * 
      * @see TableUtil#printTable(String, String[], String[][]) 테이블 출력 유틸리티
      */
     private void viewAllEnclosures() {
+        
         if (repository.count() == 0) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 사육장이 없습니다.");
             return;
@@ -227,6 +281,7 @@ public class EnclosureManager {
         String[] headers = {"Enclosure ID", "Name", "Size(m2)", "Temp(C)", "Location", "Environment", "Inhabitants", "Caretakers"};
 
         List<Enclosure> allEnclosures = repository.findAll();
+        
         String[][] data = new String[allEnclosures.size()][];
 
         for (int i = 0; i < allEnclosures.size(); i++) {
@@ -590,13 +645,24 @@ public class EnclosureManager {
      * 동물 입사 관리 기능을 처리합니다.
      * Working Data Pattern을 사용하여 AnimalManager의 원본 데이터를 보호합니다.
      * 
-     * 처리 과정:
-     * 1. 사전 조건 확인 (사육장과 동물 존재 여부)
-     * 2. Working Data 생성 (AnimalManager에서 복사본 획득)
-     * 3. 사용자 인터페이스 처리 (목록 표시, 선택받기)
-     * 4. 입사 처리 시뮬레이션 (working data로 먼저 검증)
-     * 5. 실제 데이터 업데이트 (검증 완료 후 원본 수정)
-     * 6. 결과 표시
+     * <p><strong>Working Data Pattern 적용 이유:</strong></p>
+     * <ul>
+     *   <li>원본 데이터 보호: AnimalManager의 실제 데이터를 직접 수정하지 않음</li>
+     *   <li>롤백 가능성: 작업 중 오류 발생 시 원본 데이터에 영향 없음</li>
+     *   <li>시뮬레이션: 실제 처리 전 유효성 검증 수행</li>
+     * </ul>
+     * 
+     * <p><strong>처리 과정:</strong></p>
+     * <ol>
+     *   <li>사전 조건 확인 (사육장과 동물 존재 여부)</li>
+     *   <li>Working Data 생성 (AnimalManager에서 복사본 획득)</li>
+     *   <li>사용자 인터페이스 처리 (목록 표시, 선택받기)</li>
+     *   <li>입사 처리 시뮬레이션 (working data로 먼저 검증)</li>
+     *   <li>실제 데이터 업데이트 (검증 완료 후 원본 수정)</li>
+     *   <li>결과 표시</li>
+     * </ol>
+     * 
+     * @throws RuntimeException 동물 입사 처리 중 오류 발생 시
      */
     private void manageAnimalAdmission() {
         UIUtil.printSeparator('━');

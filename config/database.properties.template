@@ -16,3 +16,7 @@ db.serverTimezone=Asia/Seoul
 # 커넥션 설정
 db.connectionTimeout=30000
 db.maxRetries=3
+
+# 로깅 설정
+# 개발 환경에서는 디버그 모드 활성화
+app.debug=true

@@ -1,15 +1,7 @@
--- 동물 테이블 (실제 코드 기반)
-CREATE TABLE animals (
-    id VARCHAR(50) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    species ENUM('Lion', 'Tiger', 'Bear', 'Elephant', 'Wolf', 'Eagle', 'Owl', 'Snake') NOT NULL,
-    age INT,
-    gender VARCHAR(20),
-    health_status VARCHAR(50),
-    enclosure_id VARCHAR(50),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (enclosure_id) REFERENCES enclosures(id) ON DELETE SET NULL
+-- ID 생성기 테이블 (자동 ID 생성용)
+CREATE TABLE id_generator (
+    prefix VARCHAR(10) PRIMARY KEY,
+    last_number INT NOT NULL
 );
 
 -- 사육장 테이블 (실제 코드 기반)
@@ -20,29 +12,8 @@ CREATE TABLE enclosures (
     temperature DECIMAL(5, 1),
     location_type ENUM('INDOOR', 'OUTDOOR') NOT NULL,
     environment_type ENUM('LAND', 'AQUATIC', 'MIXED') NOT NULL,
-    max_capacity INT NOT NULL DEFAULT 10,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- 사육장-동물 관계 테이블 (inhabitants Map 구현)
-CREATE TABLE enclosure_animals (
-    enclosure_id VARCHAR(50) NOT NULL,
-    animal_id VARCHAR(50) NOT NULL,
-    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (enclosure_id, animal_id),
-    FOREIGN KEY (enclosure_id) REFERENCES enclosures(id) ON DELETE CASCADE,
-    FOREIGN KEY (animal_id) REFERENCES animals(id) ON DELETE CASCADE
-);
-
--- 사육장-사육사 관계 테이블 (caretakers Map 구현)
-CREATE TABLE enclosure_caretakers (
-    enclosure_id VARCHAR(50) NOT NULL,
-    keeper_id VARCHAR(50) NOT NULL,
-    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (enclosure_id, keeper_id),
-    FOREIGN KEY (enclosure_id) REFERENCES enclosures(id) ON DELETE CASCADE,
-    FOREIGN KEY (keeper_id) REFERENCES zoo_keepers(id) ON DELETE CASCADE
 );
 
 -- 사육사 테이블 (실제 코드 기반)
@@ -62,6 +33,33 @@ CREATE TABLE zoo_keepers (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- 방문 예약 테이블 (실제 코드 기반)
+CREATE TABLE reservations (
+    id VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    phone_number VARCHAR(20) NOT NULL,
+    visit_date DATE NOT NULL,
+    number_of_visitors INT NOT NULL DEFAULT 1,
+    number_of_adults INT NOT NULL DEFAULT 1,
+    number_of_childs INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 동물 테이블 (실제 코드 기반)
+CREATE TABLE animals (
+    id VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    species ENUM('Lion', 'Tiger', 'Bear', 'Elephant', 'Wolf', 'Eagle', 'Owl', 'Snake') NOT NULL,
+    age INT,
+    gender VARCHAR(20),
+    health_status VARCHAR(50),
+    enclosure_id VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (enclosure_id) REFERENCES enclosures(id) ON DELETE SET NULL
+);
+
 -- 수입/지출 테이블 (실제 코드 기반)
 CREATE TABLE income_expends (
     id VARCHAR(50) PRIMARY KEY,
@@ -76,19 +74,15 @@ CREATE TABLE income_expends (
     FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE SET NULL
 );
 
--- 방문 예약 테이블 (실제 코드 기반)
-CREATE TABLE reservations (
-    id VARCHAR(50) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    phone_number VARCHAR(20) NOT NULL,
-    visit_date DATE NOT NULL,
-    number_of_visitors INT NOT NULL DEFAULT 1,
-    number_of_adults INT NOT NULL DEFAULT 1,
-    number_of_childs INT NOT NULL DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+-- 사육장-사육사 관계 테이블 (caretakers Map 구현)
+CREATE TABLE enclosure_caretakers (
+    enclosure_id VARCHAR(50) NOT NULL,
+    keeper_id VARCHAR(50) NOT NULL,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (enclosure_id, keeper_id),
+    FOREIGN KEY (enclosure_id) REFERENCES enclosures(id) ON DELETE CASCADE,
+    FOREIGN KEY (keeper_id) REFERENCES zoo_keepers(id) ON DELETE CASCADE
 );
-
 
 -- 사육사-수입지출 중간테이블 (급여 지출 기록)
 CREATE TABLE zoo_keeper_income_expends (
@@ -100,13 +94,6 @@ CREATE TABLE zoo_keeper_income_expends (
     FOREIGN KEY (keeper_id) REFERENCES zoo_keepers(id) ON DELETE CASCADE,
     FOREIGN KEY (income_expend_id) REFERENCES income_expends(id) ON DELETE CASCADE
 );
-
--- ID 생성기 테이블 (자동 ID 생성용)
-CREATE TABLE id_generator (
-    prefix VARCHAR(10) PRIMARY KEY,
-    last_number INT NOT NULL
-);
-
 
 -- 미구현 기능
 -- 동물-수입지출 중간테이블 (동물 관련 비용 - 사료, 의료비 등)

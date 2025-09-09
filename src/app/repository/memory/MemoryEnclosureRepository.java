@@ -168,29 +168,17 @@ public class MemoryEnclosureRepository implements EnclosureRepository {
                 .collect(Collectors.toList());
     }
     
+        
     /**
-     * 최대 수용 인원 이하로 필터링하여 인클로저를 조회합니다.
+     * 현재 수용 가능한 인클로저를 조회합니다.
+     * max_capacity 컬럼이 제거되어 모든 사육장이 수용 가능한 것으로 처리됩니다.
      *
-     * @param maxCapacity 최대 수용 인원
-     * @return 조건에 맞는 인클로저 리스트
-     */
-    @Override
-    public List<Enclosure> findByMaxCapacityLessThanEqual(int maxCapacity) {
-        return enclosures.values().stream()
-                .filter(enclosure -> enclosure.getMaxCapacity() <= maxCapacity)
-                .collect(Collectors.toList());
-    }
-    
-    /**
-     * 현재 수용 가능한 인클로저를 조회합니다 (현재 인원 < 최대 수용 인원).
-     *
-     * @return 수용 가능한 인클로저 리스트
+     * @return 모든 인클로저 리스트
      */
     @Override
     public List<Enclosure> findAvailableEnclosures() {
-        return enclosures.values().stream()
-                .filter(enclosure -> enclosure.getCurrentCapacity() < enclosure.getMaxCapacity())
-                .collect(Collectors.toList());
+        // max_capacity 컬럼이 제거되어 모든 사육장이 수용 가능한 것으로 처리
+        return new ArrayList<>(enclosures.values());
     }
     
     /**
