@@ -1,5 +1,6 @@
 package app.config;
 
+import app.common.SimpleLogger;
 import java.io.*;
 import java.util.Properties;
 
@@ -15,6 +16,9 @@ public class DatabaseConfigLoader {
     
     private Properties properties;
     private String environment;
+    
+    // 로거 인스턴스
+    private static final SimpleLogger logger = SimpleLogger.getLogger(DatabaseConfigLoader.class);
     
     public DatabaseConfigLoader() {
         this("dev"); // 기본값: 개발 환경
@@ -32,15 +36,18 @@ public class DatabaseConfigLoader {
         properties = new Properties();
         String configFile = getConfigFileName();
         
+        logger.debug("설정 파일 로드 시작: %s", configFile);
+        
         try (InputStream input = new FileInputStream(CONFIG_DIR + configFile)) {
             properties.load(input);
-            System.out.println("데이터베이스 설정 로드 완료: " + configFile);
+            logger.info("데이터베이스 설정 로드 완료: %s", configFile);
+            logger.debug("로드된 설정 항목 개수: %d", properties.size());
         } catch (FileNotFoundException e) {
-            System.err.println("설정 파일을 찾을 수 없습니다: " + configFile);
-            System.err.println("템플릿 파일을 참고하여 설정 파일을 생성해주세요.");
+            logger.error("설정 파일을 찾을 수 없습니다: " + configFile);
+            logger.error("템플릿 파일을 참고하여 설정 파일을 생성해주세요.");
             throw new RuntimeException("데이터베이스 설정 파일 로드 실패", e);
         } catch (IOException e) {
-            System.err.println("설정 파일 읽기 중 오류 발생: " + e.getMessage());
+            logger.error("설정 파일 읽기 중 오류 발생", e);
             throw new RuntimeException("데이터베이스 설정 파일 읽기 실패", e);
         }
     }
@@ -103,6 +110,24 @@ public class DatabaseConfigLoader {
     }
     
     /**
+     * 디버그 모드 여부를 반환합니다.
+     * properties 파일의 app.debug 설정을 먼저 확인하고,
+     * 없으면 시스템 프로퍼티를 확인합니다.
+     * 
+     * @return 디버그 모드 여부
+     */
+    public boolean isDebugMode() {
+        // properties 파일에서 먼저 확인
+        String debugFromConfig = properties.getProperty("app.debug");
+        if (debugFromConfig != null) {
+            return Boolean.parseBoolean(debugFromConfig);
+        }
+        
+        // properties 파일에 없으면 시스템 프로퍼티에서 확인
+        return Boolean.parseBoolean(System.getProperty("app.debug", "false"));
+    }
+    
+    /**
      * 완전한 JDBC URL을 생성합니다.
      */
     public String getJdbcUrl() {
@@ -134,18 +159,19 @@ public class DatabaseConfigLoader {
      * 설정 정보를 출력합니다 (비밀번호 제외).
      */
     public void printConfiguration() {
-        System.out.println("=== 데이터베이스 설정 정보 ===");
-        System.out.println("환경: " + getEnvironment());
-        System.out.println("호스트: " + getHost());
-        System.out.println("포트: " + getPort());
-        System.out.println("데이터베이스: " + getDatabaseName());
-        System.out.println("사용자명: " + getUsername());
-        System.out.println("타임존: " + getServerTimezone());
-        System.out.println("JDBC URL: " + getJdbcUrl());
-        System.out.println("연결 타임아웃: " + getConnectionTimeout() + "ms");
-        System.out.println("최대 재시도: " + getMaxRetries());
-        System.out.println("SQL 표시: " + isShowSql());
-        System.out.println("자동 재연결: " + isAutoReconnect());
-        System.out.println("==============================");
+        logger.info("=== 데이터베이스 설정 정보 ===");
+        logger.info("환경: %s", getEnvironment());
+        logger.info("호스트: %s", getHost());
+        logger.info("포트: %d", getPort());
+        logger.info("데이터베이스: %s", getDatabaseName());
+        logger.info("사용자명: %s", getUsername());
+        logger.info("타임존: %s", getServerTimezone());
+        logger.debug("JDBC URL: %s", getJdbcUrl());
+        logger.debug("연결 타임아웃: %dms", getConnectionTimeout());
+        logger.debug("최대 재시도: %d", getMaxRetries());
+        logger.debug("SQL 표시: %s", isShowSql());
+        logger.debug("자동 재연결: %s", isAutoReconnect());
+        logger.debug("디버그 모드: %s", isDebugMode());
+        logger.info("==============================");
     }
 }
