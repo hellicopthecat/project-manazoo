@@ -496,8 +496,24 @@ public final class ZooKeeperManager {
 	 */
 	private void deleteZooKeeper() {
 		IdTracker ids = getIds();
-		repository.removeZooKeeper(ids.getMyId(), ids.getTargetId());
-		System.out.println(MenuUtil.DEFAULT_PREFIX + "************************ 삭제되었습니다. ************************");
+		boolean isManager = jdbcRepository.checkManager(ids.getMyId());
+		if (isManager) {
+			int success = jdbcRepository.deleteZooKeeperDB(ids.targetId);
+			if (success > 0) {
+				UIUtil.printSeparator('━');
+				System.out.println(
+						MenuUtil.DEFAULT_PREFIX + "************************ 삭제되었습니다. ************************");
+				UIUtil.printSeparator('━');
+			} else {
+				UIUtil.printSeparator('━');
+				System.out.println(
+						MenuUtil.DEFAULT_PREFIX + "************************ 삭제에 실패했습니다. ************************");
+				UIUtil.printSeparator('━');
+			}
+		} else {
+			System.out.println("당신은 매니저 급이 아닙니다.");
+		}
+
 	}
 
 	/**
