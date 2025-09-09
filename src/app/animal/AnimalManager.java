@@ -83,15 +83,16 @@ public class AnimalManager {
 		age = MenuUtil.Question.askNumberInputInt("동물의 나이를 입력하세요.");
 		gender = inputAnimalGender("동물의 성별을 입력하세요.");
 		healthStatus = inputAnimalHealth("동물의 건강상태를 입력하세요.");
-		enclosureId = MenuUtil.Question.askTextInput("동물의 EnclosureID를 입력하세요.");
 
-		String[] headers = { "Name", "Species", "Age", "Gender", "HealthStatus", "EnclosureID" };
-		String[][] data = { { name, species, Integer.toString(age), gender, healthStatus, enclosureId } };
+		String[] headers = { "Name", "Species", "Age", "Gender", "HealthStatus" };
+		String[][] data = { { name, species, Integer.toString(age), gender, healthStatus } };
 		TableUtil.printTable("입력하신 정보는 아래와 같습니다.", headers, data);
 
 		boolean choice = MenuUtil.Question.askYesNo("등록하시겠습니까?");
 		if (choice) {
-			JdbcAnimalRepository.createAnimal(connection, id, name, species, age, gender, healthStatus, enclosureId);
+			Animal animal = JdbcAnimalRepository.createAnimal(connection, id, name, species, age, gender, healthStatus);
+			System.out.printf(MenuUtil.DEFAULT_PREFIX + "동물 등록 성공!");
+			animal.showAnimal();
 		}
 	}
 

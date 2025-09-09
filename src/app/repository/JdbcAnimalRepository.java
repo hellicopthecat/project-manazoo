@@ -80,8 +80,8 @@ public class JdbcAnimalRepository implements AnimalRepository {
 		return save(animal);
 	}
 
-	public static void createAnimal(Connection connection, String id, String name, String species, int age,
-			String gender, String healthStatus, String enclosureId) throws SQLException {
+	public static Animal createAnimal(Connection connection, String id, String name, String species, int age,
+			String gender, String healthStatus) throws SQLException {
 		String sql = "insert into animals (id, name, species, age, gender, health_status, enclosure_id, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		PreparedStatement pstmt = connection.prepareStatement(sql);
@@ -95,12 +95,14 @@ public class JdbcAnimalRepository implements AnimalRepository {
 		pstmt.setString(8, null);
 		pstmt.setString(9, null);
 
+		Animal animal = null;
 		if (pstmt.executeUpdate() == 1) {
-			System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 등록 성공!");
+			animal = new Animal(id, name, species, age, gender, healthStatus, null);
 		} else {
 			System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 등록 실패!");
 		}
 		pstmt.close();
+		return animal;
 	}
 
 	@Override
