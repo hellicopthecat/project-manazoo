@@ -6,7 +6,7 @@ import app.common.ui.MenuUtil;
 import app.common.ui.TableUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
-import app.repository.memory.MemoryVisitorRepository;
+import app.repository.jdbc.JdbcVisitorRepository;
 import app.repository.interfaces.VisitorRepository;
 
 public class VisitorManager {
@@ -14,7 +14,7 @@ public class VisitorManager {
 	/**
 	 * 방문자 데이터를 관리하는 Repository입니다. Singleton Repository를 사용하여 데이터 일관성을 보장합니다.
 	 */
-	private final VisitorRepository repository = MemoryVisitorRepository.getInstance();
+	private final VisitorRepository repository = JdbcVisitorRepository.getInstance();
 
 	String id;
 	String name;
