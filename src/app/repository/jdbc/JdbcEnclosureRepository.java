@@ -639,7 +639,8 @@ public class JdbcEnclosureRepository implements EnclosureRepository {
     }
 
     /**
-     * 사육장의 동물들을 조회합니다 (animals.enclosure_id 기반).
+     * 사육장의 동물들을 조회하여 ID로 등록합니다.
+     * 실제 Animal 객체는 필요 시점에 AnimalManager를 통해 조회됩니다.
      */
     private void loadEnclosureAnimals(Connection connection, Enclosure enclosure) throws SQLException {
         String sql = "SELECT id FROM animals WHERE enclosure_id = ?";
@@ -650,9 +651,10 @@ public class JdbcEnclosureRepository implements EnclosureRepository {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     String animalId = rs.getString("id");
-                    // 실제 Animal 객체는 AnimalManager에서 조회하도록 설계되어 있으므로
-                    // 여기서는 ID만 저장
-                    enclosure.addInhabitant(animalId, animalId);
+                    // Repository 전용 오버로드 메서드 사용
+                    enclosure.addInhabitant(animalId);
+                    
+                    logger.debug("동물 ID 등록: %s → 사육장 %s", animalId, enclosure.getId());
                 }
             }
         }
@@ -667,9 +669,10 @@ public class JdbcEnclosureRepository implements EnclosureRepository {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     String keeperId = rs.getString("keeper_id");
-                    // 실제 ZooKeeper 객체는 ZooKeeperManager에서 조회하도록 설계되어 있으므로
-                    // 여기서는 ID만 저장
-                    enclosure.assignCaretaker(keeperId, keeperId);
+                    // Repository 전용 오버로드 메서드 사용
+                    enclosure.assignCaretaker(keeperId);
+                    
+                    logger.debug("사육사 ID 등록: %s → 사육장 %s", keeperId, enclosure.getId());
                 }
             }
         }
