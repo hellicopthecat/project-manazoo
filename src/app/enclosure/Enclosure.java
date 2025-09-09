@@ -72,6 +72,25 @@ public class Enclosure implements EnclosureInterface {
 	}
 
 	/**
+	 * Repository 전용: 동물 ID만으로 입주 등록하는 메서드입니다.
+	 * 실제 Animal 객체는 필요 시점에 AnimalManager를 통해 조회됩니다.
+	 * 
+	 * @param animalId 동물 ID
+	 */
+	public void addInhabitant(String animalId) {
+		if (animalId == null || animalId.trim().isEmpty()) {
+			throw new IllegalArgumentException("동물 ID는 필수입니다.");
+		}
+		
+		if (this.inhabitants.containsKey(animalId)) {
+			throw new IllegalStateException("이미 등록된 동물 ID: " + animalId);
+		}
+		
+		// ID를 키와 값으로 모두 사용 (Repository 패턴에서 일반적)
+		this.inhabitants.put(animalId, animalId);
+	}
+
+	/**
 	 * 사육장에서 동물을 이주시키는 메서드입니다.
 	 * 
 	 * @param animalId 동물 ID
@@ -138,6 +157,25 @@ public class Enclosure implements EnclosureInterface {
 	 */
 	public void assignCaretaker(String keeperId, Object keeper) {
 		this.caretakers.put(keeperId, keeper);
+	}
+
+	/**
+	 * Repository 전용: 사육사 ID만으로 배정하는 메서드입니다.
+	 * 실제 ZooKeeper 객체는 필요 시점에 ZooKeeperManager를 통해 조회됩니다.
+	 * 
+	 * @param keeperId 사육사 ID
+	 */
+	public void assignCaretaker(String keeperId) {
+		if (keeperId == null || keeperId.trim().isEmpty()) {
+			throw new IllegalArgumentException("사육사 ID는 필수입니다.");
+		}
+		
+		if (this.caretakers.containsKey(keeperId)) {
+			throw new IllegalStateException("이미 배정된 사육사 ID: " + keeperId);
+		}
+		
+		// ID를 키와 값으로 모두 사용 (Repository 패턴에서 일반적)
+		this.caretakers.put(keeperId, keeperId);
 	}
 
 	/**
