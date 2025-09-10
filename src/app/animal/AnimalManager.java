@@ -6,21 +6,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import app.common.IdGeneratorUtil;
+import app.common.DatabaseIdGenerator;
 import app.common.InputUtil;
 import app.common.ui.MenuUtil;
 import app.common.ui.TableUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
-import app.repository.memory.MemoryAnimalRepository;
+import app.repository.JdbcAnimalRepository;
 import app.repository.interfaces.AnimalRepository;
 
 public class AnimalManager {
 	/**
-	 * 동물 데이터를 관리하는 Repository입니다.
-	 * Singleton Repository를 사용하여 데이터 일관성을 보장합니다.
+	 * 동물 데이터를 관리하는 Repository입니다. Singleton Repository를 사용하여 데이터 일관성을 보장합니다.
 	 */
-	private final AnimalRepository repository = MemoryAnimalRepository.getInstance();
+	private final AnimalRepository repository = JdbcAnimalRepository.getInstance();
 
 	String id;
 	String name;
@@ -55,6 +54,7 @@ public class AnimalManager {
 			case 4 -> removeAnimal();
 			case 0 -> {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "이전 메뉴로 돌아갑니다.");
+				UIUtil.printSeparator('━');
 				return;
 			}
 			default -> System.out.println(MenuUtil.DEFAULT_PREFIX + "잘못된 선택입니다.");
@@ -74,16 +74,15 @@ public class AnimalManager {
 		TextArtUtil.printRegisterMenuTitle();
 		UIUtil.printSeparator('━');
 
-		id = IdGeneratorUtil.generateId();
-		inputAnimalName("동물의 이름을 입력하세요.");
-		inputAnimalSpecies("동물의 종을 입력하세요.");
+		id = DatabaseIdGenerator.generateId();
+		name = inputAnimalName("동물의 이름을 입력하세요.");
+		species = inputAnimalSpecies("동물의 종을 입력하세요.");
 		age = MenuUtil.Question.askNumberInputInt("동물의 나이를 입력하세요.");
-		inputAnimalGender("동물의 성별을 입력하세요.");
-		inputAnimalHealth("동물의 건강상태를 입력하세요.");
-		enclosureId = MenuUtil.Question.askTextInput("동물의 EnclosureID를 입력하세요.");
+		gender = inputAnimalGender("동물의 성별을 입력하세요.");
+		healthStatus = inputAnimalHealth("동물의 건강상태를 입력하세요.");
 
-		String[] headers = { "Name", "Species", "Age", "Gender", "HealthStatus", "EnclosureID" };
-		String[][] data = { { name, species, Integer.toString(age), gender, healthStatus, enclosureId } };
+		String[] headers = { "Name", "Species", "Age", "Gender", "HealthStatus" };
+		String[][] data = { { name, species, Integer.toString(age), gender, healthStatus } };
 		TableUtil.printTable("입력하신 정보는 아래와 같습니다.", headers, data);
 
 		boolean choice = MenuUtil.Question.askYesNo("등록하시겠습니까?");
@@ -95,13 +94,12 @@ public class AnimalManager {
 		}
 	}
 
-	public void inputAnimalName(String question) {
+	public String inputAnimalName(String question) {
 		while (true) {
 			String inName = MenuUtil.Question.askTextInput(question);
 			List<Animal> findAnimal = repository.getAnimalsByName(inName);
 			if (findAnimal.isEmpty()) {
-				name = inName;
-				break;
+				return inName;
 			} else {
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "동일한 이름이 있습니다.");
 				System.out.println();
@@ -109,47 +107,67 @@ public class AnimalManager {
 		}
 	}
 
-	public void inputAnimalSpecies(String question) {
+	public String inputAnimalSpecies(String question) {
 		String[] speciesChoices = { "Lion", "Tiger", "Bear", "Elephant", "Wolf", "Eagle", "Owl", "Snake" };
 		int inSpecies = MenuUtil.Question.askSingleChoice(question, speciesChoices);
 		switch (inSpecies) {
-		case 1 -> species = "Lion";
-		case 2 -> species = "Tiger";
-		case 3 -> species = "Bear";
-		case 4 -> species = "Elephant";
-		case 5 -> species = "Wolf";
-		case 6 -> species = "Eagle";
-		case 7 -> species = "Owl";
-		case 8 -> species = "Snake";
+		case 1 -> {
+			return "Lion";
+		}
+		case 2 -> {
+			return "Tiger";
+		}
+		case 3 -> {
+			return "Bear";
+		}
+		case 4 -> {
+			return "Elephant";
+		}
+		case 5 -> {
+			return "Wolf";
+		}
+		case 6 -> {
+			return "Eagle";
+		}
+		case 7 -> {
+			return "Owl";
+		}
+		case 8 -> {
+			return "Snake";
+		}
 		default -> System.out.println();
 		}
+		return null;
 	}
 
-	public void inputAnimalGender(String question) {
+	public String inputAnimalGender(String question) {
 		String[] genderChoices = { "Male", "Female" };
 		int inGender = MenuUtil.Question.askSingleChoice(question, genderChoices);
 		if (inGender == 1) {
-			gender = "Male";
+			return "Male";
 		} else if (inGender == 2) {
-			gender = "Female";
+			return "Female";
 		}
+		return null;
 	}
 
-	public void inputAnimalHealth(String question) {
+	public String inputAnimalHealth(String question) {
 		String[] healthChoices = { "Good", "Fair", "Poor" };
 		int inHealth = MenuUtil.Question.askSingleChoice(question, healthChoices);
 		if (inHealth == 1) {
-			healthStatus = "Good";
+			return "Good";
 		} else if (inHealth == 2) {
-			healthStatus = "Fair";
+			return "Fair";
 		} else if (inHealth == 3) {
-			healthStatus = "Poor";
+			return "Poor";
 		}
+		return null;
 	}
 
 	// << 2. 동물 조회 >>
 	public void viewAnimals() {
 		if (repository.count() == 0) {
+			UIUtil.printSeparator('━');
 			System.out.println(MenuUtil.DEFAULT_PREFIX + "등록된 동물이 없습니다.");
 			return;
 		}
@@ -201,7 +219,7 @@ public class AnimalManager {
 					String.valueOf(animal.getAge()), animal.getGender(), animal.getHealthStatus(),
 					animal.getEnclosureId() };
 		}
-		String title = String.format("동물 목록 (총 %d마리)", repository.count());
+		String title = String.format("동물 목록 (총 %d마리)", data.length);
 		TableUtil.printTable(title, headers, data);
 	}
 
@@ -215,7 +233,7 @@ public class AnimalManager {
 				animal.showAnimal();
 				return;
 			} else {
-				System.out.println(MenuUtil.DEFAULT_PREFIX + "ID를 다시 입력해 주세요. ");
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "해당 ID의 동물이 없습니다.");
 				System.out.println();
 			}
 		}
@@ -258,6 +276,10 @@ public class AnimalManager {
 
 		String[] headers = { "Animal ID", "Name", "Species", "Age", "Gender", "HealthStatus", "EnclosureID" };
 		List<Animal> findAnimals = repository.getAnimalsBySpecies(inSpecies);
+		if (findAnimals.isEmpty()) {
+			System.out.println(MenuUtil.DEFAULT_PREFIX + "해당 종의 동물이 없습니다.");
+			return;
+		}
 		String[][] data = new String[findAnimals.size()][];
 
 		for (int i = 0; i < findAnimals.size(); i++) {
@@ -298,22 +320,20 @@ public class AnimalManager {
 		}
 
 		// < 원하는 정보 선택 >
-		String[] choices = { "나이", "건강상태", "EnclosureID" };
+		String[] choices = { "Age", "HealthStatus" };
 		int choice = MenuUtil.Question.askSingleChoice("수정할 정보를 입력하세요.", choices);
 
 		// < 정보 수정 >
 		switch (choice) {
 		case 1 -> editAnimalAge(animal);
 		case 2 -> editAnimalHealth(animal);
-		case 3 -> editAnimalEnclosureID(animal);
 		default -> System.out.println();
 		}
-
 	}
 
 	public void editAnimalAge(Animal animal) {
-		int changeAge = MenuUtil.Question.askNumberInputInt("수정할 나이를 입력하세요.");
-		animal.setAge(changeAge);
+		String changeAge = MenuUtil.Question.askTextInput("수정할 나이를 입력하세요.");
+		repository.updateAnimal(changeAge, animal);
 		System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
 		animal.showAnimal();
 	}
@@ -329,14 +349,7 @@ public class AnimalManager {
 		} else if (inHealth == 3) {
 			changeHealth = "Poor";
 		}
-		animal.setHealthStatus(changeHealth);
-		System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
-		animal.showAnimal();
-	}
-
-	public void editAnimalEnclosureID(Animal animal) {
-		String changeEnclosureId = MenuUtil.Question.askTextInput("수정할 EnclosureID를 입력하세요.");
-		animal.setEnclosureId(changeEnclosureId);
+		repository.updateAnimal(changeHealth, animal);
 		System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
 		animal.showAnimal();
 	}
@@ -362,7 +375,6 @@ public class AnimalManager {
 				if (choice) {
 					repository.removeAnimal(findId);
 					System.out.println(MenuUtil.DEFAULT_PREFIX + "동물이 삭제되었습니다.");
-					UIUtil.printSeparator('━');
 					return;
 				}
 			} else {

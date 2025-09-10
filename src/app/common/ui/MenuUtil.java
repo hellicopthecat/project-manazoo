@@ -34,6 +34,8 @@ public final class MenuUtil {
 		System.out.println("  ◆ 1. 관리자 모드  │  Administrator");
 		System.out.println();
 		System.out.println("  ◆ 2. 관람객 모드  │  Visitor");
+		System.out.println();
+		System.out.println("  ◆ 0. 시스템 종료  │  Exit");
 		UIUtil.printSeparator('━');
 		System.out.print("  선택 번호를 입력하세요 ▶ ");
 	}
