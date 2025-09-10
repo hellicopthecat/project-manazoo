@@ -19,14 +19,27 @@ public class ZooKeeper implements ZooKeeperBasicBehavior {
 	private ZooKeeperRank rank;
 	private Department department;
 	private boolean isWorking;
-	private int experieneceYear;
+	private int experienceYear;
 	private boolean canHandleDangerAnimal;
 	private boolean canAssignTask;
 	private List<String> licenses = new ArrayList<>();
-	// public List<Enclosures> enclosures;
 	private long salary = 0l;
 
 	// constructor
+	public ZooKeeper(String id, String name, int age, Gender gender, ZooKeeperRank rank, Department department,
+			boolean isWorking, int experienceYear, boolean canHandleDangerAnimal, List<String> licenses) {
+		this.id = id;
+		this.name = name;
+		this.age = age;
+		this.gender = gender;
+		this.rank = rank;
+		this.department = department;
+		this.isWorking = isWorking;
+		this.experienceYear = experienceYear;
+		this.canHandleDangerAnimal = canHandleDangerAnimal;
+		this.licenses = licenses;
+	}
+
 	public ZooKeeper(String id, String name, int age, Gender gender, ZooKeeperRank rank, Department department,
 			boolean isWorking, int experieneceYear, boolean canHandleDangerAnimal, boolean canAssignTask,
 			List<String> licenses) {
@@ -37,7 +50,7 @@ public class ZooKeeper implements ZooKeeperBasicBehavior {
 		this.rank = rank;
 		this.department = department;
 		this.isWorking = isWorking;
-		this.experieneceYear = experieneceYear;
+		this.experienceYear = experieneceYear;
 		this.canHandleDangerAnimal = canHandleDangerAnimal;
 		this.canAssignTask = canAssignTask;
 		this.licenses = licenses;
@@ -58,6 +71,14 @@ public class ZooKeeper implements ZooKeeperBasicBehavior {
 
 	public int getAge() {
 		return age;
+	}
+
+	public int getExperienceYear() {
+		return experienceYear;
+	}
+
+	public long getSalary() {
+		return salary;
 	}
 
 	public void setAge(int age) {
@@ -100,11 +121,11 @@ public class ZooKeeper implements ZooKeeperBasicBehavior {
 	}
 
 	public int getExperieneceYear() {
-		return experieneceYear;
+		return experienceYear;
 	}
 
 	protected void setExperieneceYear(int experieneceYear) {
-		this.experieneceYear = experieneceYear;
+		this.experienceYear = experieneceYear;
 	}
 
 	public boolean isCanHandleDangerAnimal() {
@@ -148,7 +169,7 @@ public class ZooKeeper implements ZooKeeperBasicBehavior {
 
 		return String.format(MenuUtil.DEFAULT_PREFIX
 				+ "id : %s | 이름 : %s | 나이 : %d | 성별 : %s | 직급 : %s | 부서 : %s | 재직여부 : %s | 연차 : %d | 고위험군생물관리 : %s | 업무부여 : %s | 자격증 : %s | 누적급여 : %d",
-				id, name, age, g, r, d, w, experieneceYear, da, at, licensesStr, salary);
+				id, name, age, g, r, d, w, experienceYear, da, at, licensesStr, salary);
 	}
 
 	/**

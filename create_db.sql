@@ -69,9 +69,11 @@ CREATE TABLE income_expends (
     type ENUM('INCOME', 'EXPENSE') NOT NULL,
     event_type ENUM('FEE', 'EMPLOYEE_MONTH', 'EMPLOYEE_EXTRA', 'ENCLOSURE', 'SAFARI', 'AQUASHOW', 'EXPERIENCE', 'FOOD') NOT NULL,
     reservation_id VARCHAR(50), -- 1:1 관계 - 예약과 연결된 수입 (입장료)
+    zookeeper_id VARCHAR(50), -- 1:1 관계 - 사육사와 연결된 수입 (급여)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE SET NULL
+    FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE SET NULL,
+    FOREIGN KEY (zookeeper_id) REFERENCES zoo_keepers(id) ON DELETE SET NULL
 );
 
 -- 사육장-사육사 관계 테이블 (caretakers Map 구현)

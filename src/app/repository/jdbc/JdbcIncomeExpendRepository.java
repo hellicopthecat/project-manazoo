@@ -52,6 +52,54 @@ public class JdbcIncomeExpendRepository {
 		return ie;
 	}
 
+	public IncomeExpend createInExReservation(IncomeExpend newIE, String id) {
+		IncomeExpend ie = null;
+		String sql = """
+				INSERT INTO income_expends
+				(id, amount, description, date, type, event_type,reservation_id)
+				VALUES (?,?,?,?,?,?,?)
+				""";
+		try (Connection conn = DatabaseConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, newIE.getId());
+			pstmt.setLong(2, newIE.getMoney());
+			pstmt.setString(3, newIE.getDesc());
+			pstmt.setDate(4, Date.valueOf(LocalDate.now()));
+			pstmt.setString(5, newIE.getIEType().name());
+			pstmt.setString(6, newIE.getEventType().name());
+			pstmt.setString(7, id);
+			pstmt.executeUpdate();
+			ie = newIE;
+		} catch (SQLException e) {
+			throw new RuntimeException("데이터베이스 저장에 실패했습니다. " + e.getMessage(), e);
+		}
+		return ie;
+	}
+
+	public IncomeExpend createInExSalary(IncomeExpend newIE, String id) {
+		IncomeExpend ie = null;
+		String sql = """
+				INSERT INTO income_expends
+				(id, amount, description, date, type, event_type, zookeeper_id)
+				VALUES (?,?,?,?,?,?,?)
+				""";
+		try (Connection conn = DatabaseConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, newIE.getId());
+			pstmt.setLong(2, newIE.getMoney());
+			pstmt.setString(3, newIE.getDesc());
+			pstmt.setDate(4, Date.valueOf(LocalDate.now()));
+			pstmt.setString(5, newIE.getIEType().name());
+			pstmt.setString(6, newIE.getEventType().name());
+			pstmt.setString(7, id);
+			pstmt.executeUpdate();
+			ie = newIE;
+		} catch (SQLException e) {
+			throw new RuntimeException("데이터베이스 저장에 실패했습니다. " + e.getMessage(), e);
+		}
+		return ie;
+	}
+
 	public List<IncomeExpend> getIncomeList() {
 		List<IncomeExpend> list = new ArrayList<>();
 		String sql = """
