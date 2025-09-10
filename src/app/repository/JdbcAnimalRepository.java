@@ -13,7 +13,6 @@ import app.animal.Animal;
 import app.common.SimpleLogger;
 import app.common.ui.MenuUtil;
 import app.config.DatabaseConnection;
-import app.enclosure.Enclosure;
 import app.repository.interfaces.AnimalRepository;
 import app.repository.jdbc.JdbcEnclosureRepository;
 
@@ -85,7 +84,6 @@ public class JdbcAnimalRepository implements AnimalRepository {
 					animals.add(animal);
 					connection.commit();
 				}
-				pstmt.close();
 				return animals;
 			}
 		} catch (SQLException e) {
@@ -130,7 +128,7 @@ public class JdbcAnimalRepository implements AnimalRepository {
 			}
 
 		} catch (SQLException e) {
-			throw new RuntimeException("사육장 개수 조회 중 오류 발생: " + e.getMessage(), e);
+			throw new RuntimeException("동물 마리수 조회 중 오류 발생: " + e.getMessage(), e);
 		}
 
 		return 0;
@@ -139,12 +137,13 @@ public class JdbcAnimalRepository implements AnimalRepository {
 	@Override
 	public Animal createAnimal(String id, String name, String species, int age, String gender, String healthStatus,
 			String enclosureId) {
+		String sql = """
+				INSERT INTO animals (id, name, species, age, gender, health_status, enclosure_id)
+				VALUES (?, ?, ?, ?, ?, ?, ?)
+				""";
+
 		try (Connection connection = DatabaseConnection.getConnection()) {
 			connection.setAutoCommit(false);
-			String sql = """
-					INSERT INTO animals (id, name, species, age, gender, health_status, enclosure_id)
-					VALUES (?, ?, ?, ?, ?, ?, ?)
-					""";
 
 			try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
 				pstmt.setString(1, id);
@@ -162,8 +161,12 @@ public class JdbcAnimalRepository implements AnimalRepository {
 				} else {
 					System.out.println(MenuUtil.DEFAULT_PREFIX + "동물 등록 실패!");
 				}
-				pstmt.close();
 				return animal;
+			} catch (Exception e) {
+				connection.rollback();
+				throw new RuntimeException("동물 저장 중 오류 발생: " + e.getMessage(), e);
+			} finally {
+				connection.setAutoCommit(true);
 			}
 		} catch (SQLException e) {
 			throw new RuntimeException("데이터베이스 연결 실패: " + e.getMessage(), e);
@@ -183,7 +186,6 @@ public class JdbcAnimalRepository implements AnimalRepository {
 				PreparedStatement stmt = connection.prepareStatement(sql)) {
 
 			stmt.setString(1, id);
-			Animal animal = null;
 
 			try (ResultSet rs = stmt.executeQuery()) {
 				if (rs.next()) {
@@ -194,140 +196,170 @@ public class JdbcAnimalRepository implements AnimalRepository {
 					String healthStatus = rs.getString(6);
 					String enclosureId = rs.getString(7);
 
-					animal = new Animal(id, name, species, age, gender, healthStatus, enclosureId);
+					return new Animal(id, name, species, age, gender, healthStatus, enclosureId);
+				} else {
+					return null;
 				}
-				stmt.close();
-				return animal;
 			}
+		} catch (SQLException e) {
+			throw new RuntimeException("동물 조회 중 오류 발생 (ID: " + id + "): " + e.getMessage(), e);
 		}
-
-	}catch(
-
-	SQLException e)
-	{
-		throw new RuntimeException("동물 조회 중 오류 발생 (ID: " + id + "): " + e.getMessage(), e);
-	}
 	}
 
 	@Override
 	public List<Animal> getAnimalsByName(String name) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public static List<Animal> getAnimalsByName(Connection connection, String name) throws SQLException {
 		List<Animal> animals = new ArrayList<>();
 
-		String sql = "select * from animals where name = ?";
-		PreparedStatement pstmt = connection.prepareStatement(sql);
-		pstmt.setString(1, name);
-		ResultSet rs = pstmt.executeQuery();
+		name = name.toLowerCase();
+		String sql = "SELECT * FROM animals WHERE LOWER(name) = LOWER(?)";
 
-		Animal animal = null;
+		try (Connection connection = DatabaseConnection.getConnection();
+				PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-		if (rs.next()) {
-			String id = rs.getString(1);
-			String species = rs.getString(3);
-			int age = rs.getInt(4);
-			String gender = rs.getString(5);
-			String healthStatus = rs.getString(6);
-			String enclosureId = rs.getString(7);
+			stmt.setString(1, name);
+			Animal animal = null;
 
-			animal = new Animal(id, name, species, age, gender, healthStatus, enclosureId);
-			animals.add(animal);
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					String id = rs.getString(1);
+					String species = rs.getString(3);
+					int age = rs.getInt(4);
+					String gender = rs.getString(5);
+					String healthStatus = rs.getString(6);
+					String enclosureId = rs.getString(7);
+
+					animal = new Animal(id, name, species, age, gender, healthStatus, enclosureId);
+					animals.add(animal);
+					return animals;
+				} else {
+					return new ArrayList<>();
+				}
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException("동물 조회 중 오류 발생 (Name: " + name + "): " + e.getMessage(), e);
 		}
-		pstmt.close();
-		return animals;
 	}
 
 	@Override
 	public List<Animal> getAnimalsBySpecies(String species) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public static List<Animal> getAnimalsBySpecies(Connection connection, String species) throws SQLException {
 		List<Animal> animals = new ArrayList<>();
 
-		String sql = "select * from animals where species = ?";
-		PreparedStatement pstmt = connection.prepareStatement(sql);
-		pstmt.setString(1, species);
-		ResultSet rs = pstmt.executeQuery();
+		String sql = "SELECT * FROM animals WHERE species = ?";
 
-		Animal animal = null;
+		try (Connection connection = DatabaseConnection.getConnection();
+				PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-		if (rs.next()) {
-			String id = rs.getString(1);
-			String name = rs.getString(2);
-			int age = rs.getInt(4);
-			String gender = rs.getString(5);
-			String healthStatus = rs.getString(6);
-			String enclosureId = rs.getString(7);
+			stmt.setString(1, species);
+			Animal animal = null;
 
-			animal = new Animal(id, name, species, age, gender, healthStatus, enclosureId);
-			animals.add(animal);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					String id = rs.getString(1);
+					String name = rs.getString(2);
+					int age = rs.getInt(4);
+					String gender = rs.getString(5);
+					String healthStatus = rs.getString(6);
+					String enclosureId = rs.getString(7);
+
+					animal = new Animal(id, name, species, age, gender, healthStatus, enclosureId);
+					animals.add(animal);
+				}
+				return animals;
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException("동물 조회 중 오류 발생 (Species: " + species + "): " + e.getMessage(), e);
 		}
-		pstmt.close();
-		return animals;
 	}
 
 	@Override
 	public Animal updateAnimal(String animalId, Animal animal) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+		// animalId 가 숫자로 들어온 경우 ==> 동물의 나이를 수정
+		if (isNumeric(animalId)) {
+			int age = Integer.parseInt(animalId);
+			String sql = "UPDATE animals SET age = ? WHERE id = ?";
 
-	public static Animal updateAnimal(Connection connection, Animal animal, int age) throws SQLException {
-		String sql = "update animals set age = ? where id = ?";
+			try (Connection connection = DatabaseConnection.getConnection()) {
+				connection.setAutoCommit(false);
 
-		PreparedStatement pstmt = connection.prepareStatement(sql);
-		pstmt.setInt(1, age);
-		pstmt.setString(2, animal.getId());
+				try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+					pstmt.setInt(1, age);
+					pstmt.setString(2, animal.getId());
 
-		if (pstmt.executeUpdate() == 1) {
-			animal.setAge(age);
+					if (pstmt.executeUpdate() == 1) {
+						animal.setAge(age);
+						connection.commit();
+					} else {
+						System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 실패했습니다.");
+					}
+					return animal;
+				} catch (Exception e) {
+					connection.rollback();
+					throw new RuntimeException("동물 수정 중 오류 발생: " + e.getMessage(), e);
+				} finally {
+					connection.setAutoCommit(true);
+				}
+			} catch (SQLException e) {
+				throw new RuntimeException("데이터베이스 연결 실패: " + e.getMessage(), e);
+			}
+
+			// animalId 가 String으로 들어온 경우 ==> 동물의 건강상태를 수정
 		} else {
-			System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 실패했습니다.");
+			String sql = "UPDATE animals SET health_status = ? WHERE id = ?";
+
+			try (Connection connection = DatabaseConnection.getConnection()) {
+				connection.setAutoCommit(false);
+
+				try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+					pstmt.setString(1, animalId);
+					pstmt.setString(2, animal.getId());
+
+					if (pstmt.executeUpdate() == 1) {
+						animal.setHealthStatus(animalId);
+						connection.commit();
+					} else {
+						System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 실패했습니다.");
+					}
+					return animal;
+				} catch (Exception e) {
+					connection.rollback();
+					throw new RuntimeException("동물 수정 중 오류 발생: " + e.getMessage(), e);
+				} finally {
+					connection.setAutoCommit(true);
+				}
+			} catch (SQLException e) {
+				throw new RuntimeException("데이터베이스 연결 실패: " + e.getMessage(), e);
+			}
 		}
-		pstmt.close();
-		return animal;
-	}
-
-	public static Animal updateAnimal(Connection connection, Animal animal, String healthStatus) throws SQLException {
-		String sql = "update animals set health_status = ? where id = ?";
-
-		PreparedStatement pstmt = connection.prepareStatement(sql);
-		pstmt.setString(1, healthStatus);
-		pstmt.setString(2, animal.getId());
-
-		if (pstmt.executeUpdate() == 1) {
-			animal.setHealthStatus(healthStatus);
-		} else {
-			System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 실패했습니다.");
-		}
-		pstmt.close();
-		return animal;
 	}
 
 	@Override
 	public boolean removeAnimal(String animalId) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public static void removeAnimal(Connection connection, String animalId) throws SQLException {
-		String sql = "delete from animals where id = ?";
-
-		PreparedStatement pstmt = connection.prepareStatement(sql);
-		pstmt.setString(1, animalId);
-
-		if (pstmt.executeUpdate() == 1) {
-
-		} else {
-
+		if (animalId == null) {
+			return false;
 		}
 
-		pstmt.close();
+		try (Connection connection = DatabaseConnection.getConnection()) {
+			connection.setAutoCommit(false);
+
+			try {
+				String sql = "DELETE FROM animals WHERE id = ?";
+
+				try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+					pstmt.setString(1, animalId);
+					int affected = pstmt.executeUpdate();
+
+					connection.commit();
+					return affected > 0;
+				}
+			} catch (Exception e) {
+				connection.rollback();
+				throw new RuntimeException("동물 삭제 중 오류 발생: " + e.getMessage(), e);
+			} finally {
+				connection.setAutoCommit(true);
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException("동물 삭제 중 데이터베이스 연결 실패: " + e.getMessage(), e);
+		}
 	}
 
 	@Override
@@ -370,6 +402,21 @@ public class JdbcAnimalRepository implements AnimalRepository {
 	public boolean isAnimalInEnclosure(String animalId, String enclosureId) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	// =================== 내부 헬퍼 메소드 ===================
+
+	// 입력받은 String 이 Int 로 변환 가능한지를 true/false 로 반환하는 메소드
+	private static boolean isNumeric(String str) {
+		if (str == null || str.isEmpty()) {
+			return false;
+		}
+		try {
+			Integer.parseInt(str);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 
 }
