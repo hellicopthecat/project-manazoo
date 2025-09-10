@@ -45,6 +45,13 @@ public interface AnimalRepository extends Repository<Animal, String> {
 	List<Animal> getAnimalList();
 
 	/**
+	 * 등록된 동물의 총 개수를 반환합니다.
+	 * 
+	 * @return 동물 개수
+	 */
+	long count();
+
+	/**
 	 * ID로 동물을 조회합니다.
 	 * 
 	 * @param id 동물 ID

@@ -180,7 +180,6 @@ public class MemoryAnimalRepository implements AnimalRepository {
 	 * @param gender       성별
 	 * @param healthStatus 건강 상태
 	 * @param enclosureId  사육장 ID
-	 * @param zkId         사육사 ID
 	 * @return 생성된 동물 객체
 	 */
 	@Override

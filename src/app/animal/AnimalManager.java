@@ -12,7 +12,7 @@ import app.common.ui.MenuUtil;
 import app.common.ui.TableUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
-import app.repository.JdbcAnimalRepository;
+import app.repository.jdbc.JdbcAnimalRepository;
 import app.repository.interfaces.AnimalRepository;
 
 public class AnimalManager {
@@ -20,7 +20,7 @@ public class AnimalManager {
 	 * 동물 데이터를 관리하는 Repository입니다. Singleton Repository를 사용하여 데이터 일관성을 보장합니다.
 	 */
 	private final AnimalRepository repository = JdbcAnimalRepository.getInstance();
-
+	
 	String id;
 	String name;
 	String species;
@@ -332,10 +332,10 @@ public class AnimalManager {
 	}
 
 	public void editAnimalAge(Animal animal) {
-		String changeAge = MenuUtil.Question.askTextInput("수정할 나이를 입력하세요.");
+			String changeAge = MenuUtil.Question.askTextInput("수정할 나이를 입력하세요.");
 		repository.updateAnimal(changeAge, animal);
-		System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
-		animal.showAnimal();
+			System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
+			animal.showAnimal();
 	}
 
 	public void editAnimalHealth(Animal animal) {
@@ -517,20 +517,6 @@ public class AnimalManager {
 			return enclosureId.equals(animalEnclosureId);
 		}
 		return false;
-	}
-
-	/**
-	 * AnimalManager의 인스턴스를 반환합니다. Singleton 패턴을 위한 메서드입니다.
-	 * 
-	 * @return AnimalManager 인스턴스
-	 */
-	private static AnimalManager instance = null;
-
-	public static AnimalManager getInstance() {
-		if (instance == null) {
-			instance = new AnimalManager();
-		}
-		return instance;
 	}
 
 }
