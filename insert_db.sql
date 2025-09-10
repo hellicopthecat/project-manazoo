@@ -47,7 +47,7 @@ INSERT INTO zoo_keepers (id, name, age, gender, department, rank_level, is_worki
 -- =============================================
 -- 4. Reservations Table
 -- =============================================
-INSERT INTO reservations (id, name, phone_number, visit_date, number_of_visitors, number_of_adults, number_of_childs, created_at) VALUES
+INSERT INTO reservations (id, name, phone_number, visit_date, number_of_visitors, number_of_adults, number_of_children, created_at) VALUES
 ('R-0001', 'Johnson Family', '555-1234-5678', '2024-03-15', 4, 2, 2, '2024-03-10 14:30:00'),
 ('R-0002', 'Smith Couple', '555-2345-6789', '2024-03-16', 2, 2, 0, '2024-03-11 16:20:00'),
 ('R-0003', 'Williams Group', '555-3456-7890', '2024-03-17', 8, 4, 4, '2024-03-12 10:15:00'),
@@ -190,7 +190,7 @@ SELECT
     COUNT(*) as reservation_count,
     SUM(number_of_visitors) as total_visitors,
     SUM(number_of_adults) as total_adults,
-    SUM(number_of_childs) as total_children
+    SUM(number_of_children) as total_children
 FROM reservations
 GROUP BY 
     CASE 

@@ -41,7 +41,7 @@ CREATE TABLE reservations (
     visit_date DATE NOT NULL,
     number_of_visitors INT NOT NULL DEFAULT 1,
     number_of_adults INT NOT NULL DEFAULT 1,
-    number_of_childs INT NOT NULL DEFAULT 0,
+    number_of_children INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
