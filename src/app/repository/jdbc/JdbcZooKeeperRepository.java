@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import app.config.DatabaseConnection;
-import app.incomeExpend.IncomeExpend;
 import app.zooKeeper.ZooKeeper;
 import app.zooKeeper.zooKeeperEnum.Department;
 import app.zooKeeper.zooKeeperEnum.Gender;
@@ -48,7 +47,11 @@ public class JdbcZooKeeperRepository {
 	 */
 	public ZooKeeper createZooKeeper(ZooKeeper zk) {
 		ZooKeeper newZk = null;
-		String sql = "INSERT INTO zoo_keepers (id, name, age, gender, department, rank_level, is_working, experience_year, can_handle_danger_animal, licenses) values (?,?,?,?,?,?,?,?,?,?)";
+		String sql = """
+				INSERT INTO zoo_keepers
+				(id, name, age, gender, department, rank_level, is_working, experience_year, can_handle_danger_animal, licenses)
+				VALUES (?,?,?,?,?,?,?,?,?,?)
+				""";
 		try (Connection connection = DatabaseConnection.getConnection();
 				PreparedStatement pstmt = connection.prepareStatement(sql);) {
 			pstmt.setString(1, zk.getId()); // id
@@ -76,7 +79,10 @@ public class JdbcZooKeeperRepository {
 	 */
 	public List<ZooKeeper> getZooKeeperListDB() {
 		List<ZooKeeper> zooKeepers = new ArrayList<>();
-		String sql = "SELECT * FROM zoo_keepers";
+		String sql = """
+				SELECT *
+				FROM zoo_keepers
+				""";
 		try (Connection connection = DatabaseConnection.getConnection();
 				Statement statement = connection.createStatement();
 				ResultSet resultset = statement.executeQuery(sql);) {
@@ -106,7 +112,11 @@ public class JdbcZooKeeperRepository {
 	 */
 	public ZooKeeper getZooKeeperByIdDB(String id) {
 		ZooKeeper zk = null;
-		String sql = "SELECT * FROM zoo_keepers WHERE id = ?";
+		String sql = """
+				SELECT *
+				FROM zoo_keepers
+				WHERE id = ?
+				""";
 		try (Connection connection = DatabaseConnection.getConnection();
 				PreparedStatement pstmt = connection.prepareStatement(sql);) {
 			pstmt.setString(1, id);
@@ -138,7 +148,11 @@ public class JdbcZooKeeperRepository {
 
 	public List<ZooKeeper> getZooKeeperByNameDB(String name) {
 		List<ZooKeeper> zkList = new ArrayList<>();
-		String sql = "SELECT * FROM zoo_keepers WHERE name = ?";
+		String sql = """
+				SELECT *
+				FROM zoo_keepers
+				WHERE name = ?
+				""";
 		try (Connection connection = DatabaseConnection.getConnection();
 				PreparedStatement pstmt = connection.prepareStatement(sql)) {
 			pstmt.setString(1, name);
@@ -155,7 +169,7 @@ public class JdbcZooKeeperRepository {
 				}
 			}
 		} catch (SQLException e) {
-			throw new RuntimeException("사육사를 가져오는데 실패했습니다." + e.getMessage(), e);
+			throw new RuntimeException("사육사리스트를 가져오는데 실패했습니다." + e.getMessage(), e);
 		}
 		return zkList;
 	}
@@ -168,7 +182,11 @@ public class JdbcZooKeeperRepository {
 	 */
 	public List<ZooKeeper> getZookeeperByDepartmentDB(int index) {
 		List<ZooKeeper> zooKeepers = new ArrayList<>();
-		String sql = "SELECT * FROM zoo_keepers WHERE department = ?";
+		String sql = """
+				SELECT *
+				FROM zoo_keepers
+				WHERE department = ?
+				""";
 		try (Connection connection = DatabaseConnection.getConnection();
 				PreparedStatement pstmt = connection.prepareStatement(sql)) {
 			Department d_enum = ZooKeeperConverter.departmentConverter(index);
@@ -186,7 +204,7 @@ public class JdbcZooKeeperRepository {
 				}
 			}
 		} catch (SQLException e) {
-			throw new RuntimeException("사육사를 가져오는데 실패했습니다." + e.getMessage(), e);
+			throw new RuntimeException("사육사리스트를 가져오는데 실패했습니다." + e.getMessage(), e);
 		}
 		return zooKeepers;
 	}
@@ -196,11 +214,15 @@ public class JdbcZooKeeperRepository {
 	 * 
 	 * @param targetId
 	 * @param index
-	 * @return int
+	 * @return boolean
 	 */
 	public boolean editIsWorkingDB(String targetId, int index) {
 		boolean success = false;
-		String sql = "UPDATE zoo_keeper SET is_working = ? WHERE id = ?";
+		String sql = """
+				UPDATE zoo_keepers
+				SET is_working = ?
+				WHERE id = ?
+				""";
 		try (Connection connection = DatabaseConnection.getConnection();
 				PreparedStatement pstmt = connection.prepareStatement(sql);) {
 			pstmt.setInt(1, index == 1 ? 1 : 0);
@@ -208,7 +230,7 @@ public class JdbcZooKeeperRepository {
 			int rows = pstmt.executeUpdate();
 			success = rows > 0;
 		} catch (SQLException e) {
-			throw new RuntimeException("사육사를 가져오는데 실패했습니다." + e.getMessage(), e);
+			throw new RuntimeException("사육사를 재직현황을 수정했습니다." + e.getMessage(), e);
 		}
 		return success;
 	}
@@ -218,11 +240,15 @@ public class JdbcZooKeeperRepository {
 	 * 
 	 * @param targetId
 	 * @param index
-	 * @return int
+	 * @return boolean
 	 */
 	public boolean editPermissionDangerAnimalDB(String targetId, int index) {
 		boolean success = false;
-		String sql = "UPDATE zoo_keeper SET can_handle_danger_animal = ? WHERE id = ?";
+		String sql = """
+				UPDATE zoo_keepers
+				SET can_handle_danger_animal = ?
+				WHERE id = ?
+				""";
 		try (Connection connection = DatabaseConnection.getConnection();
 				PreparedStatement pstmt = connection.prepareStatement(sql)) {
 			pstmt.setInt(1, index == 1 ? 1 : 0);
@@ -230,33 +256,32 @@ public class JdbcZooKeeperRepository {
 			int rows = pstmt.executeUpdate();
 			success = rows > 0;
 		} catch (SQLException e) {
-			throw new RuntimeException("사육사를 가져오는데 실패했습니다." + e.getMessage(), e);
+			throw new RuntimeException("위험동물관리여부 수정에 실패했습니다." + e.getMessage(), e);
 		}
 		return success;
 	}
 
 	/**
 	 * 사육사를 삭제하는 DB 메서드입니다.
+	 * 
 	 * @param targetId
-	 * @return 
+	 * @return boolean
 	 */
 	public boolean deleteZooKeeperDB(String targetId) {
 		boolean success = false;
-		String sql = "DELETE FROM zoo_keeper WHERE id = ?";
+		String sql = """
+				DELETE FROM zoo_keepers
+				WHERE id = ?
+				""";
 		try (Connection connection = DatabaseConnection.getConnection();
 				PreparedStatement pstmt = connection.prepareStatement(sql)) {
 			pstmt.setString(1, targetId);
 			int rows = pstmt.executeUpdate();
 			success = rows > 0;
 		} catch (SQLException e) {
-			throw new RuntimeException("사육사를 가져오는데 실패했습니다." + e.getMessage(), e);
+			throw new RuntimeException("사육사 삭제에 실패했습니다." + e.getMessage(), e);
 		}
 		return success;
-	}
-
-	public IncomeExpend createSalaryServiceDB(IncomeExpend ie) {
-		IncomeExpend newIe = null;
-		return newIe;
 	}
 
 	// Util Methods
