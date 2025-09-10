@@ -437,8 +437,8 @@ public final class ZooKeeperManager {
 		boolean isManager = jdbcRepository.checkManager(ids.getMyId());
 		if (isManager) {
 			int index = getValidateInt(null, "1. 재직, 2. 퇴사", 1, 2);
-			int success = jdbcRepository.editIsWorkingDB(ids.targetId, index);
-			if (success > 0) {
+			boolean success = jdbcRepository.editIsWorkingDB(ids.targetId, index);
+			if (success) {
 				UIUtil.printSeparator('━');
 				System.out.println(
 						MenuUtil.DEFAULT_PREFIX + "************************ 재직여부가 수정되었습니다. ************************");
@@ -478,8 +478,8 @@ public final class ZooKeeperManager {
 		boolean isManager = jdbcRepository.checkManager(ids.getMyId());
 		if (isManager) {
 			int index = getValidateInt(null, "1. 가능, 2. 불가능", 1, 2);
-			int success = jdbcRepository.editPermissionDangerAnimalDB(ids.targetId, index);
-			if (success > 0) {
+			boolean success = jdbcRepository.editPermissionDangerAnimalDB(ids.targetId, index);
+			if (success) {
 				UIUtil.printSeparator('━');
 				System.out.println(MenuUtil.DEFAULT_PREFIX
 						+ "************************ 위험동물관리여부가 수정되었습니다. ************************");
@@ -505,8 +505,8 @@ public final class ZooKeeperManager {
 		IdTracker ids = getIds();
 		boolean isManager = jdbcRepository.checkManager(ids.getMyId());
 		if (isManager) {
-			int success = jdbcRepository.deleteZooKeeperDB(ids.targetId);
-			if (success > 0) {
+			boolean success = jdbcRepository.deleteZooKeeperDB(ids.targetId);
+			if (success) {
 				UIUtil.printSeparator('━');
 				System.out.println(
 						MenuUtil.DEFAULT_PREFIX + "************************ 삭제되었습니다. ************************");

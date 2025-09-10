@@ -198,15 +198,15 @@ public class JdbcZooKeeperRepository {
 	 * @param index
 	 * @return int
 	 */
-	public int editIsWorkingDB(String targetId, int index) {
-		int success = 0;
+	public boolean editIsWorkingDB(String targetId, int index) {
+		boolean success = false;
 		String sql = "UPDATE zoo_keeper SET is_working = ? WHERE id = ?";
 		try (Connection connection = DatabaseConnection.getConnection();
 				PreparedStatement pstmt = connection.prepareStatement(sql);) {
 			pstmt.setInt(1, index == 1 ? 1 : 0);
 			pstmt.setString(2, targetId);
-			success = pstmt.executeUpdate();
-
+			int rows = pstmt.executeUpdate();
+			success = rows > 0;
 		} catch (SQLException e) {
 			throw new RuntimeException("사육사를 가져오는데 실패했습니다." + e.getMessage(), e);
 		}
@@ -220,14 +220,15 @@ public class JdbcZooKeeperRepository {
 	 * @param index
 	 * @return int
 	 */
-	public int editPermissionDangerAnimalDB(String targetId, int index) {
-		int success = 0;
+	public boolean editPermissionDangerAnimalDB(String targetId, int index) {
+		boolean success = false;
 		String sql = "UPDATE zoo_keeper SET can_handle_danger_animal = ? WHERE id = ?";
 		try (Connection connection = DatabaseConnection.getConnection();
 				PreparedStatement pstmt = connection.prepareStatement(sql)) {
 			pstmt.setInt(1, index == 1 ? 1 : 0);
 			pstmt.setString(2, targetId);
-			success = pstmt.executeUpdate();
+			int rows = pstmt.executeUpdate();
+			success = rows > 0;
 		} catch (SQLException e) {
 			throw new RuntimeException("사육사를 가져오는데 실패했습니다." + e.getMessage(), e);
 		}
@@ -239,13 +240,14 @@ public class JdbcZooKeeperRepository {
 	 * @param targetId
 	 * @return 
 	 */
-	public int deleteZooKeeperDB(String targetId) {
-		int success = 0;
+	public boolean deleteZooKeeperDB(String targetId) {
+		boolean success = false;
 		String sql = "DELETE FROM zoo_keeper WHERE id = ?";
 		try (Connection connection = DatabaseConnection.getConnection();
 				PreparedStatement pstmt = connection.prepareStatement(sql)) {
 			pstmt.setString(1, targetId);
-			success = pstmt.executeUpdate();
+			int rows = pstmt.executeUpdate();
+			success = rows > 0;
 		} catch (SQLException e) {
 			throw new RuntimeException("사육사를 가져오는데 실패했습니다." + e.getMessage(), e);
 		}
