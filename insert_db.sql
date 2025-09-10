@@ -71,16 +71,16 @@ INSERT INTO animals (id, name, species, age, gender, health_status, enclosure_id
 -- 6. Income/Expense Table
 -- =============================================
 INSERT INTO income_expends (id, amount, description, date, type, event_type, reservation_id, created_at) VALUES
-('I-0001', 32000, 'Johnson Family admission fee (2 adults, 2 children)', '2024-03-15', 'INCOME', 'FEE', 'R-0001', '2024-03-15 09:30:00'),
-('I-0002', 20000, 'Smith Couple admission fee (2 adults)', '2024-03-16', 'INCOME', 'FEE', 'R-0002', '2024-03-16 10:15:00'),
-('I-0003', 4500000, 'John Wildlife March salary', '2024-03-01', 'EXPENSE', 'EMPLOYEE_MONTH', NULL, '2024-03-01 09:00:00'),
-('I-0004', 3200000, 'Sarah Birdson March salary', '2024-03-01', 'EXPENSE', 'EMPLOYEE_MONTH', NULL, '2024-03-01 09:00:00'),
-('I-0005', 150000, 'Lion food supply purchase', '2024-03-05', 'EXPENSE', 'FOOD', NULL, '2024-03-05 14:20:00'),
-('I-0006', 64000, 'Williams Group admission fee (4 adults, 4 children)', '2024-03-17', 'INCOME', 'FEE', 'R-0003', '2024-03-17 11:30:00'),
-('I-0007', 350000, 'Lincoln Elementary School group admission (3 adults, 22 children)', '2024-03-18', 'INCOME', 'FEE', 'R-0004', '2024-03-18 13:45:00'),
-('I-0008', 120000, 'TechCorp Company admission fee (12 adults)', '2024-03-20', 'INCOME', 'FEE', 'R-0005', '2024-03-20 10:00:00'),
-('I-0009', 80000, 'Eagle medical treatment cost', '2024-03-10', 'EXPENSE', 'FOOD', NULL, '2024-03-10 16:30:00'),
-('I-0010', 200000, 'Enclosure maintenance expenses', '2024-03-12', 'EXPENSE', 'ENCLOSURE', NULL, '2024-03-12 15:45:00');
+('I-0001', 32000, 'Johnson Family admission fee (2 adults, 2 children)', '2024-03-15', 'INCOME', 'FEE', 'R-0001', NULL , '2024-03-15 09:30:00'),
+('I-0002', 20000, 'Smith Couple admission fee (2 adults)', '2024-03-16', 'INCOME', 'FEE', 'R-0002', NULL , '2024-03-16 10:15:00'),
+('I-0003', 4500000, 'John Wildlife March salary', '2024-03-01', 'EXPENSE', 'EMPLOYEE_MONTH', NULL, NULL , '2024-03-01 09:00:00'),
+('I-0004', 3200000, 'Sarah Birdson March salary', '2024-03-01', 'EXPENSE', 'EMPLOYEE_MONTH', NULL, NULL , '2024-03-01 09:00:00'),
+('I-0005', 150000, 'Lion food supply purchase', '2024-03-05', 'EXPENSE', 'FOOD', NULL, NULL , '2024-03-05 14:20:00'),
+('I-0006', 64000, 'Williams Group admission fee (4 adults, 4 children)', '2024-03-17', 'INCOME', 'FEE', 'R-0003', NULL , '2024-03-17 11:30:00'),
+('I-0007', 350000, 'Lincoln Elementary School group admission (3 adults, 22 children)', '2024-03-18', 'INCOME', 'FEE', 'R-0004', NULL , '2024-03-18 13:45:00'),
+('I-0008', 120000, 'TechCorp Company admission fee (12 adults)', '2024-03-20', 'INCOME', 'FEE', 'R-0005', NULL , '2024-03-20 10:00:00'),
+('I-0009', 80000, 'Eagle medical treatment cost', '2024-03-10', 'EXPENSE', 'FOOD', NULL, NULL , '2024-03-10 16:30:00'),
+('I-0010', 200000, 'Enclosure maintenance expenses', '2024-03-12', 'EXPENSE', 'ENCLOSURE', NULL, NULL , '2024-03-12 15:45:00');
 
 -- =============================================
 -- 7. Enclosure-Caretaker Relationships

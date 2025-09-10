@@ -1,16 +1,18 @@
 package app.zooKeeper;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import app.common.DatabaseIdGenerator;
-import app.common.IdGeneratorUtil;
 import app.common.InputUtil;
 import app.common.ui.MenuUtil;
 import app.common.ui.TableUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
 import app.finance.FinanceManager;
+import app.incomeExpend.IncomeExpend;
 import app.repository.interfaces.ZooKeeperRepository;
 import app.repository.jdbc.JdbcZooKeeperRepository;
 import app.repository.memory.MemoryZooKeeperRepository;
@@ -51,7 +53,7 @@ public final class ZooKeeperManager {
 	 * 초기 더미 데이터를 생성합니다.
 	 */
 	private ZooKeeperManager() {
-		initializeTestData();
+//		initializeTestData();
 	}
 
 	/**
@@ -78,38 +80,38 @@ public final class ZooKeeperManager {
 	 * 다양한 부서와 직급의 사육사들을 미리 등록하여 시스템 테스트를 위한 기본 환경을 구성합니다.
 	 * 운영 환경에서는 이 메서드를 제거하거나 설정으로 제어해야 합니다.
 	 */
-	private void initializeTestData() {
-		try {
-			// 관리자급 사육사 (높은 직급)
-			repository.createZooKeeper(IdGeneratorUtil.generateId(), "김관리", 35, 1, 5, 1, 1, 10, 1, "동물관리사,수의사");
-			repository.createZooKeeper(IdGeneratorUtil.generateId(), "박부장", 40, 2, 6, 2, 1, 15, 1, "동물관리사,안전관리사");
-
-			// 포유류 부서 사육사
-			repository.createZooKeeper(IdGeneratorUtil.generateId(), "이포유", 28, 2, 3, 1, 1, 5, 1, "동물관리사");
-
-			// 조류 부서 사육사
-			repository.createZooKeeper(IdGeneratorUtil.generateId(), "박조류", 32, 1, 4, 2, 1, 8, 1, "조류전문가,응급처치");
-
-			// 파충류 부서 사육사 (일부 휴직)
-			repository.createZooKeeper(IdGeneratorUtil.generateId(), "최파충", 26, 2, 2, 3, 2, 3, 2, "");
-
-			// 어류 부서 사육사
-			repository.createZooKeeper(IdGeneratorUtil.generateId(), "정어류", 30, 1, 3, 4, 1, 6, 1, "잠수자격증,수중작업");
-
-			// 교육 부서 사육사
-			repository.createZooKeeper(IdGeneratorUtil.generateId(), "한교육", 29, 2, 3, 8, 1, 4, 2, "교육지도사");
-
-			// 신입 사육사
-			repository.createZooKeeper(IdGeneratorUtil.generateId(), "신입수", 24, 1, 1, 1, 1, 1, 2, "동물관리사");
-
-			System.out.println("✅ 더미 사육사 데이터 8명이 성공적으로 생성되었습니다.");
-			System.out.println("   - 관리자: 2명, 중간직: 4명, 신입: 2명");
-
-		} catch (Exception e) {
-			System.err.println("❌ 더미 데이터 생성 중 오류 발생: " + e.getMessage());
-			e.printStackTrace();
-		}
-	}
+//	private void initializeTestData() {
+//		try {
+//			// 관리자급 사육사 (높은 직급)
+//			repository.createZooKeeper(IdGeneratorUtil.generateId(), "김관리", 35, 1, 5, 1, 1, 10, 1, "동물관리사,수의사");
+//			repository.createZooKeeper(IdGeneratorUtil.generateId(), "박부장", 40, 2, 6, 2, 1, 15, 1, "동물관리사,안전관리사");
+//
+//			// 포유류 부서 사육사
+//			repository.createZooKeeper(IdGeneratorUtil.generateId(), "이포유", 28, 2, 3, 1, 1, 5, 1, "동물관리사");
+//
+//			// 조류 부서 사육사
+//			repository.createZooKeeper(IdGeneratorUtil.generateId(), "박조류", 32, 1, 4, 2, 1, 8, 1, "조류전문가,응급처치");
+//
+//			// 파충류 부서 사육사 (일부 휴직)
+//			repository.createZooKeeper(IdGeneratorUtil.generateId(), "최파충", 26, 2, 2, 3, 2, 3, 2, "");
+//
+//			// 어류 부서 사육사
+//			repository.createZooKeeper(IdGeneratorUtil.generateId(), "정어류", 30, 1, 3, 4, 1, 6, 1, "잠수자격증,수중작업");
+//
+//			// 교육 부서 사육사
+//			repository.createZooKeeper(IdGeneratorUtil.generateId(), "한교육", 29, 2, 3, 8, 1, 4, 2, "교육지도사");
+//
+//			// 신입 사육사
+//			repository.createZooKeeper(IdGeneratorUtil.generateId(), "신입수", 24, 1, 1, 1, 1, 1, 2, "동물관리사");
+//
+//			System.out.println("✅ 더미 사육사 데이터 8명이 성공적으로 생성되었습니다.");
+//			System.out.println("   - 관리자: 2명, 중간직: 4명, 신입: 2명");
+//
+//		} catch (Exception e) {
+//			System.err.println("❌ 더미 데이터 생성 중 오류 발생: " + e.getMessage());
+//			e.printStackTrace();
+//		}
+//	}
 
 	// inner util methods
 	/**
@@ -233,18 +235,23 @@ public final class ZooKeeperManager {
 			// InMemory
 			// String id = IdGeneratorUtil.generateId();
 			String id = DatabaseIdGenerator.generateId();
-			/*
-			 * repository.createZooKeeper(id, name, age, genderIndex, rankIndex,
-			 * departmentIndex, isWorkingIndex, experienceYear, canHandleDangerAnimalIndex,
-			 * desc);
-			 */
-			jdbcRepository.createZooKeeper(id, name, age, genderIndex, rankIndex, departmentIndex, isWorkingIndex,
-					experienceYear, canHandleDangerAnimalIndex, desc);
+			ZooKeeper zk = new ZooKeeper(id, name, age, ZooKeeperConverter.genderConverter(genderIndex),
+					ZooKeeperConverter.rankConverter(rankIndex),
+					ZooKeeperConverter.departmentConverter(departmentIndex),
+					ZooKeeperConverter.workingConverter(isWorkingIndex), experienceYear,
+					ZooKeeperConverter.possibleImpossibleConverter(canHandleDangerAnimalIndex), stringListMaker(desc));
+			jdbcRepository.createZooKeeper(zk);
 			UIUtil.printSeparator('━');
 			System.out.println(MenuUtil.DEFAULT_PREFIX + "사육사가 등록되었습니다.");
 			UIUtil.printSeparator('━');
 			break;
 		}
+	}
+
+	private List<String> stringListMaker(String licenses) {
+		List<String> list = licenses != null && !licenses.isEmpty() ? Arrays.asList(licenses.split(","))
+				: new ArrayList<>();
+		return list;
 	}
 
 	/**
@@ -524,10 +531,25 @@ public final class ZooKeeperManager {
 	// 급여생성
 	private void createSalaryService() {
 		IdTracker ids = getIds();
-		long money = FinanceManager.getInstance().useMoney();
-		boolean ok = repository.setSalary(ids.getMyId(), ids.getTargetId(), money);
-		if (ok) {
-			System.out.println("************************ 급여가 생성 되었습니다. ************************");
+		boolean isManager = jdbcRepository.checkManager(ids.getMyId());
+		if (isManager) {
+			IncomeExpend ie = FinanceManager.getInstance().useMoneyForSalary(ids.targetId);
+			if (ie != null) {
+				UIUtil.printSeparator('━');
+				System.out.println(
+						MenuUtil.DEFAULT_PREFIX + "************************ 급여가 생성되었습니다. ************************");
+				UIUtil.printSeparator('━');
+			} else {
+				UIUtil.printSeparator('━');
+				System.out.println(
+						MenuUtil.DEFAULT_PREFIX + "************************ 급여 생성에 실패했습니다. ************************");
+				UIUtil.printSeparator('━');
+			}
+		} else {
+			UIUtil.printSeparator('━');
+			System.out.println(
+					MenuUtil.DEFAULT_PREFIX + "************************ 당신은 매니저가 아닙니다. ************************");
+			UIUtil.printSeparator('━');
 		}
 	}
 

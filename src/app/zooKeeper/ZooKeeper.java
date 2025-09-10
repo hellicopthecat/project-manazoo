@@ -73,6 +73,14 @@ public class ZooKeeper implements ZooKeeperBasicBehavior {
 		return age;
 	}
 
+	public int getExperienceYear() {
+		return experienceYear;
+	}
+
+	public long getSalary() {
+		return salary;
+	}
+
 	public void setAge(int age) {
 		this.age = age;
 	}

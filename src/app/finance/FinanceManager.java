@@ -85,51 +85,87 @@ public final class FinanceManager {
 	 * 
 	 * @return money
 	 */
-	public Long useMoney() {
+	public IncomeExpend useMoney() {
 		while (true) {
-			// 수입/지출
-			UIUtil.printSeparator('━');
-			System.out.println(MenuUtil.DEFAULT_PREFIX + "1: 수입 , 2: 지출");
-			System.out.println(MenuUtil.DEFAULT_PREFIX + "수입 지출 구분 번호를 입력하세요 ▶");
-			int ieNum = InputUtil.getIntInput();
-			// 수입/지출 타입변환
-			IncomeExpendType ieType = IEConverter.IETypeConverter(ieNum);
-
-			// 이벤트
-			System.out.println(
-					MenuUtil.DEFAULT_PREFIX + "1: 입장료, 2: 사파리, 3: 아쿠아쇼, 4:체험, 5: 식비, 6: 사육장, 7: 직원월급, 8: 직원수당");
-			System.out.println();
-			System.out.println(MenuUtil.DEFAULT_PREFIX + "이벤트 종류 번호를 입력하세요 ▶");
-			// 이벤트 타입변환
-			int eventNum = InputUtil.getIntInput();
-			EventType eventType = IEConverter.eventTypeConverter(eventNum);
-
-			// 금액 작성
-			System.out.println();
-			System.out.println(MenuUtil.DEFAULT_PREFIX + "금액을 입력하세요 ▶");
-			long money = InputUtil.getLongInput();
-
-			// 설명작성
-			System.out.println();
-			System.out.println(MenuUtil.DEFAULT_PREFIX + "설명을 작성하세요 ▶");
-			String desc = InputUtil.getStringInput();
-
-//			String id = IdGeneratorUtil.generateId();
-			String id = DatabaseIdGenerator.generateId();
-			IncomeExpend ie = new IncomeExpend(id, money, desc, ieType, eventType);
+			IncomeExpend ie = useMoneyQuestions();
 			IncomeExpend inex = jdbcIERepository.createIncomeExpend(ie);
 			if (inex != null) {
 				System.out.println();
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서가 작성되었습니다.");
 				System.out.println();
-				return money;
+				return inex;
 			} else {
 				System.out.println();
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서 작성이 실패했습니다.");
 				System.out.println();
 			}
 		}
-		// 수입일 경우
+	}
+
+	public IncomeExpend useMoneyForSalary(String targetId) {
+		while (true) {
+			IncomeExpend ie = useMoneyQuestions();
+			IncomeExpend inex = jdbcIERepository.createInExSalary(ie, targetId);
+			if (inex != null) {
+				System.out.println();
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서가 작성되었습니다.");
+				System.out.println();
+				return inex;
+			} else {
+				System.out.println();
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서 작성이 실패했습니다.");
+				System.out.println();
+			}
+		}
+	}
+
+	public IncomeExpend useMoneyForReservation(String targetId) {
+		while (true) {
+			IncomeExpend ie = useMoneyQuestions();
+			IncomeExpend inex = jdbcIERepository.createInExReservation(ie, targetId);
+			if (inex != null) {
+				System.out.println();
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서가 작성되었습니다.");
+				System.out.println();
+				return inex;
+			} else {
+				System.out.println();
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서 작성이 실패했습니다.");
+				System.out.println();
+			}
+		}
+	}
+
+	private IncomeExpend useMoneyQuestions() {
+		// 수입/지출
+		UIUtil.printSeparator('━');
+		System.out.println(MenuUtil.DEFAULT_PREFIX + "1: 수입 , 2: 지출");
+		System.out.println(MenuUtil.DEFAULT_PREFIX + "수입 지출 구분 번호를 입력하세요 ▶");
+		int ieNum = InputUtil.getIntInput();
+		// 수입/지출 타입변환
+		IncomeExpendType ieType = IEConverter.IETypeConverter(ieNum);
+
+		// 이벤트
+		System.out.println(MenuUtil.DEFAULT_PREFIX + "1: 입장료, 2: 사파리, 3: 아쿠아쇼, 4:체험, 5: 식비, 6: 사육장, 7: 직원월급, 8: 직원수당");
+		System.out.println();
+		System.out.println(MenuUtil.DEFAULT_PREFIX + "이벤트 종류 번호를 입력하세요 ▶");
+		// 이벤트 타입변환
+		int eventNum = InputUtil.getIntInput();
+		EventType eventType = IEConverter.eventTypeConverter(eventNum);
+
+		// 금액 작성
+		System.out.println();
+		System.out.println(MenuUtil.DEFAULT_PREFIX + "금액을 입력하세요 ▶");
+		long money = InputUtil.getLongInput();
+
+		// 설명작성
+		System.out.println();
+		System.out.println(MenuUtil.DEFAULT_PREFIX + "설명을 작성하세요 ▶");
+		String desc = InputUtil.getStringInput();
+
+		String id = DatabaseIdGenerator.generateId();
+		IncomeExpend ie = new IncomeExpend(id, money, desc, ieType, eventType);
+		return ie;
 	}
 
 	/**
