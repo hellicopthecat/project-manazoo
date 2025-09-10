@@ -210,7 +210,7 @@ public final class FinanceManager {
 	 * 지출 내역 리스트 
 	 */
 	private void getExpendList() {
-		List<IncomeExpend> el = jdbcIERepository.getExpendList();
+		List<IncomeExpend> el = jdbcIERepository.getExpenseList();
 		inexTable(el, false);
 	}
 
@@ -285,7 +285,7 @@ public final class FinanceManager {
 	 * @return 지출 리스트 합계 (없으면 0 반환)
 	 */
 	private Long getTotalExpends() {
-		List<IncomeExpend> il = jdbcIERepository.getExpendList();
+		List<IncomeExpend> il = jdbcIERepository.getExpenseList();
 		il.stream().map(ie -> ie.money).reduce(0l, (x, y) -> x + y);
 		return il.stream().map(ie -> ie.money).reduce(0l, (x, y) -> x + y);
 	}

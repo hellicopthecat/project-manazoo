@@ -17,6 +17,7 @@ import app.incomeExpend.IncomeExpend;
 import app.incomeExpend.IncomeExpendType;
 
 public class JdbcIncomeExpendRepository {
+
 	private JdbcIncomeExpendRepository() {
 
 	}
@@ -31,7 +32,11 @@ public class JdbcIncomeExpendRepository {
 
 	public int createInEx(String id, long amount, String desc, int ieType, int eventNum) {
 		int success = 0;
-		String sql = "INSERT INTO(id, amount, description, date, type, event_type) income_expends VALUES (?,?,?,?,?,?)";
+		String sql = """
+				INSERT INTO income_expends
+				(id, amount, description, date, type, event_type)
+				VALUES (?,?,?,?,?,?)
+				""";
 		try (Connection conn = DatabaseConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setString(1, id);
@@ -51,13 +56,12 @@ public class JdbcIncomeExpendRepository {
 		List<IncomeExpend> list = new ArrayList<>();
 		String sql = """
 				SELECT *
-				FROM income_expend
-				WHERE type = INCOME
+				FROM income_expends
+				WHERE type = 'INCOME'
 				""";
 		try (Connection conn = DatabaseConnection.getConnection();
 				Statement stmt = conn.createStatement();
 				ResultSet resultset = stmt.executeQuery(sql)) {
-
 			while (resultset.next()) {
 				IncomeExpend ie = new IncomeExpend(resultset.getString("id"), resultset.getLong("amount"),
 						resultset.getString("description"), IncomeExpendType.valueOf(resultset.getString("type")),
@@ -70,17 +74,16 @@ public class JdbcIncomeExpendRepository {
 		return list;
 	}
 
-	public List<IncomeExpend> getExpendList() {
+	public List<IncomeExpend> getExpenseList() {
 		List<IncomeExpend> list = new ArrayList<>();
 		String sql = """
 				SELECT *
-				FROM income_expend
-				WHERE type = EXPEND
+				FROM income_expends
+				WHERE type = 'EXPENSE'
 				""";
 		try (Connection conn = DatabaseConnection.getConnection();
 				Statement stmt = conn.createStatement();
 				ResultSet resultset = stmt.executeQuery(sql)) {
-
 			while (resultset.next()) {
 				IncomeExpend ie = new IncomeExpend(resultset.getString("id"), resultset.getLong("amount"),
 						resultset.getString("description"), IncomeExpendType.valueOf(resultset.getString("type")),
