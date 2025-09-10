@@ -116,19 +116,9 @@ public final class FinanceManager {
 
 //			String id = IdGeneratorUtil.generateId();
 			String id = DatabaseIdGenerator.generateId();
-			// 수입/지출 객체 생성
-			if (ieType == IncomeExpendType.INCOME) {
-				// 자본증가
-				capital += money;
-				// Repository를 통한 데이터 저장
-			} else {
-				// 지출일경우
-				// 자본감소
-				capital -= money;
-				// Repository를 통한 데이터 저장
-			}
-			int inex = jdbcIERepository.createInEx(id, money, desc, ieNum, eventNum);
-			if (inex > 0) {
+			IncomeExpend ie = new IncomeExpend(id, money, desc, ieType, eventType);
+			IncomeExpend inex = jdbcIERepository.createIncomeExpend(ie);
+			if (inex != null) {
 				System.out.println();
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서가 작성되었습니다.");
 				System.out.println();
@@ -189,10 +179,10 @@ public final class FinanceManager {
 			for (int i = 0; i < inex.size(); i++) {
 				IncomeExpend income = inex.get(i);
 				data[i][0] = income.getId();
-				data[i][1] = IEConverter.IETypeStringConverter(income.IEType);
-				data[i][2] = IEConverter.eventTypeStringConverter(income.eventType);
-				data[i][3] = income.money + "";
-				data[i][4] = income.desc;
+				data[i][1] = IEConverter.IETypeStringConverter(income.getIEType());
+				data[i][2] = IEConverter.eventTypeStringConverter(income.getEventType());
+				data[i][3] = income.getMoney() + "";
+				data[i][4] = income.getDesc();
 			}
 			TableUtil.printTable(title, headers, data);
 		}
@@ -210,7 +200,7 @@ public final class FinanceManager {
 	 * 지출 내역 리스트 
 	 */
 	private void getExpendList() {
-		List<IncomeExpend> el = jdbcIERepository.getExpenseList();
+		List<IncomeExpend> el = jdbcIERepository.getExpendList();
 		inexTable(el, false);
 	}
 
@@ -261,9 +251,7 @@ public final class FinanceManager {
 	 * @return 수입 리스트 합계 (없으면 0 반환)
 	 */
 	private Long getTotalIncomes() {
-		List<IncomeExpend> il = jdbcIERepository.getIncomeList();
-		il.stream().map(ie -> ie.money).reduce(0l, (x, y) -> x + y);
-		return il.stream().map(ie -> ie.money).reduce(0l, (x, y) -> x + y);
+		return jdbcIERepository.getTotalIncomes();
 	}
 
 	/**
@@ -285,9 +273,7 @@ public final class FinanceManager {
 	 * @return 지출 리스트 합계 (없으면 0 반환)
 	 */
 	private Long getTotalExpends() {
-		List<IncomeExpend> il = jdbcIERepository.getExpenseList();
-		il.stream().map(ie -> ie.money).reduce(0l, (x, y) -> x + y);
-		return il.stream().map(ie -> ie.money).reduce(0l, (x, y) -> x + y);
+		return jdbcIERepository.getTotalExpends();
 	}
 
 	/**

@@ -12,7 +12,6 @@ import java.util.List;
 
 import app.config.DatabaseConnection;
 import app.incomeExpend.EventType;
-import app.incomeExpend.IEConverter;
 import app.incomeExpend.IncomeExpend;
 import app.incomeExpend.IncomeExpendType;
 
@@ -30,8 +29,8 @@ public class JdbcIncomeExpendRepository {
 		return SingletonHolder.INSTANCE;
 	}
 
-	public int createInEx(String id, long amount, String desc, int ieType, int eventNum) {
-		int success = 0;
+	public IncomeExpend createIncomeExpend(IncomeExpend newIE) {
+		IncomeExpend ie = null;
 		String sql = """
 				INSERT INTO income_expends
 				(id, amount, description, date, type, event_type)
@@ -39,17 +38,18 @@ public class JdbcIncomeExpendRepository {
 				""";
 		try (Connection conn = DatabaseConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql)) {
-			pstmt.setString(1, id);
-			pstmt.setLong(2, amount);
-			pstmt.setString(3, desc);
+			pstmt.setString(1, newIE.getId());
+			pstmt.setLong(2, newIE.getMoney());
+			pstmt.setString(3, newIE.getDesc());
 			pstmt.setDate(4, Date.valueOf(LocalDate.now()));
-			pstmt.setString(5, IEConverter.IETypeConverter(ieType).name());
-			pstmt.setString(6, IEConverter.eventTypeConverter(eventNum).name());
-			success = pstmt.executeUpdate();
+			pstmt.setString(5, newIE.getIEType().name());
+			pstmt.setString(6, newIE.getEventType().name());
+			pstmt.executeUpdate();
+			ie = newIE;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return success;
+		return ie;
 	}
 
 	public List<IncomeExpend> getIncomeList() {
@@ -74,7 +74,7 @@ public class JdbcIncomeExpendRepository {
 		return list;
 	}
 
-	public List<IncomeExpend> getExpenseList() {
+	public List<IncomeExpend> getExpendList() {
 		List<IncomeExpend> list = new ArrayList<>();
 		String sql = """
 				SELECT *
@@ -94,5 +94,45 @@ public class JdbcIncomeExpendRepository {
 			e.printStackTrace();
 		}
 		return list;
+	}
+
+	public Long getTotalIncomes() {
+		String sql = """
+				SELECT SUM(amount) AS total
+				FROM income_expends
+				WHERE type = 'INCOME'
+				""";
+		try (Connection conn = DatabaseConnection.getConnection();
+				Statement stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery(sql)) {
+
+			if (rs.next()) {
+				// NULL 처리: 수입이 하나도 없으면 SUM 결과가 NULL이므로 0L로 반환
+				return rs.getLong("total");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0L;
+	}
+
+	public Long getTotalExpends() {
+		String sql = """
+				SELECT SUM(amount) AS total
+				FROM income_expends
+				WHERE type = 'EXPENSE'
+				""";
+		try (Connection conn = DatabaseConnection.getConnection();
+				Statement stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery(sql)) {
+
+			if (rs.next()) {
+				// NULL 처리: 수입이 하나도 없으면 SUM 결과가 NULL이므로 0L로 반환
+				return rs.getLong("total");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0L;
 	}
 }

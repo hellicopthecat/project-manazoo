@@ -184,7 +184,7 @@ public class MemoryIncomeExpendRepository implements IncomeExpendRepository {
 	 */
 	@Override
 	public List<IncomeExpend> getIncomeList() {
-		return storage.values().stream().filter(ie -> ie.IEType == IncomeExpendType.INCOME)
+		return storage.values().stream().filter(ie -> ie.getIEType() == IncomeExpendType.INCOME)
 				.collect(Collectors.toList());
 	}
 
@@ -195,7 +195,7 @@ public class MemoryIncomeExpendRepository implements IncomeExpendRepository {
 	 */
 	@Override
 	public List<IncomeExpend> getExpendList() {
-		return storage.values().stream().filter(ie -> ie.IEType == IncomeExpendType.EXPENSE)
+		return storage.values().stream().filter(ie -> ie.getIEType() == IncomeExpendType.EXPENSE)
 				.collect(Collectors.toList());
 	}
 
@@ -206,7 +206,7 @@ public class MemoryIncomeExpendRepository implements IncomeExpendRepository {
 	 */
 	@Override
 	public Long getTotalIncomes() {
-		return getIncomeList().stream().mapToLong(ie -> ie.money).sum();
+		return getIncomeList().stream().mapToLong(ie -> ie.getMoney()).sum();
 	}
 
 	/**
@@ -216,6 +216,6 @@ public class MemoryIncomeExpendRepository implements IncomeExpendRepository {
 	 */
 	@Override
 	public Long getTotalExpends() {
-		return getExpendList().stream().mapToLong(ie -> ie.money).sum();
+		return getExpendList().stream().mapToLong(ie -> ie.getMoney()).sum();
 	}
 }
