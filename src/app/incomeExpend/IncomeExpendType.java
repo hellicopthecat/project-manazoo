@@ -7,5 +7,5 @@ package app.incomeExpend;
  * - 수입(INCOME) 또는 지출(EXPEND)
  */
 public enum IncomeExpendType {
-	INCOME, EXPEND
+	INCOME, EXPENSE
 }

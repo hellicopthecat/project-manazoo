@@ -53,7 +53,7 @@ public class IEConverter {
 	public static IncomeExpendType IETypeConverter(int ieNum) {
 		IncomeExpendType ieType = switch (ieNum) {
 		case 1 -> IncomeExpendType.INCOME;
-		case 2 -> IncomeExpendType.EXPEND;
+		case 2 -> IncomeExpendType.EXPENSE;
 		default -> null;
 		};
 		return ieType;
@@ -68,7 +68,7 @@ public class IEConverter {
 	public static String IETypeStringConverter(IncomeExpendType spendType) {
 		String convert = switch (spendType) {
 		case INCOME -> "Income";
-		case EXPEND -> "Expend";
+		case EXPENSE -> "Expense";
 		default -> null;
 		};
 		return convert;
