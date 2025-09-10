@@ -47,7 +47,7 @@ public class JdbcIncomeExpendRepository {
 			pstmt.executeUpdate();
 			ie = newIE;
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new RuntimeException("데이터베이스 저장에 실패했습니다. " + e.getMessage(), e);
 		}
 		return ie;
 	}
@@ -69,7 +69,7 @@ public class JdbcIncomeExpendRepository {
 				list.add(ie);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new RuntimeException("데이터를 불러오는데 오류가 발생했습니다." + e.getMessage(), e);
 		}
 		return list;
 	}
@@ -91,7 +91,7 @@ public class JdbcIncomeExpendRepository {
 				list.add(ie);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new RuntimeException("데이터를 불러오는데 오류가 발생했습니다." + e.getMessage(), e);
 		}
 		return list;
 	}
@@ -111,7 +111,7 @@ public class JdbcIncomeExpendRepository {
 				return rs.getLong("total");
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new RuntimeException("데이터를 처리하는데 오류가 발생했습니다." + e.getMessage(), e);
 		}
 		return 0L;
 	}
@@ -131,7 +131,7 @@ public class JdbcIncomeExpendRepository {
 				return rs.getLong("total");
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new RuntimeException("데이터를 처리하는데 오류가 발생했습니다." + e.getMessage(), e);
 		}
 		return 0L;
 	}
