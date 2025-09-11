@@ -12,8 +12,8 @@ import app.common.ui.MenuUtil;
 import app.common.ui.TableUtil;
 import app.common.ui.TextArtUtil;
 import app.common.ui.UIUtil;
-import app.repository.JdbcAnimalRepository;
 import app.repository.interfaces.AnimalRepository;
+import app.repository.jdbc.JdbcAnimalRepository;
 
 public class AnimalManager {
 	/**
@@ -137,7 +137,7 @@ public class AnimalManager {
 		}
 		default -> System.out.println();
 		}
-		return null;
+		return "";
 	}
 
 	public String inputAnimalGender(String question) {
@@ -148,7 +148,7 @@ public class AnimalManager {
 		} else if (inGender == 2) {
 			return "Female";
 		}
-		return null;
+		return "";
 	}
 
 	public String inputAnimalHealth(String question) {
@@ -161,7 +161,7 @@ public class AnimalManager {
 		} else if (inHealth == 3) {
 			return "Poor";
 		}
-		return null;
+		return "";
 	}
 
 	// << 2. 동물 조회 >>

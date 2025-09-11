@@ -24,3 +24,4 @@ desktop.ini
 config/database.properties
 config/database-*.properties
 !config/database.properties.template
+/bin1/

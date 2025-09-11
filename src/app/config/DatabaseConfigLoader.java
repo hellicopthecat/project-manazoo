@@ -86,7 +86,7 @@ public class DatabaseConfigLoader {
     }
     
     public String getPassword() {
-        return properties.getProperty("db.password", "1111");
+        return properties.getProperty("db.password", "rla1028812");
     }
     
     public String getServerTimezone() {

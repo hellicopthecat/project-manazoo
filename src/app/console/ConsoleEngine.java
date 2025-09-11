@@ -18,8 +18,6 @@ import app.zooKeeper.ZooKeeperManager;
 public class ConsoleEngine {
 	/**
 	 * 애플리케이션을 시작합니다. 로딩 애니메이션 후 메인 메뉴로 진입합니다.
-	 * 
-	 * @throws SQLException
 	 */
 	public static void start() {
 		TextArtUtil.printLoadingAnimation();
@@ -28,8 +26,6 @@ public class ConsoleEngine {
 
 	/**
 	 * 접속 방식 선택 메뉴를 표시하고 처리합니다. 관리자 모드와 관람객 모드 중 선택할 수 있습니다.
-	 * 
-	 * @throws SQLException
 	 */
 	private static void showAccessMenu() {
 		while (true) {
@@ -57,8 +53,6 @@ public class ConsoleEngine {
 
 	/**
 	 * 관리자 모드를 처리합니다. 동물 관리, 사육장 관리, 직원 관리 메뉴를 제공합니다.
-	 * 
-	 * @throws SQLException
 	 */
 	private static void handleAdminMode() {
 		System.out.println(MenuUtil.DEFAULT_PREFIX + "관리자 모드로 접속합니다...");
@@ -70,8 +64,6 @@ public class ConsoleEngine {
 
 	/**
 	 * 관리자 메뉴를 표시하고 처리합니다.
-	 * 
-	 * @throws SQLException
 	 */
 	private static void showAdminMenu() {
 
@@ -107,8 +99,6 @@ public class ConsoleEngine {
 
 	/**
 	 * 동물 관리 기능을 처리합니다.
-	 * 
-	 * @throws SQLException
 	 */
 	private static void handleAnimalManagement() {
 		AnimalManager manager = new AnimalManager();
