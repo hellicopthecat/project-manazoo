@@ -175,7 +175,35 @@ public class JdbcAnimalRepository implements AnimalRepository {
 
 	@Override
 	public List<Animal> getAnimalList() {
-		return null;
+		List<Animal> animals = new ArrayList<>();
+		String sql = "SELECT * FROM animals";
+		
+		try (Connection connection = DatabaseConnection.getConnection();
+			 PreparedStatement pstmt = connection.prepareStatement(sql);
+			 ResultSet rs = pstmt.executeQuery()) {
+			
+			while (rs.next()) {
+				String id = rs.getString(1);
+				String name = rs.getString(2);
+				String species = rs.getString(3);
+				int age = rs.getInt(4);
+				String gender = rs.getString(5);
+				String healthStatus = rs.getString(6);
+				String enclosureId = rs.getString(7);
+
+				Animal animal = new Animal(id, name, species, age, gender, healthStatus, enclosureId);
+				animals.add(animal);
+			}
+			
+			logger.debug("총 {}마리의 동물을 조회했습니다.", animals.size());
+			
+		} catch (SQLException e) {
+			logger.error("동물 목록 조회 중 오류 발생", e);
+			// 예외 발생 시에도 빈 리스트 반환 (null 방지)
+		}
+		
+		// 항상 빈 리스트라도 반환하여 null 방지
+		return animals;
 	}
 
 	@Override
@@ -208,67 +236,80 @@ public class JdbcAnimalRepository implements AnimalRepository {
 
 	@Override
 	public List<Animal> getAnimalsByName(String name) {
+		if (name == null) {
+			return new ArrayList<>();
+		}
+		
 		List<Animal> animals = new ArrayList<>();
-
-		name = name.toLowerCase();
 		String sql = "SELECT * FROM animals WHERE LOWER(name) = LOWER(?)";
 
 		try (Connection connection = DatabaseConnection.getConnection();
 				PreparedStatement stmt = connection.prepareStatement(sql)) {
 
 			stmt.setString(1, name);
-			Animal animal = null;
 
 			try (ResultSet rs = stmt.executeQuery()) {
-				if (rs.next()) {
+				while (rs.next()) {
 					String id = rs.getString(1);
+					String animalName = rs.getString(2);
 					String species = rs.getString(3);
 					int age = rs.getInt(4);
 					String gender = rs.getString(5);
 					String healthStatus = rs.getString(6);
 					String enclosureId = rs.getString(7);
 
-					animal = new Animal(id, name, species, age, gender, healthStatus, enclosureId);
+					Animal animal = new Animal(id, animalName, species, age, gender, healthStatus, enclosureId);
 					animals.add(animal);
-					return animals;
-				} else {
-					return new ArrayList<>();
 				}
 			}
+			
+			logger.debug("이름이 '{}'인 동물 {}마리를 조회했습니다.", name, animals.size());
+			
 		} catch (SQLException e) {
-			throw new RuntimeException("동물 조회 중 오류 발생 (Name: " + name + "): " + e.getMessage(), e);
+			logger.error("이름으로 동물 조회 중 오류 발생: " + name, e);
+			// 예외 발생 시에도 빈 리스트 반환
 		}
+		
+		return animals;
 	}
 
 	@Override
 	public List<Animal> getAnimalsBySpecies(String species) {
+		if (species == null) {
+			return new ArrayList<>();
+		}
+		
 		List<Animal> animals = new ArrayList<>();
-
 		String sql = "SELECT * FROM animals WHERE species = ?";
 
 		try (Connection connection = DatabaseConnection.getConnection();
 				PreparedStatement stmt = connection.prepareStatement(sql)) {
 
 			stmt.setString(1, species);
-			Animal animal = null;
 
 			try (ResultSet rs = stmt.executeQuery()) {
 				while (rs.next()) {
 					String id = rs.getString(1);
 					String name = rs.getString(2);
+					String animalSpecies = rs.getString(3);
 					int age = rs.getInt(4);
 					String gender = rs.getString(5);
 					String healthStatus = rs.getString(6);
 					String enclosureId = rs.getString(7);
 
-					animal = new Animal(id, name, species, age, gender, healthStatus, enclosureId);
+					Animal animal = new Animal(id, name, animalSpecies, age, gender, healthStatus, enclosureId);
 					animals.add(animal);
 				}
-				return animals;
 			}
+			
+			logger.debug("종류가 '{}'인 동물 {}마리를 조회했습니다.", species, animals.size());
+			
 		} catch (SQLException e) {
-			throw new RuntimeException("동물 조회 중 오류 발생 (Species: " + species + "): " + e.getMessage(), e);
+			logger.error("종별 동물 조회 중 오류 발생: " + species, e);
+			// 예외 발생 시에도 빈 리스트 반환
 		}
+		
+		return animals;
 	}
 
 	@Override

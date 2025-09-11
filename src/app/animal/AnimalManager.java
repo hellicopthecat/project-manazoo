@@ -396,8 +396,17 @@ public class AnimalManager {
 	 */
 	public boolean hasAvailableAnimals() {
 		List<Animal> allAnimals = repository.getAnimalList();
+		
+		// 이중 방어: Repository 구현체에서 예외적으로 null을 반환할 가능성에 대비
+		if (allAnimals == null) {
+			return false;
+		}
+		
 		return allAnimals.stream()
-				.anyMatch(animal -> animal.getEnclosureId() == null || animal.getEnclosureId().trim().isEmpty());
+				.anyMatch(animal -> {
+					String enclosureId = animal.getEnclosureId();
+					return enclosureId == null || enclosureId.trim().isEmpty();
+				});
 	}
 
 	/**
@@ -419,10 +428,18 @@ public class AnimalManager {
 	 */
 	public Map<String, Animal> getAvailableAnimals() {
 		List<Animal> allAnimals = repository.getAnimalList();
-		return allAnimals.stream().filter(animal -> {
-			String enclosureId = animal.getEnclosureId();
-			return enclosureId == null || enclosureId.trim().isEmpty();
-		}).collect(Collectors.toMap(Animal::getId, animal -> animal));
+		
+		// 이중 방어: null 체크
+		if (allAnimals == null) {
+			return new HashMap<>();
+		}
+		
+		return allAnimals.stream()
+				.filter(animal -> {
+					String enclosureId = animal.getEnclosureId();
+					return enclosureId == null || enclosureId.trim().isEmpty();
+				})
+				.collect(Collectors.toMap(Animal::getId, animal -> animal));
 	}
 
 	/**
