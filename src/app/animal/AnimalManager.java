@@ -74,12 +74,12 @@ public class AnimalManager {
 		TextArtUtil.printRegisterMenuTitle();
 		UIUtil.printSeparator('━');
 
-		id = DatabaseIdGenerator.generateId();
-		name = inputAnimalName("동물의 이름을 입력하세요.");
-		species = inputAnimalSpecies("동물의 종을 입력하세요.");
-		age = MenuUtil.Question.askNumberInputInt("동물의 나이를 입력하세요.");
-		gender = inputAnimalGender("동물의 성별을 입력하세요.");
-		healthStatus = inputAnimalHealth("동물의 건강상태를 입력하세요.");
+		String id = DatabaseIdGenerator.generateId();
+		String name = inputAnimalName("동물의 이름을 입력하세요.");
+		String species = inputAnimalSpecies("동물의 종을 입력하세요.");
+		int age = MenuUtil.Question.askNumberInputInt("동물의 나이를 입력하세요.");
+		String gender = inputAnimalGender("동물의 성별을 입력하세요.");
+		String healthStatus = inputAnimalHealth("동물의 건강상태를 입력하세요.");
 
 		String[] headers = { "Name", "Species", "Age", "Gender", "HealthStatus" };
 		String[][] data = { { name, species, Integer.toString(age), gender, healthStatus } };
@@ -87,7 +87,7 @@ public class AnimalManager {
 
 		boolean choice = MenuUtil.Question.askYesNo("등록하시겠습니까?");
 		if (choice) {
-			Animal animal = repository.createAnimal(id, name, species, age, gender, healthStatus, enclosureId);
+			Animal animal = repository.createAnimal(id, name, species, age, gender, healthStatus, null);
 			syncWithSingleton();
 			System.out.printf(MenuUtil.DEFAULT_PREFIX + "동물 등록 성공!");
 			animal.showAnimal();
@@ -332,10 +332,22 @@ public class AnimalManager {
 	}
 
 	public void editAnimalAge(Animal animal) {
+		try {
 			String changeAge = MenuUtil.Question.askTextInput("수정할 나이를 입력하세요.");
-		repository.updateAnimal(changeAge, animal);
+			int age = Integer.parseInt(changeAge);
+			
+			if (age < 0) {
+				System.out.println(MenuUtil.DEFAULT_PREFIX + "나이는 0 이상이어야 합니다.");
+				return;
+			}
+			
+			animal.setAge(age);
+			repository.updateAnimal(animal.getId(), animal);
 			System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
 			animal.showAnimal();
+		} catch (NumberFormatException e) {
+			System.out.println(MenuUtil.DEFAULT_PREFIX + "올바른 숫자를 입력해주세요.");
+		}
 	}
 
 	public void editAnimalHealth(Animal animal) {
@@ -349,7 +361,8 @@ public class AnimalManager {
 		} else if (inHealth == 3) {
 			changeHealth = "Poor";
 		}
-		repository.updateAnimal(changeHealth, animal);
+		animal.setHealthStatus(changeHealth);
+		repository.updateAnimal(animal.getId(), animal);
 		System.out.print(MenuUtil.DEFAULT_PREFIX + "수정이 완료되었습니다.");
 		animal.showAnimal();
 	}

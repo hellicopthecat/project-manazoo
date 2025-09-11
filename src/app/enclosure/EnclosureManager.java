@@ -57,6 +57,11 @@ public class EnclosureManager {
      * Singleton Repository를 사용하여 데이터 일관성을 보장합니다.
      */
     private final EnclosureRepository repository = JdbcEnclosureRepository.getInstance();
+    
+    /**
+     * 동물 관리를 위한 AnimalManager 인스턴스입니다.
+     */
+    private final AnimalManager animalManager = new AnimalManager();
 
     /**
      * 사용자로부터 LocationType을 선택받는 헬퍼 메서드입니다.
@@ -630,8 +635,8 @@ public class EnclosureManager {
             return;
         }
         
-        // 2. Working Data 패턴: AnimalManager로부터 작업용 복사본 획득
-        Map<String, Animal> workingAnimals = AnimalManager.getInstance().getWorkingCopyOfAvailableAnimals();
+        // 2. Working Data 패턴: AnimalManager 인스턴스 사용
+        Map<String, Animal> workingAnimals = animalManager.getWorkingCopyOfAvailableAnimals();
         
         if (workingAnimals.isEmpty()) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "현재 배치 가능한 동물이 없습니다.");
@@ -688,8 +693,8 @@ public class EnclosureManager {
             return false;
         }
         
-        // AnimalManager의 배치 가능한 동물 존재 여부 확인
-        boolean hasAnimals = AnimalManager.getInstance().hasAvailableAnimals();
+        // AnimalManager 인스턴스 사용
+        boolean hasAnimals = animalManager.hasAvailableAnimals();
         
         if (!hasAnimals) {
             System.out.println(MenuUtil.DEFAULT_PREFIX + "배치 가능한 동물이 없습니다.");
@@ -848,7 +853,7 @@ public class EnclosureManager {
      */
     private boolean executeAnimalAdmission(String enclosureId, String animalId) {
         try {
-            Animal animal = AnimalManager.getInstance().removeAvailableAnimal(animalId, enclosureId);
+            Animal animal = animalManager.removeAvailableAnimal(animalId, enclosureId);
             if (animal == null) {
                 return false;
             }
