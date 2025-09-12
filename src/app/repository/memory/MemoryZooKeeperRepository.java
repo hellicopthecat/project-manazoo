@@ -1,4 +1,4 @@
-package app.repository;
+package app.repository.memory;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,0 +1,22 @@
+# 데이터베이스 설정 템플릿 파일
+# 실제 사용 시 이 파일을 복사하여 database.properties로 만들고 값을 수정하세요.
+
+# 데이터베이스 서버 정보
+db.host=YOUR_DATABASE_HOST
+db.port=3306
+db.name=YOUR_DATABASE_NAME
+
+# 인증 정보
+db.username=YOUR_USERNAME
+db.password=YOUR_PASSWORD
+
+# 연결 옵션 (한국 표준시)
+db.serverTimezone=Asia/Seoul
+
+# 커넥션 설정
+db.connectionTimeout=30000
+db.maxRetries=3
+
+# 로깅 설정
+# 개발 환경에서는 디버그 모드 활성화
+app.debug=true

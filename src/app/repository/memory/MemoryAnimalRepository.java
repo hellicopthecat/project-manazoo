@@ -1,5 +1,6 @@
-package app.repository;
+package app.repository.memory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -194,11 +195,17 @@ public class MemoryAnimalRepository implements AnimalRepository {
 	/**
 	 * 저장소의 모든 동물 목록을 반환합니다.
 	 * 
-	 * @return 전체 동물 목록
+	 * @return 전체 동물 목록 (빈 리스트일 수 있지만 null은 반환하지 않음)
 	 */
 	@Override
 	public List<Animal> getAnimalList() {
-		return findAll();
+		// animals Map이 null이거나 비어있어도 안전하게 처리
+		if (animals == null || animals.isEmpty()) {
+			return new ArrayList<>();
+		}
+		
+		// 새로운 ArrayList로 복사하여 반환 (원본 보호)
+		return new ArrayList<>(animals.values());
 	}
 
 	/**
@@ -216,30 +223,35 @@ public class MemoryAnimalRepository implements AnimalRepository {
 	 * 특정 이름을 가진 동물들을 조회합니다.
 	 * 
 	 * @param name 동물 이름
-	 * @return 해당 이름의 동물 목록
+	 * @return 해당 이름의 동물 목록 (빈 리스트일 수 있지만 null은 반환하지 않음)
 	 */
 	@Override
 	public List<Animal> getAnimalsByName(String name) {
-		if (name == null || name.trim().isEmpty()) {
-			return List.of();
+		// animals Map이 null인 경우 방어
+		if (animals == null || name == null || name.trim().isEmpty()) {
+			return new ArrayList<>();
 		}
 
-		return animals.values().stream().filter(animal -> name.equals(animal.getName())).collect(Collectors.toList());
+		return animals.values().stream()
+				.filter(animal -> name.equals(animal.getName()))
+				.collect(Collectors.toList());
 	}
 
 	/**
 	 * 특정 종의 동물들을 조회합니다.
 	 * 
 	 * @param species 동물 종류
-	 * @return 해당 종의 동물 목록
+	 * @return 해당 종의 동물 목록 (빈 리스트일 수 있지만 null은 반환하지 않음)
 	 */
 	@Override
 	public List<Animal> getAnimalsBySpecies(String species) {
-		if (species == null || species.trim().isEmpty()) {
-			return List.of();
+		// animals Map이 null인 경우 방어
+		if (animals == null || species == null || species.trim().isEmpty()) {
+			return new ArrayList<>();
 		}
 
-		return animals.values().stream().filter(animal -> species.equals(animal.getSpecies()))
+		return animals.values().stream()
+				.filter(animal -> species.equals(animal.getSpecies()))
 				.collect(Collectors.toList());
 	}
 

@@ -1,0 +1,36 @@
+# IDE 파일
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS 파일
+.DS_Store
+Thumbs.db
+
+# Git 파일
+.git/
+.gitignore
+
+# 빌드 파일 (JAR 제외)
+target/
+build/
+*.class
+*.log
+
+# 설정 파일 (사용하지 않는 것들)
+config/database-prod.properties
+config/database.properties.template
+
+# Docker 파일
+docker-compose.yml
+.dockerignore
+
+# 문서
+README.md
+*.md
+
+# 기타
+node_modules/
+*.tmp
+*.bak

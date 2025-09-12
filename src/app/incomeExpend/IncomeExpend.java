@@ -10,15 +10,15 @@ import app.common.ui.MenuUtil;
  */
 public class IncomeExpend {
 	// 고유 ID - ID generator 업데이트 후 사용 예정
-	String id;
+	private String id;
 	// 거래 금액
-	public Long money;
+	private Long money;
 	// 수입(INCOME) 또는 지출(EXPEND) 타입
-	public IncomeExpendType IEType;
+	private IncomeExpendType IEType;
 	// 구체적인 이벤트 타입 (입장료, 월급, 식비 등)
-	public EventType eventType;
+	private EventType eventType;
 	// 설명 (해당 수입/지출에 대한 부가 설명)
-	public String desc;
+	private String desc;
 
 	/**
 	 * 생성자
@@ -27,7 +27,6 @@ public class IncomeExpend {
 	 * @param eventType 구체적인 이벤트 구분
 	 */
 	public IncomeExpend(String id, Long money, String desc, IncomeExpendType IEType, EventType eventType) {
-		super();
 		this.id = id;
 		this.money = money;
 		this.IEType = IEType;
@@ -52,6 +51,22 @@ public class IncomeExpend {
 	 */
 	public String getId() {
 		return id;
+	}
+
+	public Long getMoney() {
+		return money;
+	}
+
+	public IncomeExpendType getIEType() {
+		return IEType;
+	}
+
+	public EventType getEventType() {
+		return eventType;
+	}
+
+	public String getDesc() {
+		return desc;
 	}
 
 	/**
