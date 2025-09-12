@@ -217,7 +217,7 @@ public class JdbcZooKeeperRepository {
 	public List<ZooKeeper> getWorkingKeepersDB() {
 		List<ZooKeeper> zooKeepers = new ArrayList<>();
 		String sql = """
-				SELECT id,name,age,gender,rank_level,department,is_working,experience_year,can_handle_danger_animal
+				SELECT *
 				FROM zoo_keepers
 				WHERE is_working = 1
 				""";
