@@ -1,5 +1,6 @@
 package app.finance;
 
+import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
@@ -105,15 +106,20 @@ public final class FinanceManager {
 	public IncomeExpend useMoneyForSalary(String targetId) {
 		while (true) {
 			IncomeExpend ie = useMoneyQuestions();
-			IncomeExpend inex = jdbcIERepository.createInExSalary(ie, targetId);
-			if (inex != null) {
+			try {
+				IncomeExpend inex = jdbcIERepository.createInExSalary(ie, targetId);
 				System.out.println();
 				System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서가 작성되었습니다.");
 				System.out.println();
 				return inex;
-			} else {
+			} catch (SQLException e) {
 				System.out.println();
-				System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서 작성이 실패했습니다.");
+				if (e.getMessage().contains("4백만원")) {
+					System.out.println(MenuUtil.DEFAULT_PREFIX + "4백만원 이상 트랜잭션 발생!!!");
+					System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서 작성이 실패했습니다.");
+				} else {
+					System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서 작성이 실패했습니다.");
+				}
 				System.out.println();
 			}
 		}

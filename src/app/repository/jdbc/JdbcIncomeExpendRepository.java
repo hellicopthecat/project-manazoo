@@ -29,8 +29,13 @@ public class JdbcIncomeExpendRepository {
 		return SingletonHolder.INSTANCE;
 	}
 
+	/**
+	 * IncomeExpend를 생성하는 메서드입니다.
+	 * 
+	 * @param newIE
+	 * @return IncomeExpend
+	 */
 	public IncomeExpend createIncomeExpend(IncomeExpend newIE) {
-		IncomeExpend ie = null;
 		String sql = """
 				INSERT INTO income_expends
 				(id, amount, description, date, type, event_type)
@@ -45,13 +50,19 @@ public class JdbcIncomeExpendRepository {
 			pstmt.setString(5, newIE.getIEType().name());
 			pstmt.setString(6, newIE.getEventType().name());
 			pstmt.executeUpdate();
-			ie = newIE;
+			return newIE;
 		} catch (SQLException e) {
 			throw new RuntimeException("데이터베이스 저장에 실패했습니다. " + e.getMessage(), e);
 		}
-		return ie;
 	}
 
+	/**
+	 * 예약을 생성해 IncomeExpend를 작성해주는 메서드입니다.
+	 * 
+	 * @param newIE
+	 * @param id
+	 * @return IncomeExpend
+	 */
 	public IncomeExpend createInExReservation(IncomeExpend newIE, String id) {
 		IncomeExpend ie = null;
 		String sql = """
@@ -76,30 +87,61 @@ public class JdbcIncomeExpendRepository {
 		return ie;
 	}
 
-	public IncomeExpend createInExSalary(IncomeExpend newIE, String id) {
-		IncomeExpend ie = null;
-		String sql = """
+	/**
+	 * 사육사의 급여를 생성해 InEx를 생성후 누적급여를 가산해주는 메서드입니다.
+	 * 4백만원 이상시 트랜잭션이 발동됩니다.
+	 * 
+	 * @param newIE
+	 * @param id
+	 * @return IncomeExpend
+	 * @throws SQLException
+	 */
+	public IncomeExpend createInExSalary(IncomeExpend newIE, String id) throws SQLException {
+		String salarySql = """
 				INSERT INTO income_expends
 				(id, amount, description, date, type, event_type, zookeeper_id)
 				VALUES (?,?,?,?,?,?,?)
 				""";
-		try (Connection conn = DatabaseConnection.getConnection();
-				PreparedStatement pstmt = conn.prepareStatement(sql)) {
-			pstmt.setString(1, newIE.getId());
-			pstmt.setLong(2, newIE.getMoney());
-			pstmt.setString(3, newIE.getDesc());
-			pstmt.setDate(4, Date.valueOf(LocalDate.now()));
-			pstmt.setString(5, newIE.getIEType().name());
-			pstmt.setString(6, newIE.getEventType().name());
-			pstmt.setString(7, id);
-			pstmt.executeUpdate();
-			ie = newIE;
+		String zooKeeperSql = """
+				UPDATE zoo_keepers
+				SET salary = salary + ?
+				WHERE id = ?
+				""";
+		Connection conn = null;
+		try {
+			conn = DatabaseConnection.getConnection();
+			conn.setAutoCommit(false);
+			try (PreparedStatement ie_pstmt = conn.prepareStatement(salarySql);
+					PreparedStatement zooKeeper_pstmt = conn.prepareStatement(zooKeeperSql)) {
+				if (newIE.getMoney() > 4000000) {
+					throw new SQLException("4백만원");
+				}
+				ie_pstmt.setString(1, newIE.getId());
+				ie_pstmt.setLong(2, newIE.getMoney());
+				ie_pstmt.setString(3, newIE.getDesc());
+				ie_pstmt.setDate(4, Date.valueOf(LocalDate.now()));
+				ie_pstmt.setString(5, newIE.getIEType().name());
+				ie_pstmt.setString(6, newIE.getEventType().name());
+				ie_pstmt.setString(7, id);
+				ie_pstmt.executeUpdate();
+				zooKeeper_pstmt.setLong(1, newIE.getMoney());
+				zooKeeper_pstmt.setString(2, id);
+				zooKeeper_pstmt.executeUpdate();
+			}
+			conn.commit();
+			return newIE;
 		} catch (SQLException e) {
-			throw new RuntimeException("데이터베이스 저장에 실패했습니다. " + e.getMessage(), e);
+			conn.rollback();
+			throw e;
 		}
-		return ie;
 	}
 
+	/**
+	 * 수입모델리스트를 표출하는 DB메서드 입니다.
+	 * 
+	 * 
+	 * @return List<IncomeExpend>
+	 */
 	public List<IncomeExpend> getIncomeList() {
 		List<IncomeExpend> list = new ArrayList<>();
 		String sql = """
@@ -122,6 +164,12 @@ public class JdbcIncomeExpendRepository {
 		return list;
 	}
 
+	/**
+	 * 지출모델리스트를 표출하는 DB메서드 입니다.
+	 * 
+	 * 
+	 * @return List<IncomeExpend>
+	 */
 	public List<IncomeExpend> getExpendList() {
 		List<IncomeExpend> list = new ArrayList<>();
 		String sql = """
@@ -144,6 +192,12 @@ public class JdbcIncomeExpendRepository {
 		return list;
 	}
 
+	/**
+	 * 전체 수입을 표출하는 DB메서드 입니다.
+	 * 
+	 * 
+	 * @return Long
+	 */
 	public Long getTotalIncomes() {
 		String sql = """
 				SELECT SUM(amount) AS total
@@ -164,6 +218,12 @@ public class JdbcIncomeExpendRepository {
 		return 0L;
 	}
 
+	/**
+	 * 전체 지출을 표출하는 DB메서드 입니다.
+	 * 
+	 * 
+	 * @return Long
+	 */
 	public Long getTotalExpends() {
 		String sql = """
 				SELECT SUM(amount) AS total
