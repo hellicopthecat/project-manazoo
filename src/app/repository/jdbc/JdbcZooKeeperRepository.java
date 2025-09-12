@@ -89,9 +89,9 @@ public class JdbcZooKeeperRepository {
 			while (resultset.next()) {
 				List<String> list = stringListMaker(resultset);
 				ZooKeeper zooKeeper = new ZooKeeper(resultset.getString("id"), resultset.getString("name"),
-						resultset.getInt("age"), Gender.valueOf(resultset.getString("gender")),
-						ZooKeeperRank.valueOf(resultset.getString("rank_level")),
-						Department.valueOf(resultset.getString("department")),
+						resultset.getInt("age"), Gender.valueOf(resultset.getString("gender").toUpperCase()),
+						ZooKeeperRank.valueOf(resultset.getString("rank_level").toUpperCase()),
+						Department.valueOf(resultset.getString("department").toUpperCase()),
 						resultset.getInt("is_working") == 1 ? true : false, resultset.getInt("experience_year"),
 						resultset.getInt("can_handle_danger_animal") == 1 ? true : false, list);
 				zooKeepers.add(zooKeeper);
@@ -124,9 +124,9 @@ public class JdbcZooKeeperRepository {
 				while (resultset.next()) {
 					List<String> list = stringListMaker(resultset);
 					zk = new ZooKeeper(resultset.getString("id"), resultset.getString("name"), resultset.getInt("age"),
-							Gender.valueOf(resultset.getString("gender")),
-							ZooKeeperRank.valueOf(resultset.getString("rank_level")),
-							Department.valueOf(resultset.getString("department")),
+							Gender.valueOf(resultset.getString("gender").toUpperCase()),
+							ZooKeeperRank.valueOf(resultset.getString("rank_level").toUpperCase()),
+							Department.valueOf(resultset.getString("department").toUpperCase()),
 							resultset.getInt("is_working") == 1 ? true : false, resultset.getInt("experience_year"),
 							resultset.getInt("can_handle_danger_animal") == 1 ? true : false, list);
 				}
@@ -160,9 +160,9 @@ public class JdbcZooKeeperRepository {
 				while (resultset.next()) {
 					List<String> list = stringListMaker(resultset);
 					ZooKeeper zk = new ZooKeeper(resultset.getString("id"), resultset.getString("name"),
-							resultset.getInt("age"), Gender.valueOf(resultset.getString("gender")),
-							ZooKeeperRank.valueOf(resultset.getString("rank_level")),
-							Department.valueOf(resultset.getString("department")),
+							resultset.getInt("age"), Gender.valueOf(resultset.getString("gender").toUpperCase()),
+							ZooKeeperRank.valueOf(resultset.getString("rank_level").toUpperCase()),
+							Department.valueOf(resultset.getString("department").toUpperCase()),
 							resultset.getInt("is_working") == 1 ? true : false, resultset.getInt("experience_year"),
 							resultset.getInt("can_handle_danger_animal") == 1 ? true : false, list);
 					zkList.add(zk);
@@ -195,9 +195,9 @@ public class JdbcZooKeeperRepository {
 				while (resultset.next()) {
 					List<String> list = stringListMaker(resultset);
 					ZooKeeper zk = new ZooKeeper(resultset.getString("id"), resultset.getString("name"),
-							resultset.getInt("age"), Gender.valueOf(resultset.getString("gender")),
-							ZooKeeperRank.valueOf(resultset.getString("rank_level")),
-							Department.valueOf(resultset.getString("department")),
+							resultset.getInt("age"), Gender.valueOf(resultset.getString("gender").toUpperCase()),
+							ZooKeeperRank.valueOf(resultset.getString("rank_level").toUpperCase()),
+							Department.valueOf(resultset.getString("department").toUpperCase()),
 							resultset.getInt("is_working") == 1 ? true : false, resultset.getInt("experience_year"),
 							resultset.getInt("can_handle_danger_animal") == 1 ? true : false, list);
 					zooKeepers.add(zk);
@@ -207,6 +207,65 @@ public class JdbcZooKeeperRepository {
 			throw new RuntimeException("사육사리스트를 가져오는데 실패했습니다." + e.getMessage(), e);
 		}
 		return zooKeepers;
+	}
+
+	/**
+	 * 현재 일을 하고 있는 사육사리스트를 반환합니다.
+	 * 
+	 * @return List<ZooKeepers>
+	 */
+	public List<ZooKeeper> getWorkingKeepersDB() {
+		List<ZooKeeper> zooKeepers = new ArrayList<>();
+		String sql = """
+				SELECT id,name,age,gender,rank_level,department,is_working,experience_year,can_handle_danger_animal
+				FROM zoo_keepers
+				WHERE is_working = 1
+				""";
+		try (Connection connection = DatabaseConnection.getConnection();
+				Statement statement = connection.createStatement();
+				ResultSet resultset = statement.executeQuery(sql);) {
+			while (resultset.next()) {
+				List<String> list = stringListMaker(resultset);
+				ZooKeeper zooKeeper = new ZooKeeper(resultset.getString("id"), resultset.getString("name"),
+						resultset.getInt("age"), Gender.valueOf(resultset.getString("gender").toUpperCase()),
+						ZooKeeperRank.valueOf(resultset.getString("rank_level").toUpperCase()),
+						Department.valueOf(resultset.getString("department").toUpperCase()),
+						resultset.getInt("is_working") == 1 ? true : false, resultset.getInt("experience_year"),
+						resultset.getInt("can_handle_danger_animal") == 1 ? true : false, list);
+				zooKeepers.add(zooKeeper);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return zooKeepers;
+	}
+
+	/**
+	 * 현재 일을 하고 있는 사육사리스트를 반환합니다.
+	 * 
+	 * @return boolean
+	 */
+	public boolean hasWorkingKeepers() {
+		String sql = """
+				SELECT count(id)
+				FROM zoo_keepers
+				WHERE is_working = 1
+				""";
+		try (Connection connection = DatabaseConnection.getConnection();
+				Statement statement = connection.createStatement();
+				ResultSet resultset = statement.executeQuery(sql);) {
+			if (resultset.next()) {
+				int count = resultset.getInt(1);
+				return count > 0;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	/**

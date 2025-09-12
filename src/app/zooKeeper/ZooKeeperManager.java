@@ -688,7 +688,7 @@ public final class ZooKeeperManager {
 	 * @return 재직 중인 사육사 리스트
 	 */
 	public List<ZooKeeper> getWorkingKeepers() {
-		return repository.getWorkingKeepers();
+		return jdbcRepository.getWorkingKeepersDB();
 	}
 
 	/**
@@ -697,6 +697,6 @@ public final class ZooKeeperManager {
 	 * @return 재직 중인 사육사 존재 여부
 	 */
 	public boolean hasWorkingKeepers() {
-		return repository.hasWorkingKeepers();
+		return jdbcRepository.hasWorkingKeepers();
 	}
 }
