@@ -21,7 +21,7 @@ public class DatabaseConfigLoader {
     private static final SimpleLogger logger = SimpleLogger.getLogger(DatabaseConfigLoader.class);
     
     public DatabaseConfigLoader() {
-        this("dev"); // 기본값: 개발 환경
+        this("prod");
     }
     
     public DatabaseConfigLoader(String environment) {
@@ -70,22 +70,51 @@ public class DatabaseConfigLoader {
     
     // 데이터베이스 연결 정보 getter 메서드들
     public String getHost() {
+        // 환경변수를 우선적으로 확인
+        String envHost = System.getenv("DB_HOST");
+        if (envHost != null && !envHost.trim().isEmpty()) {
+            return envHost;
+        }
         return properties.getProperty("db.host", "localhost");
     }
     
     public int getPort() {
+        // 환경변수를 우선적으로 확인
+        String envPort = System.getenv("DB_PORT");
+        if (envPort != null && !envPort.trim().isEmpty()) {
+            try {
+                return Integer.parseInt(envPort);
+            } catch (NumberFormatException e) {
+                logger.error(String.format("잘못된 DB_PORT 환경변수 값: %s, 기본값 사용", envPort));
+            }
+        }
         return Integer.parseInt(properties.getProperty("db.port", "3306"));
     }
     
     public String getDatabaseName() {
+        // 환경변수를 우선적으로 확인
+        String envDbName = System.getenv("DB_NAME");
+        if (envDbName != null && !envDbName.trim().isEmpty()) {
+            return envDbName;
+        }
         return properties.getProperty("db.name", "manazoo");
     }
     
     public String getUsername() {
+        // 환경변수를 우선적으로 확인
+        String envUsername = System.getenv("DB_USERNAME");
+        if (envUsername != null && !envUsername.trim().isEmpty()) {
+            return envUsername;
+        }
         return properties.getProperty("db.username", "root");
     }
     
     public String getPassword() {
+        // 환경변수를 우선적으로 확인
+        String envPassword = System.getenv("DB_PASSWORD");
+        if (envPassword != null && !envPassword.trim().isEmpty()) {
+            return envPassword;
+        }
         return properties.getProperty("db.password", "1111");
     }
     
