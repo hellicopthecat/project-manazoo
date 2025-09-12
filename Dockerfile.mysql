@@ -5,10 +5,6 @@ LABEL maintainer="manazoo-team"
 LABEL description="ManageZoo MySQL 데이터베이스"
 LABEL version="1.0"
 
-# 환경 변수 설정
-ENV MYSQL_ROOT_PASSWORD=password
-ENV MYSQL_DATABASE=manazoo
-
 # 초기화 SQL 파일 복사 (데이터 자동 초기화)
 COPY create_db.sql /docker-entrypoint-initdb.d/01-create_db.sql
 COPY insert_db.sql /docker-entrypoint-initdb.d/02-insert_db.sql
