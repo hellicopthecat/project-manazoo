@@ -57,7 +57,7 @@ public class JdbcIncomeExpendRepository {
 	}
 
 	/**
-	 * 예약을 생성해 IncomeExpend를 작성해주는 매서드입니다.
+	 * 예약을 생성해 IncomeExpend를 작성해주는 메서드입니다.
 	 * 
 	 * @param newIE
 	 * @param id
@@ -89,7 +89,7 @@ public class JdbcIncomeExpendRepository {
 
 	/**
 	 * 사육사의 급여를 생성해 InEx를 생성후 누적급여를 가산해주는 메서드입니다.
-	 * 4백만원 이상시 트렌젝션이 발동됩니다.
+	 * 4백만원 이상시 트랜잭션이 발동됩니다.
 	 * 
 	 * @param newIE
 	 * @param id
@@ -107,7 +107,9 @@ public class JdbcIncomeExpendRepository {
 				SET salary = salary + ?
 				WHERE id = ?
 				""";
-		try (Connection conn = DatabaseConnection.getConnection();) {
+		Connection conn = null;
+		try {
+			conn = DatabaseConnection.getConnection();
 			conn.setAutoCommit(false);
 			try (PreparedStatement ie_pstmt = conn.prepareStatement(salarySql);
 					PreparedStatement zooKeeper_pstmt = conn.prepareStatement(zooKeeperSql)) {
@@ -129,6 +131,7 @@ public class JdbcIncomeExpendRepository {
 			conn.commit();
 			return newIE;
 		} catch (SQLException e) {
+			conn.rollback();
 			throw e;
 		}
 	}

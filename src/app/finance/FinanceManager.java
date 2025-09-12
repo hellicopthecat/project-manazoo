@@ -115,7 +115,7 @@ public final class FinanceManager {
 			} catch (SQLException e) {
 				System.out.println();
 				if (e.getMessage().contains("4백만원")) {
-					System.out.println(MenuUtil.DEFAULT_PREFIX + "4백만원 이상 트랜젝션 발생!!!");
+					System.out.println(MenuUtil.DEFAULT_PREFIX + "4백만원 이상 트랜잭션 발생!!!");
 					System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서 작성이 실패했습니다.");
 				} else {
 					System.out.println(MenuUtil.DEFAULT_PREFIX + "수입지출결의서 작성이 실패했습니다.");
