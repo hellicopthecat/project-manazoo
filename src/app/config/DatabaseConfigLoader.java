@@ -21,7 +21,7 @@ public class DatabaseConfigLoader {
     private static final SimpleLogger logger = SimpleLogger.getLogger(DatabaseConfigLoader.class);
     
     public DatabaseConfigLoader() {
-        this("prod"); // 기본값: 개발 환경
+        this("prod");
     }
     
     public DatabaseConfigLoader(String environment) {
