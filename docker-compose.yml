@@ -1,0 +1,38 @@
+services:
+  mysql:
+    build:
+      context: .
+      dockerfile: Dockerfile.mysql
+    container_name: mysql-container
+    ports:
+      - "3310:3306" 
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - manazoo-network
+
+  manazoo-app:
+    build: .
+    container_name: manazoo-app
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    env_file:
+      - .env.dev
+    stdin_open: true
+    tty: true
+    networks:
+      - manazoo-network
+    profiles:
+      - manual
+
+volumes:
+  mysql_data:
+
+# manazoo-network 생성
+networks:
+  manazoo-network:
+    driver: bridge
