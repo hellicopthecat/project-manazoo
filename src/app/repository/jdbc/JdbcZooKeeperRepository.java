@@ -110,7 +110,7 @@ public class JdbcZooKeeperRepository {
 	 * @param id
 	 * @return ZooKeeper
 	 */
-	public ZooKeeper getZooKeeperByIdDB(String id) {
+	public ZooKeeper getZooKeeperById(String id) {
 		ZooKeeper zk = null;
 		String sql = """
 				SELECT *
@@ -243,9 +243,9 @@ public class JdbcZooKeeperRepository {
 	}
 
 	/**
-	 * 현재 일을 하고 있는 사육사리스트를 반환합니다.
+	 * 현재 일을 하고 있는 사육사가 존재하는지 확인합니다.
 	 * 
-	 * @return boolean
+	 * @return boolean 현재 일을 하고 있는 사육사가 존재하면 true, 그렇지 않으면 false를 반환합니다.
 	 */
 	public boolean hasWorkingKeepers() {
 		String sql = """
@@ -351,7 +351,7 @@ public class JdbcZooKeeperRepository {
 	 * @return boolean
 	 */
 	public boolean checkManager(String id) {
-		ZooKeeper zk = getZooKeeperByIdDB(id);
+		ZooKeeper zk = getZooKeeperById(id);
 		if (zk.getRank() == ZooKeeperRank.DIRECTOR || zk.getRank() == ZooKeeperRank.MANAGER
 				|| zk.getRank() == ZooKeeperRank.HEAD_KEEPER) {
 			return true;
