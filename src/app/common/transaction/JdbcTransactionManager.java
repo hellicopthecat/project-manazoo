@@ -67,7 +67,7 @@ public class JdbcTransactionManager implements TransactionManager {
             T result = callback.execute();
             
             // 3. 커밋 (읽기 전용이 아닌 경우에만)
-            if (!readOnly && !originalAutoCommit) {
+            if (!readOnly && originalAutoCommit) {
                 connection.commit();
                 logger.info("트랜잭션 커밋됨");
             }
@@ -78,7 +78,7 @@ public class JdbcTransactionManager implements TransactionManager {
             // 4. 롤백 처리
             if (connection != null && !readOnly) {
                 try {
-                    if (!originalAutoCommit) {
+                    if (originalAutoCommit) {
                         connection.rollback();
                         logger.info("트랜잭션 롤백됨");
                     }
@@ -106,7 +106,7 @@ public class JdbcTransactionManager implements TransactionManager {
                     if (readOnly) {
                         connection.setReadOnly(false);
                     }
-                    if (!originalAutoCommit) {
+                    if (originalAutoCommit) {
                         connection.setAutoCommit(originalAutoCommit);
                     }
                     
