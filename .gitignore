@@ -35,3 +35,6 @@ desktop.ini
 config/database.properties
 config/database-*.properties
 !config/database.properties.template
+
+# code rules
+code_rules/
